@@ -24,6 +24,11 @@ public class Rs2ActorModel implements Actor
     @Override
     public WorldView getWorldView()
     {
+        if (actor == null)
+        {
+            return null;
+        }
+
         return CupidBot.getClientThread().invoke(actor::getWorldView);
     }
 
@@ -71,6 +76,11 @@ public class Rs2ActorModel implements Actor
     @Override
     public WorldPoint getWorldLocation()
     {
+        if (actor == null)
+        {
+            return null;
+        }
+
         return CupidBot.getClientThread().invoke(() -> {
             WorldView worldView = actor.getWorldView();
             if (worldView != null && !worldView.isTopLevel()) {
@@ -451,8 +461,19 @@ public class Rs2ActorModel implements Actor
     }
 
     public WorldPoint projectActorLocationToMainWorld() {
+        if (actor == null)
+        {
+            return null;
+        }
+
         WorldPoint actorLocation = actor.getWorldLocation();
         WorldView wv = actor.getWorldView();
+
+        if (actorLocation == null || wv == null)
+        {
+            return actorLocation;
+        }
+
         LocalPoint localPoint = LocalPoint.fromWorld(wv, actorLocation);
 
         if (localPoint == null)
@@ -470,8 +491,14 @@ public class Rs2ActorModel implements Actor
         float[] projection = mainWorldProjection
                 .project(localPoint.getX(), 0, localPoint.getY());
 
+        Client client = CupidBot.getClient();
+        if (client == null || client.getTopLevelWorldView() == null)
+        {
+            return actorLocation;
+        }
+
         return WorldPoint.fromLocal(
-                CupidBot.getClient().getTopLevelWorldView(),
+                client.getTopLevelWorldView(),
                 (int) projection[0],
                 (int) projection[2],
                 0
