@@ -5,6 +5,8 @@ import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.cupidbot.CupidBot;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.ActivityIntensity;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 
 /**
  * Provides configuration settings for the anti-ban system used by various plugins within the bot framework.
@@ -117,6 +119,7 @@ public class Rs2AntibanSettings {
         private Double microBreakChance;
         private Double moveMouseRandomlyChance;
         private Double moveMouseOffScreenChance;
+        private String mouseSpeed;
     }
 
     public static void saveToProfile() {
@@ -156,6 +159,17 @@ public class Rs2AntibanSettings {
         }
     }
 
+    public static MouseSpeed getConfiguredMouseSpeed() {
+        return mouseSpeed != null ? mouseSpeed : MouseSpeed.DEFAULT;
+    }
+
+    public static MouseSpeed getEffectiveMouseSpeed(ActivityIntensity activityIntensity) {
+        if (dynamicIntensity) {
+            return MouseSpeed.fromActivityIntensity(activityIntensity);
+        }
+        return getConfiguredMouseSpeed();
+    }
+
     private static PersistentSettings snapshot() {
         PersistentSettings settings = new PersistentSettings();
         settings.antibanEnabled = antibanEnabled;
@@ -185,6 +199,7 @@ public class Rs2AntibanSettings {
         settings.microBreakChance = microBreakChance;
         settings.moveMouseRandomlyChance = moveMouseRandomlyChance;
         settings.moveMouseOffScreenChance = moveMouseOffScreenChance;
+        settings.mouseSpeed = mouseSpeed != null ? mouseSpeed.name() : MouseSpeed.DEFAULT.name();
         return settings;
     }
 
@@ -270,6 +285,9 @@ public class Rs2AntibanSettings {
         if (settings.moveMouseOffScreenChance != null) {
             moveMouseOffScreenChance = settings.moveMouseOffScreenChance;
         }
+        if (settings.mouseSpeed != null) {
+            mouseSpeed = MouseSpeed.fromConfigValue(settings.mouseSpeed);
+        }
     }
 
     public static boolean actionCooldownActive = false;
@@ -302,6 +320,7 @@ public class Rs2AntibanSettings {
     public static double microBreakChance = 0.1; // 10% chance of taking a micro break by default
     public static double moveMouseRandomlyChance = 0.1; // 10% chance of moving the mouse randomly by default
     public static double moveMouseOffScreenChance = 0.1; // 10% chance of moving the mouse off screen by default
+    public static MouseSpeed mouseSpeed = MouseSpeed.DEFAULT;
 
     // reset method to reset all settings to default values
     public static void reset() {
@@ -333,5 +352,6 @@ public class Rs2AntibanSettings {
         microBreakChance = 0.1;
         moveMouseRandomlyChance = 0.1;
         moveMouseOffScreenChance = 0.1;
+        mouseSpeed = MouseSpeed.DEFAULT;
     }
 }

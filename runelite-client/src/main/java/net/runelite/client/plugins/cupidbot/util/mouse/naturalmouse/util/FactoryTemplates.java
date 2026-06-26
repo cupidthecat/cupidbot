@@ -3,6 +3,7 @@ package net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.util;
 
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.MouseMotionFactory;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.SpeedManager;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.support.*;
@@ -94,6 +95,44 @@ public class FactoryTemplates {
 
         factory.setSpeedManager(manager);
         return factory;
+    }
+
+    public static MouseMotionFactory createMouseSpeedMotionFactory(MouseMotionNature nature, MouseSpeed mouseSpeed) {
+        MouseSpeed speed = mouseSpeed != null ? mouseSpeed : MouseSpeed.DEFAULT;
+        int currentBaseTime = speed.getBaseTimeMs();
+        if (Rs2AntibanSettings.simulateFatigue)
+            currentBaseTime = Rs2Antiban.mouseFatigue.calculateBaseTimeWithNoise(currentBaseTime, speed.getFatigueMaxBaseTimeMs());
+
+        MouseMotionFactory factory = new MouseMotionFactory(nature);
+        DefaultSpeedManager manager = new DefaultSpeedManager(createHumanMouseFlows(speed));
+        factory.setDeviationProvider(new SinusoidalDeviationProvider(SinusoidalDeviationProvider.DEFAULT_SLOPE_DIVIDER));
+        factory.setNoiseProvider(new DefaultNoiseProvider(DefaultNoiseProvider.DEFAULT_NOISINESS_DIVIDER));
+        factory.getNature().setReactionTimeVariationMs(speed.getReactionTimeVariationMs());
+        manager.setMouseMovementBaseTimeMs(currentBaseTime);
+
+        DefaultOvershootManager overshootManager = (DefaultOvershootManager) factory.getOvershootManager();
+        overshootManager.setOvershoots(Rs2AntibanSettings.simulateMistakes ? speed.getOvershoots() : 0);
+        overshootManager.setMinDistanceForOvershoots(3);
+        overshootManager.setMinOvershootMovementMs(speed.getMinOvershootMovementMs());
+
+        factory.setSpeedManager(manager);
+        return factory;
+    }
+
+    private static List<Flow> createHumanMouseFlows(MouseSpeed mouseSpeed) {
+        List<Flow> flows = new ArrayList<>(Arrays.asList(
+                new Flow(FlowTemplates.variatingFlow()),
+                new Flow(FlowTemplates.slowStartupFlow()),
+                new Flow(FlowTemplates.slowStartup2Flow()),
+                new Flow(FlowTemplates.adjustingFlow()),
+                new Flow(FlowTemplates.jaggedFlow())
+        ));
+        if (mouseSpeed.getSliderIndex() <= MouseSpeed.RELAXED.getSliderIndex()) {
+            flows.add(new Flow(FlowTemplates.interruptedFlow()));
+            flows.add(new Flow(FlowTemplates.interruptedFlow2()));
+            flows.add(new Flow(FlowTemplates.stoppingFlow()));
+        }
+        return flows;
     }
 
     /**

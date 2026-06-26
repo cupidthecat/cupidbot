@@ -7,7 +7,9 @@ import net.runelite.api.Client;
 import net.runelite.client.plugins.cupidbot.CupidBot;
 import net.runelite.client.plugins.cupidbot.util.Global;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2Antiban;
+import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.ActivityIntensity;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import net.runelite.client.plugins.cupidbot.util.math.Rs2Random;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.MouseInfoAccessor;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.MouseMotionFactory;
@@ -51,6 +53,8 @@ public class NaturalMouse {
 
     private volatile MouseMotionFactory cachedFactory;
     private volatile ActivityIntensity cachedIntensity;
+    private volatile MouseSpeed cachedMouseSpeed;
+    private volatile boolean cachedDynamicIntensity;
 
     @Inject
     public NaturalMouse() {
@@ -92,30 +96,20 @@ public class NaturalMouse {
 
     public MouseMotionFactory getFactory() {
         ActivityIntensity intensity = Rs2Antiban.getActivityIntensity();
-        if (cachedFactory != null && intensity == cachedIntensity) {
+        boolean dynamicIntensity = Rs2AntibanSettings.dynamicIntensity;
+        MouseSpeed mouseSpeed = Rs2AntibanSettings.getEffectiveMouseSpeed(intensity);
+
+        if (cachedFactory != null
+                && intensity == cachedIntensity
+                && mouseSpeed == cachedMouseSpeed
+                && dynamicIntensity == cachedDynamicIntensity) {
             return cachedFactory;
         }
-        MouseMotionFactory factory;
-        if (intensity == ActivityIntensity.VERY_LOW) {
-            log.debug("Creating average computer user motion factory");
-            factory = FactoryTemplates.createAverageComputerUserMotionFactory(nature);
-        } else if (intensity == ActivityIntensity.LOW) {
-            log.debug("Creating normal gamer motion factory");
-            factory = FactoryTemplates.createNormalGamerMotionFactory(nature);
-        } else if (intensity == ActivityIntensity.MODERATE) {
-            log.debug("Creating fast gamer motion factory");
-            factory = FactoryTemplates.createFastGamerMotionFactory(nature);
-        } else if (intensity == ActivityIntensity.HIGH) {
-            log.debug("Creating fast gamer motion factory");
-            factory = FactoryTemplates.createFastGamerMotionFactory(nature);
-        } else if (intensity == ActivityIntensity.EXTREME) {
-            log.debug("Creating super fast gamer motion factory");
-            factory = FactoryTemplates.createSuperFastGamerMotionFactory(nature);
-        } else {
-            log.debug("Default: Creating super fast gamer motion factory");
-            factory = FactoryTemplates.createSuperFastGamerMotionFactory(nature);
-        }
+        log.debug("Creating {} mouse motion factory", mouseSpeed.getName());
+        MouseMotionFactory factory = FactoryTemplates.createMouseSpeedMotionFactory(nature, mouseSpeed);
         cachedIntensity = intensity;
+        cachedMouseSpeed = mouseSpeed;
+        cachedDynamicIntensity = dynamicIntensity;
         cachedFactory = factory;
         return factory;
 
