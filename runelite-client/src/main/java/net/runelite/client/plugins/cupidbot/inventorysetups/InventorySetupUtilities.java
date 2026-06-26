@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.util.Set;
 import javax.swing.SwingUtilities;
-import net.runelite.client.util.SwingUtil;
 import static net.runelite.client.plugins.cupidbot.inventorysetups.MInventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
 
 
@@ -101,13 +100,8 @@ public class InventorySetupUtilities
 				fastRemoveAll((Container) ic, false);
 			}
 
-			// each removeNotify needs to remove anything from the event queue that is for that widget
-			// this however requires taking a lock, and is moderately slow, so we just execute all of
-			// those events with a secondary event loop
-			SwingUtil.pumpPendingEvents();
-
 			// call removeNotify early; this is most of the work in removeAll, and generates events that
-			// the next secondaryLoop will pickup
+			// removeAll would otherwise process later.
 			ic.removeNotify();
 		}
 

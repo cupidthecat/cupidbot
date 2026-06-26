@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaConversionException;
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -152,6 +153,10 @@ public class EventBus
 
 					final MethodHandle factory = site.getTarget();
 					lambda = (Consumer<Object>) factory.bindTo(object).invokeExact();
+				}
+				catch (LambdaConversionException e)
+				{
+					log.debug("Using reflection fallback for event subscriber method {}", method, e);
 				}
 				catch (Throwable e)
 				{

@@ -191,17 +191,12 @@ public class KourendLibraryPlugin extends Plugin
 		}
 		else if (ev.getKey().equals("hideButton"))
 		{
-			SwingUtilities.invokeLater(() ->
+			clientThread.invokeLater(() ->
 			{
-				if (!config.hideButton())
+				boolean showButton = !config.hideButton() || isInLibraryRegion();
+				SwingUtilities.invokeLater(() ->
 				{
-					clientToolbar.addNavigation(navButton);
-				}
-				else
-				{
-					Player lp = client.getLocalPlayer();
-					boolean inRegion = lp != null && lp.getWorldLocation().getRegionID() == REGION;
-					if (inRegion)
+					if (showButton)
 					{
 						clientToolbar.addNavigation(navButton);
 					}
@@ -209,18 +204,26 @@ public class KourendLibraryPlugin extends Plugin
 					{
 						clientToolbar.removeNavigation(navButton);
 					}
-				}
+					buttonAttached = showButton;
+				});
 			});
 		}
 		else if (ev.getKey().equals("showTargetHintArrow"))
 		{
-			if (client.getLocalPlayer() == null || client.getLocalPlayer().getWorldLocation().getRegionID() != REGION)
+			clientThread.invokeLater(() ->
 			{
-				return;
-			}
-
-			updateBookcaseHintArrow();
+				if (isInLibraryRegion())
+				{
+					updateBookcaseHintArrow();
+				}
+			});
 		}
+	}
+
+	private boolean isInLibraryRegion()
+	{
+		Player lp = client.getLocalPlayer();
+		return lp != null && lp.getWorldLocation().getRegionID() == REGION;
 	}
 
 	@Subscribe

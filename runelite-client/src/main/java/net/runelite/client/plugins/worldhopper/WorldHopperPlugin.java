@@ -457,10 +457,11 @@ public class WorldHopperPlugin extends Plugin
 			if (lastWorld != client.getWorld())
 			{
 				int newWorld = client.getWorld();
+				int previousWorld = lastWorld;
 				// If the player has disabled the side bar plugin panel, do not update the UI
 				if (config.showSidebar())
 				{
-					panel.switchCurrentHighlight(newWorld, lastWorld);
+					SwingUtilities.invokeLater(() -> panel.switchCurrentHighlight(newWorld, previousWorld));
 				}
 				currentPing = -1;
 				lastWorld = newWorld;
