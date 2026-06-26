@@ -13,6 +13,7 @@ import java.time.Instant;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 public class Rs2AntibanActivityPlayStyleTest
 {
@@ -97,6 +98,43 @@ public class Rs2AntibanActivityPlayStyleTest
 
 		assertSame(PlayStyle.CAUTIOUS, Rs2Antiban.getPlayStyle());
 		assertSame(ActivityIntensity.LOW, Rs2Antiban.getActivityIntensity());
+		assertSame(MouseSpeed.SLOW, Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()));
+	}
+
+	@Test
+	public void dynamicIntensitySwitchesPlayStyleWhenAttentionTimerExpires() throws Exception
+	{
+		Rs2AntibanSettings.usePlayStyle = true;
+		Rs2AntibanSettings.simulateAttentionSpan = true;
+		Rs2AntibanSettings.profileSwitching = false;
+		Rs2AntibanSettings.dynamicIntensity = true;
+		Rs2AntibanSettings.mouseSpeed = MouseSpeed.EXTREME;
+		Rs2Antiban.setActivity(Activity.GENERAL_COMBAT);
+
+		PlayStyle initialPlayStyle = Rs2Antiban.getPlayStyle();
+		setStartTime(initialPlayStyle, Instant.now().minusSeconds(10));
+		setAttentionSpan(initialPlayStyle, 1);
+
+		assertTrue(Rs2Antiban.switchPlayStyleIfAttentionExpired());
+		assertSame(PlayStyle.AGGRESSIVE, Rs2Antiban.getPlayStyle());
+		assertSame(ActivityIntensity.MODERATE, Rs2Antiban.getActivityIntensity());
+		assertSame(MouseSpeed.NORMAL, Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()));
+	}
+
+	@Test
+	public void dynamicActivityRefreshesCurrentActivityIntensity()
+	{
+		Rs2AntibanSettings.dynamicActivity = true;
+		Rs2AntibanSettings.dynamicIntensity = true;
+		Rs2AntibanSettings.mouseSpeed = MouseSpeed.EXTREME;
+		Rs2Antiban.setActivity(Activity.GENERAL_FIREMAKING);
+		Rs2Antiban.setActivityIntensity(ActivityIntensity.HIGH);
+
+		Rs2Antiban.refreshDynamicActivity();
+
+		assertSame(Activity.GENERAL_FIREMAKING, Rs2Antiban.getActivity());
+		assertSame(ActivityIntensity.LOW, Rs2Antiban.getActivityIntensity());
+		assertSame(PlayStyle.CAUTIOUS, Rs2Antiban.getPlayStyle());
 		assertSame(MouseSpeed.SLOW, Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()));
 	}
 

@@ -280,11 +280,8 @@ public class AntibanPlugin extends Plugin {
         if (Rs2AntibanSettings.usePlayStyle) {
             if (Rs2Antiban.getPlayStyle() == null)
                 return;
-            if (Rs2AntibanSettings.simulateAttentionSpan && Rs2AntibanSettings.profileSwitching &&
-                    Rs2Antiban.getPlayStyle().shouldSwitchProfileBasedOnAttention()) {
-                Rs2Antiban.setPlayStyle(Rs2Antiban.getPlayStyle().switchProfile());
+            if (Rs2Antiban.switchPlayStyleIfAttentionExpired()) {
                 refreshPanel();
-                Rs2Antiban.getPlayStyle().resetPlayStyle();
             }
         }
     }

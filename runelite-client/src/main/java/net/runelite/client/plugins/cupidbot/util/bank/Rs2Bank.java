@@ -16,7 +16,6 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.ConfigProfile;
 import net.runelite.client.config.ProfileManager;
 import net.runelite.client.config.RuneScapeProfileType;
-import net.runelite.client.plugins.bank.BankPlugin;
 import net.runelite.client.plugins.loottracker.LootTrackerItem;
 import net.runelite.client.plugins.loottracker.LootTrackerRecord;
 import net.runelite.client.plugins.cupidbot.CupidBot;
@@ -2543,20 +2542,22 @@ public class Rs2Bank {
                 final char c = pin.charAt(i);
                 final String expectedInstruction = DIGIT_INSTRUCTIONS[i];
 
-                boolean instructionVisible = sleepUntil(() -> Rs2Widget.hasWidgetText(expectedInstruction, 213, 10, false), 2000);
+                boolean instructionVisible = sleepUntil(() -> !isBankPinWidgetVisible() || isBankPinInstructionVisible(expectedInstruction), 5000);
+                if (!isBankPinWidgetVisible()) return true;
                 if (!instructionVisible) {
                     CupidBot.log("Failed to detect instruction within timeout period: " + expectedInstruction);
                     return false;
                 }
 
-                if (isBankPluginEnabled() && hasKeyboardBankPinEnabled()) {
-                    Rs2Keyboard.typeString(String.valueOf(c));
-                } else {
-                    Rs2Widget.clickWidget(String.valueOf(c), Optional.of(213), 0, true);
-                }
+                Rs2Keyboard.keyPress(c);
             }
             return true;
         }
+    }
+
+    private static boolean isBankPinInstructionVisible(String expectedInstruction) {
+        return Rs2Widget.hasWidgetText(expectedInstruction, InterfaceID.BankpinKeypad.INSTRUCTION, false)
+                || Rs2Widget.hasWidgetText(expectedInstruction, ComponentID.BANK_PIN_CONTAINER, false);
     }
 
     public static boolean handleBankPin() {
@@ -3312,16 +3313,6 @@ public class Rs2Bank {
         }
 
         return false;
-    }
-
-    private static boolean isBankPluginEnabled() {
-        return CupidBot.isPluginEnabled(BankPlugin.class);
-    }
-
-    private static boolean hasKeyboardBankPinEnabled() {
-        ConfigManager configManager = CupidBot.getConfigManager();
-        return configManager != null && "true".equalsIgnoreCase(configManager.getConfiguration("bank", "bankPinKeyboard"));
-
     }
 
     /**

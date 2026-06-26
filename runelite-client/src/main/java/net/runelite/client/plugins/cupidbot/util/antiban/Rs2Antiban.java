@@ -212,6 +212,32 @@ public class Rs2Antiban {
         applyPlayStyleIntensity(playStyleIntensity);
     }
 
+    public static boolean switchPlayStyleIfAttentionExpired() {
+        if (!Rs2AntibanSettings.usePlayStyle
+                || !Rs2AntibanSettings.simulateAttentionSpan
+                || playStyle == null
+                || (!Rs2AntibanSettings.profileSwitching
+                && !Rs2AntibanSettings.dynamicActivity
+                && !Rs2AntibanSettings.dynamicIntensity)
+                || !playStyle.shouldSwitchProfileBasedOnAttention()) {
+            return false;
+        }
+
+        setPlayStyle(playStyle.switchProfile());
+        if (playStyle != null) {
+            playStyle.resetPlayStyle();
+        }
+        return true;
+    }
+
+    public static void refreshDynamicActivity() {
+        if (activity == null || !Rs2AntibanSettings.dynamicActivity) {
+            return;
+        }
+
+        setActivity(activity);
+    }
+
     private static ActivityIntensity activityIntensityForPlayStyle(PlayStyle playStyle) {
         switch (playStyle) {
             case EXTREME_AGGRESSIVE:

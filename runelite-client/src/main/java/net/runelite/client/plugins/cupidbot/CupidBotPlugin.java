@@ -6,6 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.*;
 import net.runelite.api.gameval.InventoryID;
+import net.runelite.api.gameval.VarClientID;
+import net.runelite.api.widgets.JavaScriptCallback;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.RuneLiteProperties;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
@@ -257,6 +260,58 @@ public class CupidBotPlugin extends Plugin
 		else if (Arrays.stream(getShopContainerIds()).anyMatch(sid -> Objects.equals(event.getContainerId(), sid))) {
 			Rs2Shop.storeShopItemsInMemory(event, event.getContainerId());
 		}
+	}
+
+	@Subscribe
+	public void onScriptCallbackEvent(ScriptCallbackEvent event)
+	{
+		if (!"bankpinButtonSetup".equals(event.getEventName()))
+		{
+			return;
+		}
+
+		Client client = CupidBot.getClient();
+		if (client == null || client.getIntStackSize() < 2)
+		{
+			return;
+		}
+
+		int[] intStack = client.getIntStack();
+		int intStackSize = client.getIntStackSize();
+		installBankPinKeyListener(client, intStack[intStackSize - 2], intStack[intStackSize - 1]);
+	}
+
+	static boolean installBankPinKeyListener(Client client, int compId, int buttonId)
+	{
+		Widget button = client.getWidget(compId);
+		if (button == null)
+		{
+			return false;
+		}
+
+		Widget buttonRect = button.getChild(0);
+		if (buttonRect == null)
+		{
+			return false;
+		}
+
+		Object[] onOpListener = buttonRect.getOnOpListener();
+		if (onOpListener == null)
+		{
+			return false;
+		}
+
+		buttonRect.setOnKeyListener((JavaScriptCallback) e -> {
+			int typedChar = e.getTypedKeyChar() - '0';
+			if (typedChar != buttonId)
+			{
+				return;
+			}
+
+			client.runScript(onOpListener);
+			client.setVarcIntValue(VarClientID.KEYBOARD_TIMEOUT, client.getGameCycle() + 1);
+		});
+		return true;
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package net.runelite.client.plugins.cupidbot.util.antiban.ui;
 
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
+import net.runelite.client.plugins.cupidbot.util.antiban.Rs2Antiban;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.*;
@@ -75,10 +76,12 @@ public class ActivityPanel extends JPanel {
         });
         dynamicActivityIntensity.addActionListener(e -> {
             Rs2AntibanSettings.dynamicIntensity = dynamicActivityIntensity.isSelected();
+            Rs2Antiban.refreshDynamicActivity();
             Rs2AntibanSettings.saveToProfile();
         });
         dynamicActivity.addActionListener(e -> {
             Rs2AntibanSettings.dynamicActivity = dynamicActivity.isSelected();
+            Rs2Antiban.refreshDynamicActivity();
             Rs2AntibanSettings.saveToProfile();
         });
 
