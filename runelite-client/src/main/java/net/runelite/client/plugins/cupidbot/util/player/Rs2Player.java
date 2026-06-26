@@ -29,6 +29,7 @@ import net.runelite.client.plugins.cupidbot.util.misc.Rs2Food;
 import net.runelite.client.plugins.cupidbot.util.misc.Rs2Potion;
 import net.runelite.client.plugins.cupidbot.util.misc.Rs2UiHelper;
 import net.runelite.client.plugins.cupidbot.util.npc.Rs2NpcModel;
+import net.runelite.client.plugins.cupidbot.util.reflection.Rs2Reflection;
 import net.runelite.client.plugins.cupidbot.util.security.LoginManager;
 import net.runelite.client.plugins.cupidbot.util.tabs.Rs2Tab;
 import net.runelite.client.plugins.cupidbot.util.walker.Rs2Walker;
@@ -67,7 +68,10 @@ public class Rs2Player {
     public static int moonlightTime = -1;
     public static Instant lastAnimationTime = null;
     private static final long COMBAT_TIMEOUT_MS = 10000;
+    private static final long RUN_TOGGLE_DEBOUNCE_MS = 1200;
     private static long lastCombatTime = 0;
+    private static long lastRunToggleClickAtMs = 0;
+    private static Boolean pendingRunToggleTarget = null;
     @Getter
     public static int lastAnimationID = AnimationID.IDLE;
 
@@ -415,17 +419,104 @@ public class Rs2Player {
      * @return {@code true} if the toggle action was performed successfully or was already in the desired state,
      *         {@code false} if the run energy toggle widget was not found.
      */
-    public static boolean toggleRunEnergy(boolean toggle) {
-        if (CupidBot.getVarbitPlayerValue(173) == 0 && !toggle) return true;
-        if (CupidBot.getVarbitPlayerValue(173) == 1 && toggle) return true;
+    public static synchronized boolean toggleRunEnergy(boolean toggle) {
+        int runState = getCurrentRunState();
+        long now = System.currentTimeMillis();
+        if (!shouldClickRunToggle(toggle, runState, pendingRunToggleTarget, lastRunToggleClickAtMs, now)) {
+            if (isRunStateEnabled(runState) == toggle) {
+                pendingRunToggleTarget = null;
+            }
+            return true;
+        }
 
         Widget widget = Rs2Widget.getWidget(WidgetInfo.MINIMAP_TOGGLE_RUN_ORB.getId());
         if (widget == null) return false;
 
-        CupidBot.getMouse().click(widget.getCanvasLocation());
-        sleep(150, 300);
+        pendingRunToggleTarget = toggle;
+        lastRunToggleClickAtMs = now;
+        invokeRunToggle();
+        sleepUntil(() -> isRunStateEnabled(getCurrentRunState()) == toggle, (int) RUN_TOGGLE_DEBOUNCE_MS);
+
+        if (isRunStateEnabled(getCurrentRunState()) == toggle) {
+            pendingRunToggleTarget = null;
+        }
 
         return true;
+    }
+
+    private static void invokeRunToggle() {
+        RunToggleMenuAction action = runToggleMenuAction();
+        Rs2Reflection.invokeMenu(
+                action.param0,
+                action.param1,
+                action.opcode,
+                action.identifier,
+                action.itemId,
+                action.option,
+                action.target,
+                action.canvasX,
+                action.canvasY);
+    }
+
+    static RunToggleMenuAction runToggleMenuAction() {
+        return new RunToggleMenuAction(
+                -1,
+                WidgetInfo.MINIMAP_TOGGLE_RUN_ORB.getId(),
+                CC_OP.getId(),
+                1,
+                -1,
+                "Toggle Run",
+                "",
+                -1,
+                -1);
+    }
+
+    static final class RunToggleMenuAction {
+        final int param0;
+        final int param1;
+        final int opcode;
+        final int identifier;
+        final int itemId;
+        final String option;
+        final String target;
+        final int canvasX;
+        final int canvasY;
+
+        private RunToggleMenuAction(int param0, int param1, int opcode, int identifier, int itemId, String option, String target, int canvasX, int canvasY) {
+            this.param0 = param0;
+            this.param1 = param1;
+            this.opcode = opcode;
+            this.identifier = identifier;
+            this.itemId = itemId;
+            this.option = option;
+            this.target = target;
+            this.canvasX = canvasX;
+            this.canvasY = canvasY;
+        }
+    }
+
+    static boolean shouldClickRunToggle(boolean toggle, int currentRunState, Boolean pendingTarget, long lastClickAtMs, long nowMs) {
+        if (isRunStateEnabled(currentRunState) == toggle) {
+            return false;
+        }
+
+        return pendingTarget == null
+                || pendingTarget != toggle
+                || nowMs - lastClickAtMs >= RUN_TOGGLE_DEBOUNCE_MS;
+    }
+
+    private static int getCurrentRunState() {
+        try {
+            return CupidBot.getClientThread()
+                    .runOnClientThreadOptional(() -> CupidBot.getClient().getVarpValue(VarPlayerID.OPTION_RUN))
+                    .orElse(CupidBot.getVarbitPlayerValue(VarPlayerID.OPTION_RUN));
+        } catch (Exception ex) {
+            return CupidBot.getVarbitPlayerValue(VarPlayerID.OPTION_RUN);
+        }
+    }
+
+    private static boolean isRunStateEnabled(int runState) {
+        return runState == 1;
     }
 
     /**
@@ -434,7 +525,7 @@ public class Rs2Player {
      * @return {@code true} if run energy is enabled, {@code false} otherwise.
      */
     public static boolean isRunEnabled() {
-        return CupidBot.getVarbitPlayerValue(173) == 1;
+        return isRunStateEnabled(getCurrentRunState());
     }
 
     /**
