@@ -70,7 +70,6 @@ public class Rs2Reflection {
         {
             Rs2Keyboard.keyPress(KeyEvent.VK_BACK_SPACE);
         }
-        System.out.println("[INVOKE] => param0: " + param0 + " param1: " + param1 + " opcode: " + opcode + " id: " + identifier + " itemid: " + itemId);
     }
 
     private static volatile Field cachedOuterField;
