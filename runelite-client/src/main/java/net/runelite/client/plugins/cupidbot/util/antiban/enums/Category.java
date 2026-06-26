@@ -1,6 +1,7 @@
 package net.runelite.client.plugins.cupidbot.util.antiban.enums;
 
 import net.runelite.api.AnimationID;
+import net.runelite.api.Client;
 import net.runelite.client.plugins.cupidbot.CupidBot;
 import net.runelite.client.plugins.cupidbot.util.antiban.AntibanPlugin;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2Antiban;
@@ -302,10 +303,15 @@ public enum Category {
     }
 
     public boolean isBusy() {
-        if (!CupidBot.isLoggedIn()) {
+        if (!CupidBot.isLoggedIn() || !hasLocalPlayer()) {
             return false;
         }
         return isBusyInternal();
+    }
+
+    private static boolean hasLocalPlayer() {
+        Client client = CupidBot.getClient();
+        return client != null && client.getLocalPlayer() != null;
     }
 
     public abstract boolean isBusyInternal();

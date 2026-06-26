@@ -69,6 +69,13 @@ Install the built jar for the launcher:
 scripts/install-cupidbot-launcher-jar.sh
 ```
 
+Always use this helper for launcher jar installs. It writes a temporary file in
+`~/.cupidbot` and publishes it with an atomic rename. Do not use raw `cp` over
+`~/.cupidbot/cupidbot-<version>.jar` while a client is running; that can rewrite
+the same inode a Java classloader is still reading and trigger late
+`NoClassDefFoundError` crashes. Restart any running CupidBot client after the
+install to load the new jar.
+
 Verify the launcher install points at the jar that was just built:
 
 ```bash

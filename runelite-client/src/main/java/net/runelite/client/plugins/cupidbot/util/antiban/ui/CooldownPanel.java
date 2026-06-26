@@ -10,6 +10,8 @@ import java.awt.*;
 import static net.runelite.client.plugins.cupidbot.util.antiban.ui.UiHelper.setupSlider;
 
 public class CooldownPanel extends JPanel {
+    private boolean updatingValues;
+
     private final JCheckBox isActionCooldownActive = new JCheckBox("Action Cooldown Active");
     private final JSlider actionCooldownChance = new JSlider(0, 100, (int) (Rs2AntibanSettings.actionCooldownChance * 100));
     private final JSlider timeout = new JSlider(0, 60, Rs2Antiban.getTIMEOUT());
@@ -59,6 +61,9 @@ public class CooldownPanel extends JPanel {
     private void setupActionListeners() {
         isActionCooldownActive.addActionListener(e -> Rs2AntibanSettings.actionCooldownActive = isActionCooldownActive.isSelected());
         actionCooldownChance.addChangeListener(e -> {
+            if (updatingValues) {
+                return;
+            }
             Rs2AntibanSettings.actionCooldownChance = actionCooldownChance.getValue() / 100.0;
             actionCooldownChanceLabel.setText("Action Cooldown Chance (%): " + actionCooldownChance.getValue());
             if (!actionCooldownChance.getValueIsAdjusting()) {
@@ -66,17 +71,25 @@ public class CooldownPanel extends JPanel {
             }
         });
         timeout.addChangeListener(e -> {
+            if (updatingValues) {
+                return;
+            }
             Rs2Antiban.setTIMEOUT(timeout.getValue());
             timeoutLabel.setText("Timeout (ticks): " + timeout.getValue());
         });
     }
 
     public void updateValues() {
-        isActionCooldownActive.setSelected(Rs2AntibanSettings.actionCooldownActive);
-        isActionCooldownActive.setEnabled(false);
-        actionCooldownChance.setValue((int) (Rs2AntibanSettings.actionCooldownChance * 100));
+        updatingValues = true;
+        try {
+            isActionCooldownActive.setSelected(Rs2AntibanSettings.actionCooldownActive);
+            isActionCooldownActive.setEnabled(false);
+            actionCooldownChance.setValue((int) (Rs2AntibanSettings.actionCooldownChance * 100));
+            timeout.setValue(Rs2Antiban.getTIMEOUT());
+        } finally {
+            updatingValues = false;
+        }
         actionCooldownChanceLabel.setText("Action Cooldown Chance (%): " + actionCooldownChance.getValue());
-        timeout.setValue(Rs2Antiban.getTIMEOUT());
         timeoutLabel.setText("Timeout (ticks): " + timeout.getValue());
 
     }

@@ -191,7 +191,11 @@ public class Rs2AntibanSettings {
 
     public static MouseSpeed getEffectiveMouseSpeed(ActivityIntensity activityIntensity) {
         if (dynamicIntensity) {
-            return MouseSpeed.fromActivityIntensity(activityIntensity);
+            MouseSpeed dynamicSpeed = MouseSpeed.fromActivityIntensity(activityIntensity);
+            MouseSpeed configuredSpeed = getConfiguredMouseSpeed();
+            return configuredSpeed.getSliderIndex() < dynamicSpeed.getSliderIndex()
+                    ? configuredSpeed
+                    : dynamicSpeed;
         }
         return getConfiguredMouseSpeed();
     }

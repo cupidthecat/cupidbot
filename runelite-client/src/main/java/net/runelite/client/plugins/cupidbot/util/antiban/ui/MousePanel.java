@@ -106,6 +106,9 @@ public class MousePanel extends JPanel
             Rs2AntibanSettings.saveToProfile();
         });
         moveMouseOffScreenChance.addChangeListener(e -> {
+            if (updatingValues) {
+                return;
+            }
             Rs2AntibanSettings.moveMouseOffScreenChance = moveMouseOffScreenChance.getValue() / 100.0;
             moveMouseOffScreenChanceLabel.setText("Move Mouse Off Screen (%): " + moveMouseOffScreenChance.getValue());
             if (!moveMouseOffScreenChance.getValueIsAdjusting()) {
@@ -117,6 +120,9 @@ public class MousePanel extends JPanel
             Rs2AntibanSettings.saveToProfile();
         });
         moveMouseRandomlyChance.addChangeListener(e -> {
+            if (updatingValues) {
+                return;
+            }
             Rs2AntibanSettings.moveMouseRandomlyChance = moveMouseRandomlyChance.getValue() / 100.0;
             moveMouseRandomlyChanceLabel.setText("Random Mouse Movement (%): " + moveMouseRandomlyChance.getValue());
             if (!moveMouseRandomlyChance.getValueIsAdjusting()) {
@@ -131,6 +137,7 @@ public class MousePanel extends JPanel
             }
             Rs2AntibanSettings.mouseSpeed = mouseSpeed;
             Rs2AntibanSettings.dynamicIntensity = false;
+            Rs2Antiban.setActivityIntensity(mouseSpeed.toActivityIntensity());
             mouseSpeedLabel.setText("Mouse Speed: " + mouseSpeed.getName());
             if (!mouseSpeedSlider.getValueIsAdjusting()) {
                 Rs2AntibanSettings.saveToProfile();
@@ -140,24 +147,25 @@ public class MousePanel extends JPanel
 
     public void updateValues()
     {
-        useNaturalMouse.setSelected(Rs2AntibanSettings.naturalMouse);
-        simulateMistakes.setSelected(Rs2AntibanSettings.simulateMistakes);
-        moveMouseOffScreen.setSelected(Rs2AntibanSettings.moveMouseOffScreen);
-        moveMouseOffScreenChance.setValue((int) (Rs2AntibanSettings.moveMouseOffScreenChance * 100));
-        moveMouseRandomly.setSelected(Rs2AntibanSettings.moveMouseRandomly);
-        moveMouseRandomlyChance.setValue((int) (Rs2AntibanSettings.moveMouseRandomlyChance * 100));
-        moveMouseRandomlyChanceLabel.setText("Random Mouse Movement (%): " + moveMouseRandomlyChance.getValue());
-
-        MouseSpeed mouseSpeed = Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity());
         updatingValues = true;
         try {
+            useNaturalMouse.setSelected(Rs2AntibanSettings.naturalMouse);
+            simulateMistakes.setSelected(Rs2AntibanSettings.simulateMistakes);
+            moveMouseOffScreen.setSelected(Rs2AntibanSettings.moveMouseOffScreen);
+            moveMouseOffScreenChance.setValue((int) (Rs2AntibanSettings.moveMouseOffScreenChance * 100));
+            moveMouseRandomly.setSelected(Rs2AntibanSettings.moveMouseRandomly);
+            moveMouseRandomlyChance.setValue((int) (Rs2AntibanSettings.moveMouseRandomlyChance * 100));
+
+            MouseSpeed mouseSpeed = Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity());
             mouseSpeedSlider.setValue(mouseSpeed.getSliderIndex());
+            mouseSpeedLabel.setText(Rs2AntibanSettings.dynamicIntensity
+                    ? "Mouse Speed: Dynamic (" + mouseSpeed.getName() + ")"
+                    : "Mouse Speed: " + mouseSpeed.getName());
         } finally {
             updatingValues = false;
         }
-        mouseSpeedLabel.setText(Rs2AntibanSettings.dynamicIntensity
-                ? "Mouse Speed: Dynamic (" + mouseSpeed.getName() + ")"
-                : "Mouse Speed: " + mouseSpeed.getName());
+        moveMouseOffScreenChanceLabel.setText("Move Mouse Off Screen (%): " + moveMouseOffScreenChance.getValue());
+        moveMouseRandomlyChanceLabel.setText("Random Mouse Movement (%): " + moveMouseRandomlyChance.getValue());
     }
 
     private Hashtable<Integer, JLabel> createMouseSpeedLabels()

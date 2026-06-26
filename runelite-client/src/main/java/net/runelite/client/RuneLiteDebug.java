@@ -55,6 +55,7 @@ import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
 import net.runelite.client.util.OSType;
 import net.runelite.client.util.ReflectUtil;
 import net.runelite.client.util.CrashReportFormatter;
+import net.runelite.client.util.SafeThrowableLogger;
 import net.runelite.http.api.RuneLiteAPI;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
@@ -208,7 +209,7 @@ public class RuneLiteDebug {
 
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) ->
         {
-            log.error("Uncaught exception:", throwable);
+            SafeThrowableLogger.logUncaught(log, "Uncaught exception:", throwable);
             if (throwable instanceof AbstractMethodError) {
                 log.error("Classes are out of date; Build with maven again.");
             }

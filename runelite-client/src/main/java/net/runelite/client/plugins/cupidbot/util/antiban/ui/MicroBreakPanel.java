@@ -10,6 +10,8 @@ import java.awt.*;
 import static net.runelite.client.plugins.cupidbot.util.antiban.ui.UiHelper.setupSlider;
 
 public class MicroBreakPanel extends JPanel {
+    private boolean updatingValues;
+
     private final JCheckBox isMicroBreakActive = new JCheckBox("Micro Break Active");
     private final JCheckBox takeMicroBreaks = new JCheckBox("Take Micro Breaks");
     private final JSlider microBreakDurationLow = new JSlider(1, 10, Rs2AntibanSettings.microBreakDurationLow);
@@ -80,6 +82,9 @@ public class MicroBreakPanel extends JPanel {
             Rs2AntibanSettings.saveToProfile();
         });
         microBreakDurationLow.addChangeListener(e -> {
+            if (updatingValues) {
+                return;
+            }
             Rs2AntibanSettings.microBreakDurationLow = microBreakDurationLow.getValue();
             microBreakDurationLowLabel.setText("Micro Break Duration Low (min): " + microBreakDurationLow.getValue());
             if (!microBreakDurationLow.getValueIsAdjusting()) {
@@ -88,6 +93,9 @@ public class MicroBreakPanel extends JPanel {
             }
         });
         microBreakDurationHigh.addChangeListener(e -> {
+            if (updatingValues) {
+                return;
+            }
             Rs2AntibanSettings.microBreakDurationHigh = microBreakDurationHigh.getValue();
             microBreakDurationHighLabel.setText("Micro Break Duration High (min): " + microBreakDurationHigh.getValue());
             if (!microBreakDurationHigh.getValueIsAdjusting()) {
@@ -96,6 +104,9 @@ public class MicroBreakPanel extends JPanel {
             }
         });
         microBreakChance.addChangeListener(e -> {
+            if (updatingValues) {
+                return;
+            }
             Rs2AntibanSettings.microBreakChance = microBreakChance.getValue() / 100.0;
             microBreakChanceLabel.setText("Micro Break Chance (%): " + microBreakChance.getValue());
             if (!microBreakChance.getValueIsAdjusting()) {
@@ -106,14 +117,19 @@ public class MicroBreakPanel extends JPanel {
 
     public void updateValues() {
         AntibanPlugin.validateAndSetBreakDurations();
-        isMicroBreakActive.setSelected(Rs2AntibanSettings.microBreakActive);
-        isMicroBreakActive.setEnabled(false);
-        takeMicroBreaks.setSelected(Rs2AntibanSettings.takeMicroBreaks);
-        microBreakDurationLow.setValue(Rs2AntibanSettings.microBreakDurationLow);
+        updatingValues = true;
+        try {
+            isMicroBreakActive.setSelected(Rs2AntibanSettings.microBreakActive);
+            isMicroBreakActive.setEnabled(false);
+            takeMicroBreaks.setSelected(Rs2AntibanSettings.takeMicroBreaks);
+            microBreakDurationLow.setValue(Rs2AntibanSettings.microBreakDurationLow);
+            microBreakDurationHigh.setValue(Rs2AntibanSettings.microBreakDurationHigh);
+            microBreakChance.setValue((int) (Rs2AntibanSettings.microBreakChance * 100));
+        } finally {
+            updatingValues = false;
+        }
         microBreakDurationLowLabel.setText("Micro Break Duration Low (min): " + microBreakDurationLow.getValue());
-        microBreakDurationHigh.setValue(Rs2AntibanSettings.microBreakDurationHigh);
         microBreakDurationHighLabel.setText("Micro Break Duration High (min): " + microBreakDurationHigh.getValue());
-        microBreakChance.setValue((int) (Rs2AntibanSettings.microBreakChance * 100));
         microBreakChanceLabel.setText("Micro Break Chance (%): " + microBreakChance.getValue());
     }
 }

@@ -22,6 +22,12 @@ Install the jar for the launcher:
 scripts/install-cupidbot-launcher-jar.sh
 ```
 
+Use the script instead of copying into `~/.cupidbot` manually. It publishes the
+jar atomically so a running client can keep its old jar open safely until
+restart. Replacing the launcher jar with raw `cp` while CupidBot is running can
+cause delayed `NoClassDefFoundError` crashes when Java loads another class from
+the overwritten file.
+
 ## Build And Install Local Hub Plugins
 
 ```bash

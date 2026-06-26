@@ -93,14 +93,37 @@ public enum MouseSpeed
 			case VERY_LOW:
 				return VERY_SLOW;
 			case LOW:
-				return BRISK;
+				return SLOW;
 			case MODERATE:
+				return NORMAL;
 			case HIGH:
 				return FAST;
 			case EXTREME:
 				return EXTREME;
 			default:
 				return DEFAULT;
+		}
+	}
+
+	public ActivityIntensity toActivityIntensity()
+	{
+		switch (this)
+		{
+			case VERY_SLOW:
+				return ActivityIntensity.VERY_LOW;
+			case SLOW:
+			case RELAXED:
+				return ActivityIntensity.LOW;
+			case STEADY:
+			case NORMAL:
+			case BRISK:
+				return ActivityIntensity.MODERATE;
+			case FAST:
+			case VERY_FAST:
+				return ActivityIntensity.HIGH;
+			case EXTREME:
+			default:
+				return ActivityIntensity.EXTREME;
 		}
 	}
 }

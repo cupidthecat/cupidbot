@@ -35,6 +35,12 @@ scripts/install-cupidbot-launcher-jar.sh
 
 That copies the built jar to `~/.cupidbot/cupidbot-<version>.jar`, which is the local jar directory used by `../cupidbot-launcher`.
 
+Use the install script instead of copying the jar by hand. It publishes the new
+jar atomically so any already-running client keeps reading its old jar until it
+is restarted. A raw `cp` over `~/.cupidbot/cupidbot-<version>.jar` can rewrite
+the same file inode while Java is still loading classes from it, causing late
+`NoClassDefFoundError` crashes.
+
 ## Install Local Hub Plugins
 
 Build and install the sibling hub:

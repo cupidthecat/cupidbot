@@ -1,6 +1,5 @@
 package net.runelite.client.plugins.cupidbot.util.antiban.ui;
 
-import net.runelite.client.plugins.cupidbot.CupidBot;
 import net.runelite.client.plugins.cupidbot.util.antiban.AntibanPlugin;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
@@ -194,9 +193,6 @@ public class MasterPanel extends PluginPanel {
         mousePanel.updateValues();
         microBreakPanel.updateValues();
         cooldownPanel.updateValues();
-
-        if (!CupidBot.isLoggedIn())
-            return;
 
         playStyleLabel.setText("Play Style: " + (Rs2Antiban.getPlayStyle() != null ? Rs2Antiban.getPlayStyle().getName() : "null"));
         playStyleChangeLabel.setText("Play Style Change: " + (Rs2Antiban.getPlayStyle() != null ? Rs2Antiban.getPlayStyle().getTimeLeftUntilNextSwitch() : "null"));

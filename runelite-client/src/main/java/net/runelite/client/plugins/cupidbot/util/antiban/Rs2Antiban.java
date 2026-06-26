@@ -139,31 +139,59 @@ public class Rs2Antiban {
 
 
     public static void setActivity(@NotNull Activity activity) {
+        Activity previousActivity = Rs2Antiban.activity;
+        ActivityIntensity previousIntensity = Rs2Antiban.activityIntensity;
+        ActivityIntensity newIntensity = activity.getActivityIntensity();
+
         Rs2Antiban.activity = activity;
         Rs2Antiban.category = activity.getCategory();
-        Rs2Antiban.activityIntensity = activity.getActivityIntensity();
+        Rs2Antiban.activityIntensity = newIntensity;
 
-        if (Rs2AntibanSettings.simulateAttentionSpan) {
-            Rs2Antiban.playStyle = PlayStyle.EXTREME_AGGRESSIVE;
-            //Rs2Antiban.playStyle = activityIntensity.getPlayStyle();
+        if (shouldResetPlayStyle(previousActivity != activity, previousIntensity != newIntensity)) {
+            resetPlayStyleForIntensity(newIntensity);
         } else {
-            if (Rs2Antiban.playStyle == null)
-                Rs2Antiban.playStyle = activityIntensity.getPlayStyle();
+            applyPlayStyleIntensity(newIntensity);
         }
-
-        if (Rs2AntibanSettings.randomIntervals) {
-            Rs2Antiban.playStyle = PlayStyle.RANDOM;
-        }
-        playStyle.frequency = activityIntensity.getFrequency();
-        playStyle.amplitude = activityIntensity.getAmplitude();
-        Rs2Antiban.playStyle.resetPlayStyle();
-
-
     }
 
     public static void setActivityIntensity(ActivityIntensity activityIntensity) {
-        Rs2AntibanSettings.dynamicIntensity = false;
+        ActivityIntensity previousIntensity = Rs2Antiban.activityIntensity;
         Rs2Antiban.activityIntensity = activityIntensity;
+
+        if (shouldResetPlayStyle(false, previousIntensity != activityIntensity)) {
+            resetPlayStyleForIntensity(activityIntensity);
+        } else {
+            applyPlayStyleIntensity(activityIntensity);
+        }
+    }
+
+    private static boolean shouldResetPlayStyle(boolean activityChanged, boolean intensityChanged) {
+        if (playStyle == null) {
+            return true;
+        }
+        if (Rs2AntibanSettings.randomIntervals) {
+            return playStyle != PlayStyle.RANDOM;
+        }
+        return playStyle == PlayStyle.RANDOM || activityChanged || intensityChanged;
+    }
+
+    private static void resetPlayStyleForIntensity(ActivityIntensity activityIntensity) {
+        if (activityIntensity == null) {
+            return;
+        }
+        Rs2Antiban.playStyle = Rs2AntibanSettings.randomIntervals
+                ? PlayStyle.RANDOM
+                : activityIntensity.getPlayStyle();
+        applyPlayStyleIntensity(activityIntensity);
+        Rs2Antiban.playStyle.resetPlayStyle();
+    }
+
+    private static void applyPlayStyleIntensity(ActivityIntensity activityIntensity) {
+        if (playStyle == null || activityIntensity == null) {
+            return;
+        }
+        playStyle.frequency = activityIntensity.getFrequency();
+        playStyle.amplitude = activityIntensity.getAmplitude();
     }
 
 

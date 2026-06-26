@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.plugins.cupidbot.util.events.*;
 import net.runelite.client.ui.SplashScreen;
+import net.runelite.client.util.SafeThrowableLogger;
 import org.slf4j.event.Level;
 
 import java.util.Collections;
@@ -110,7 +111,7 @@ public class BlockingEventManager
         try {
             validateAndEnqueueWithBackoff();
         } catch (Throwable t) {
-            CupidBot.log(Level.ERROR, "BlockingEvent loop error: %s", t);
+            CupidBot.log(Level.ERROR, "BlockingEvent loop error: %s", SafeThrowableLogger.describe(t));
         } finally {
             // re-schedule using the latest currentDelay (volatile)
             loopFuture = scheduler.schedule(this::loopOnce, currentDelay, TimeUnit.MILLISECONDS);
@@ -136,11 +137,11 @@ public class BlockingEventManager
                             }
                         }
                     }
-                } catch (Exception ex) {
+                } catch (Throwable ex) {
                     CupidBot.log(Level.ERROR,
                             "Error validating BlockingEvent (%s): %s",
                             event.getName(),
-                            ex);
+                            SafeThrowableLogger.describe(ex));
                 }
             }
         }
@@ -191,12 +192,12 @@ public class BlockingEventManager
             {
                 executedSuccess = event.execute();
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 CupidBot.log(Level.ERROR,
                         "Error executing BlockingEvent (%s): %s",
                         event.getName(),
-                        ex);
+                        SafeThrowableLogger.describe(ex));
             }
             finally
             {

@@ -1607,9 +1607,12 @@ public class Rs2Player {
      * @return The pose animation ID of the player.
      */
     public static int getPoseAnimation() {
-        return CupidBot.getClientThread().runOnClientThreadOptional(() ->
-                CupidBot.getClient().getLocalPlayer().getPoseAnimation()
-        ).orElse(-1);
+        return CupidBot.getClientThread().runOnClientThreadOptional(() -> {
+            Client client = CupidBot.getClient();
+            Player localPlayer = client == null ? null : client.getLocalPlayer();
+            if (localPlayer == null) return -1;
+            return localPlayer.getPoseAnimation();
+        }).orElse(-1);
     }
 
     /**

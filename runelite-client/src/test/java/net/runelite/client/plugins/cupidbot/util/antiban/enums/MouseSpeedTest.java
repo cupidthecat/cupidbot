@@ -56,8 +56,8 @@ public class MouseSpeedTest
 	public void legacyActivityIntensityMapsToNearestMouseSpeed()
 	{
 		assertSame(MouseSpeed.VERY_SLOW, MouseSpeed.fromActivityIntensity(ActivityIntensity.VERY_LOW));
-		assertSame(MouseSpeed.BRISK, MouseSpeed.fromActivityIntensity(ActivityIntensity.LOW));
-		assertSame(MouseSpeed.FAST, MouseSpeed.fromActivityIntensity(ActivityIntensity.MODERATE));
+		assertSame(MouseSpeed.SLOW, MouseSpeed.fromActivityIntensity(ActivityIntensity.LOW));
+		assertSame(MouseSpeed.NORMAL, MouseSpeed.fromActivityIntensity(ActivityIntensity.MODERATE));
 		assertSame(MouseSpeed.FAST, MouseSpeed.fromActivityIntensity(ActivityIntensity.HIGH));
 		assertSame(MouseSpeed.EXTREME, MouseSpeed.fromActivityIntensity(ActivityIntensity.EXTREME));
 		assertSame(MouseSpeed.DEFAULT, MouseSpeed.fromActivityIntensity(null));
@@ -86,8 +86,19 @@ public class MouseSpeedTest
 	public void effectiveMouseSpeedUsesActivityIntensityWhenDynamicIntensityIsOn()
 	{
 		Rs2AntibanSettings.dynamicIntensity = true;
-		Rs2AntibanSettings.mouseSpeed = MouseSpeed.VERY_SLOW;
+		Rs2AntibanSettings.mouseSpeed = MouseSpeed.EXTREME;
 
+		assertSame(MouseSpeed.SLOW, Rs2AntibanSettings.getEffectiveMouseSpeed(ActivityIntensity.LOW));
 		assertSame(MouseSpeed.EXTREME, Rs2AntibanSettings.getEffectiveMouseSpeed(ActivityIntensity.EXTREME));
+	}
+
+	@Test
+	public void dynamicIntensityDoesNotExceedConfiguredMouseSpeed()
+	{
+		Rs2AntibanSettings.dynamicIntensity = true;
+		Rs2AntibanSettings.mouseSpeed = MouseSpeed.SLOW;
+
+		assertSame(MouseSpeed.SLOW, Rs2AntibanSettings.getEffectiveMouseSpeed(ActivityIntensity.HIGH));
+		assertSame(MouseSpeed.SLOW, Rs2AntibanSettings.getEffectiveMouseSpeed(ActivityIntensity.EXTREME));
 	}
 }

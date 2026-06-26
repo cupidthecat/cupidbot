@@ -108,6 +108,7 @@ public class AntibanPlugin extends Plugin {
      */
     private boolean warnedBreakHandlerDisabled;
     private Timer panelRefreshTimer;
+    private MasterPanel masterPanel;
 
     /**
      * Remembers last micro-break state to detect transitions (start/end).
@@ -169,20 +170,20 @@ public class AntibanPlugin extends Plugin {
     protected void startUp() throws AWTException {
         Rs2Antiban.setActivityIntensity(ActivityIntensity.EXTREME);
         loadProfileSettings();
-        final MasterPanel panel = injector.getInstance(MasterPanel.class);
+        masterPanel = injector.getInstance(MasterPanel.class);
         final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "antiban.png");
         navButton = NavigationButton.builder()
                 .tooltip("Antiban")
                 .icon(icon)
                 .priority(1)
-                .panel(panel)
+                .panel(masterPanel)
                 .build();
 
         panelRefreshTimer = new Timer();
         panelRefreshTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                SwingUtilities.invokeLater(panel::loadSettings);
+                refreshPanel();
             }
         }, 0, 600);
 
@@ -198,6 +199,7 @@ public class AntibanPlugin extends Plugin {
             panelRefreshTimer.cancel();
             panelRefreshTimer = null;
         }
+        masterPanel = null;
         clearPauseFlags();
     }
 
@@ -281,8 +283,16 @@ public class AntibanPlugin extends Plugin {
             if (Rs2AntibanSettings.simulateAttentionSpan && Rs2AntibanSettings.profileSwitching &&
                     Rs2Antiban.getPlayStyle().shouldSwitchProfileBasedOnAttention()) {
                 Rs2Antiban.setPlayStyle(Rs2Antiban.getPlayStyle().switchProfile());
+                refreshPanel();
                 Rs2Antiban.getPlayStyle().resetPlayStyle();
             }
+        }
+    }
+
+    private void refreshPanel() {
+        MasterPanel panel = masterPanel;
+        if (panel != null) {
+            SwingUtilities.invokeLater(panel::loadSettings);
         }
     }
 

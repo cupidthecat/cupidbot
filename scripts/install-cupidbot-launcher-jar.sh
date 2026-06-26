@@ -13,6 +13,16 @@ if [[ ! -f "$jar_path" ]]; then
 fi
 
 mkdir -p "$target_dir"
-install -m 0644 "$jar_path" "$target_dir/cupidbot-${version}.jar"
+target_path="$target_dir/cupidbot-${version}.jar"
+tmp_path="$(mktemp "$target_path.tmp.XXXXXX")"
+cleanup() {
+  rm -f "$tmp_path"
+}
+trap cleanup EXIT
 
-echo "Installed $target_dir/cupidbot-${version}.jar"
+install -m 0644 "$jar_path" "$tmp_path"
+mv -f "$tmp_path" "$target_path"
+trap - EXIT
+
+echo "Installed atomically $target_path"
+echo "Restart running CupidBot clients to load this jar. Do not overwrite launcher jars with cp while a client is running."
