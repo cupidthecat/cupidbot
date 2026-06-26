@@ -8,8 +8,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.input.MouseAdapter;
 import net.runelite.client.input.MouseListener;
-import net.runelite.client.plugins.microbot.Microbot;
-import net.runelite.client.plugins.microbot.util.mouse.BotEventGuard;
+import net.runelite.client.plugins.cupidbot.CupidBot;
+import net.runelite.client.plugins.cupidbot.util.mouse.BotEventGuard;
 import net.runelite.client.ui.overlay.OverlayPanel;
 
 import javax.swing.*;
@@ -45,7 +45,7 @@ public class ButtonComponent implements LayoutableRenderableEntity
 
             if (SwingUtilities.isLeftMouseButton(mouseEvent))
             {
-                    Microbot.getClientThread().invokeLater(() ->
+                    CupidBot.getClientThread().invokeLater(() ->
                     {
                         if (isHovered && isEnabled)
                         {
@@ -75,12 +75,12 @@ public class ButtonComponent implements LayoutableRenderableEntity
     // init mouse listener
     public void hookMouseListener()
     {
-        Microbot.getMouseManager().registerMouseListener(mouseListener);
+        CupidBot.getMouseManager().registerMouseListener(mouseListener);
     }
     // unhook mouse listener
     public void unhookMouseListener()
     {
-        Microbot.getMouseManager().unregisterMouseListener(mouseListener);
+        CupidBot.getMouseManager().unregisterMouseListener(mouseListener);
     }
 
     // The button text to display

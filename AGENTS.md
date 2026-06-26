@@ -1,4 +1,4 @@
-# Microbot
+# CupidBot
 
 RuneLite fork with a hidden always-on plugin hosting automation scripts. Composite Gradle build, Java 11 target (JDK 17+ to develop).
 
@@ -9,10 +9,10 @@ RuneLite fork with a hidden always-on plugin hosting automation scripts. Composi
 - Tests (opt-in): `:client:runUnitTests`, `:client:runTests`, `:client:runIntegrationTest` (needs running game)
 
 ## Non-negotiable rules
-- Never instantiate caches/queryables directly — use `Microbot.getRs2XxxCache().query()` / `.getStream()`. See `runelite-client/src/main/java/net/runelite/client/plugins/microbot/api/QUERYABLE_API.md`.
+- Never instantiate caches/queryables directly — use `CupidBot.getRs2XxxCache().query()` / `.getStream()`. See `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/api/QUERYABLE_API.md`.
 - Never block/sleep on the client thread.
 - Never use static sleeps to wait for game state — use `sleepUntil(condition, timeoutMs)`.
-- Keep `MicrobotPlugin` hidden/always-on; don't break its config panel wiring.
+- Keep `CupidBotPlugin` hidden/always-on; don't break its config panel wiring.
 - Respect existing Checkstyle/Lombok patterns; don't weaken security (telemetry tokens, HTTP clients).
 - Minimal logging; no PII or session identifiers.
 
@@ -21,15 +21,15 @@ RuneLite fork with a hidden always-on plugin hosting automation scripts. Composi
 - **P1:** script loop timing, overlay correctness, plugin discovery/config, shaded-jar packaging, build reproducibility.
 
 ## Runtime tooling
-- `./microbot-cli` (JSON output) — see `docs/MICROBOT_CLI.md`, HTTP API `docs/AGENT_SERVER.md`, full tool list `docs/AGENT_SCRIPT_TOOLS.md`.
+- `./cupidbot-cli` (JSON output) — see `docs/CUPIDBOT_CLI.md`, HTTP API `docs/AGENT_SERVER.md`, full tool list `docs/AGENT_SCRIPT_TOOLS.md`.
 - Agent Server plugin runs on port 8081 by default.
-- Offline client-thread lookup: `./microbot-cli ct <method>`.
-- Test mode: `-Dmicrobot.test.mode=true -Dmicrobot.test.script=<PluginName>` → results in `~/.runelite/test-results/`. Protocol: `docs/AGENTIC_TESTING_LOOP.md`.
+- Offline client-thread lookup: `./cupidbot-cli ct <method>`.
+- Test mode: `-Dcupidbot.test.mode=true -Dcupidbot.test.script=<PluginName>` → results in `~/.runelite/test-results/`. Protocol: `docs/AGENTIC_TESTING_LOOP.md`.
 
 ## In-game settings
-Use the settings search bar — tab indices shift on updates. Verify changes via `./microbot-cli varbit <id>`.
+Use the settings search bar — tab indices shift on updates. Verify changes via `./cupidbot-cli varbit <id>`.
 
-## Before touching `microbot/util/`
+## Before touching `cupidbot/util/`
 Read `docs/entity-guides/README.md`. Add a gotcha there when you fix an entity-assumption bug.
 
 ## Docs maintenance
@@ -38,7 +38,7 @@ Read `docs/entity-guides/README.md`. Add a gotcha there when you fix an entity-a
 - Prefer links to owner docs over copying the same guidance into multiple high-level files.
 
 ## Deeper guides
-- Script authoring & threading: `runelite-client/.../microbot/AGENTS.md`
-- State machines (use for 3+ phase scripts): `.../microbot/statemachine/AGENTS.md`
+- Script authoring & threading: `runelite-client/.../cupidbot/AGENTS.md`
+- State machines (use for 3+ phase scripts): `.../cupidbot/statemachine/AGENTS.md`
 - Architecture: `docs/ARCHITECTURE.md`, `docs/decisions/`
 - Setup: `docs/development.md`, `docs/installation.md`

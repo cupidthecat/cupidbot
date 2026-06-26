@@ -1,37 +1,36 @@
 # Architecture
 
-## Components & Interaction
-- **RuneLite client (`runelite-client`)**: Main application with Microbot hidden plugin (`MicrobotPlugin`) always enabled; entrypoint `net.runelite.client.RuneLite`. Builds shaded distribution via `shadowJar` + `microbotReleaseJar`.
-- **Microbot runtime**: `Microbot` singleton exposes caches, utilities, and script lifecycle helpers; `Script` base class drives scheduled script loops; `BlockingEventManager` preempts scripts when required UI/game states are detected.
-- **Queryable caches**: Guice-injected caches (`Rs2NpcCache`, `Rs2PlayerCache`, `Rs2TileItemCache`, `Rs2TileObjectCache`, `Rs2BoatCache`, `Rs2PlayerStateCache`) updated per tick and accessed via `Microbot.getRs2XxxCache().query()` or `.getStream()`. World-view aware for boats.
-- **Utilities (`microbot/util`)**: Facades over RuneLite APIs for player, inventory, banking, walking, etc.; expected to run on script threads, not the client thread.
-- **Included builds**: `runelite-api` (shared API artifacts), `runelite-gradle-plugin` (assemble/index/jarsign tasks), `cache` (cache tooling), `runelite-jshell` (JShell support). Root Gradle orchestrates via composite build.
-- **Telemetry/API**: `MicrobotApi`, `MicrobotVersionChecker`, and related clients can call `https://microbot.cloud/api`; users can disable this with `-Dmicrobot.disableTelemetry=true` or the Microbot config toggle.
-- **Agent Server**: Optional local control surface under `agentserver`; defaults to TCP on `127.0.0.1:8081`, token-gates requests, and can run in UDS or stealth-bind modes.
+## Components
 
-## Key Data Flows
-- User starts client → `MicrobotClientLoader` fetches jav_config/world info → RuneLite client loads → `MicrobotPlugin` starts, registers overlays/config panels and initializes caches.
-- Script loop (`Script.run()` implementations) executes on scheduled executors → queries caches via Queryable API → performs interactions through utilities (`Rs2Inventory`, `Rs2Walker`, etc.) → waits with `sleepUntil` helpers.
-- Blocking events (`BlockingEventManager`) continuously validate (e.g., welcome screen, bank popups) → if triggered, they run on a dedicated executor and block script progression until resolved.
-- Telemetry flow: session/version/fact/plugin telemetry is skipped when telemetry is disabled; failures are logged at debug level.
+- **RuneLite base client**: Preserves the normal RuneLite startup, Jagex/OSRS config loading, world list access, and official RuneLite Plugin Hub support.
+- **CupidBot runtime**: The renamed local runtime under `net.runelite.client.plugins.cupidbot`. It exposes script lifecycle helpers, queryable caches, and utility facades.
+- **Local CupidBot Hub loader**: Reads `~/.runelite/cupidbot-plugins/plugins.json` and loads matching local jars from the same directory. It does not download plugin jars.
+- **CupidBot Hub source repo**: The sibling `../CupidBot-hub` checkout builds all local plugin jars and produces the local manifest.
+- **CupidBot Launcher**: The sibling Electron launcher reads local jars from `~/.cupidbot` and uses Jagex OAuth/session endpoints for account launch.
 
-## Runtime Boundaries
-- **Threads**: Client thread (never block/sleep); script/executor threads (automation logic, sleeps allowed); blocking-event executor (resolves UI blockers). Use `ClientThread.runOnClientThreadOptional` for safe client access.
-- **Services vs libraries**: Microbot plugin runs inside client process; optional external calls are limited to configured telemetry/API clients; caches are in-memory per client instance.
-- **Distribution**: Shaded jar (`*-shaded.jar` and `microbot-<version>.jar`) produced in `runelite-client/build/libs`.
+## Network Policy
 
-## Configuration & Environments
-- Gradle properties: `gradle.properties` holds `microbot.version`, `microbot.commit.sha`, optional repo credentials (`microbot.repo.*`), and `glslang.path` (populated by CI script).
-- Runtime config: `MicrobotClientLoader` consumes `RuneLiteProperties` for jav_config URL; falls back to world-supplied hosts on failure. `MicrobotVersionChecker` logs current version/commit on startup unless telemetry is disabled.
-- Logging: Game chat logging configurable via `MicrobotConfig` (patterns/levels, microbot-only filter); logback appender wired at plugin startup.
+CupidBot removes legacy project and CupidBot service networking from the core client and loader. Core runtime networking is limited to:
 
-## Non-Obvious Behaviors
-- Caches refresh at most once per game tick; repeated queries within the same tick reuse cached lists.
-- `BlockingEventManager` uses exponential backoff when no events validate to reduce overhead; events are re-queued if execution fails.
-- Default Gradle `test` tasks are disabled in `runelite-client/build.gradle.kts`; use explicit tasks such as `:client:runUnitTests`, `:client:runTests`, `:client:runDebugTests`, `:client:runIntegrationTest`, or `:client:runClientThreadScanner`.
-- World hopping short-circuits if the player is interacting or already hopping; confirmation widget auto-click handled in `Microbot.hopToWorld`.
+- Official RuneLite endpoints used by the base client and official Plugin Hub
+- Jagex/OSRS login, account, config, world, and game endpoints
+- Localhost control APIs such as the Agent Server
+- Local CupidBot Hub plugins, which may use networking for their own plugin features
 
-## References
-- Queryable API guide: `../runelite-client/src/main/java/net/runelite/client/plugins/microbot/api/QUERYABLE_API.md`
-- Development setup: `development.md`
-- Decision records: `decisions/`
+The local hub loader skips release lookup, jar download, install telemetry, and update telemetry. Plugin jars are trusted only when their local SHA-256 hash matches the local manifest.
+
+## Data Flow
+
+1. The launcher selects a local `~/.cupidbot/cupidbot-<version>.jar`.
+2. CupidBot starts and loads normal RuneLite/Jagex runtime data.
+3. The local hub loader reads `~/.runelite/cupidbot-plugins/plugins.json`.
+4. Enabled local plugins are loaded from `~/.runelite/cupidbot-plugins/<InternalName>.jar`.
+5. Optional Agent Server traffic stays on localhost unless explicitly configured otherwise.
+
+## Build Outputs
+
+- Client jar: `runelite-client/build/libs/cupidbot-<version>.jar`
+- Hub manifest: `../CupidBot-hub/public/docs/plugins.json`
+- Hub plugin jars: `../CupidBot-hub/build/libs/<InternalName>-<version>.jar`
+- Launcher jar directory: `~/.cupidbot`
+- Local plugin directory: `~/.runelite/cupidbot-plugins`

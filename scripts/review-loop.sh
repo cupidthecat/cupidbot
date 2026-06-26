@@ -2,7 +2,7 @@
 #
 # review-loop.sh
 #
-# Autonomous code-review loop for Microbot. Every 15 minutes for ~8 hours
+# Autonomous code-review loop for CupidBot. Every 15 minutes for ~8 hours
 # it asks Claude Code to inspect a fresh slice of the codebase looking for
 # performance wins, new feature ideas, or simplification opportunities.
 # Findings are accumulated in REVIEW_FINDINGS.md, prioritised URGENT/HIGH/
@@ -128,7 +128,7 @@ cd "$PROJECT_DIR" || { log "FATAL: cannot cd to $PROJECT_DIR"; exit 1; }
 # Initialise the findings file on the very first run.
 if [ ! -f "$FINDINGS_FILE" ]; then
   cat > "$FINDINGS_FILE" <<'EOF'
-# Microbot Review Findings
+# CupidBot Review Findings
 
 Autonomous review loop output. Read this in the morning and pick what to
 implement. Items at the top of each section are most actionable.
@@ -210,7 +210,7 @@ build_prompt() {
 
   cat > "$PROMPT_FILE" <<PROMPT_EOF
 You are running iteration $iter of $total in an autonomous review loop over
-the Microbot codebase. Your job: identify ONE area of the codebase to
+the CupidBot codebase. Your job: identify ONE area of the codebase to
 inspect, find a small number of concrete improvement opportunities there,
 and append them to REVIEW_FINDINGS.md. The user will read that file in the
 morning and pick what to implement.
@@ -236,7 +236,7 @@ CRITICAL CONSTRAINTS
 
 4. Each finding MUST reference exact file paths with line numbers. Be
    concrete. "Refactor this" is useless. "Replace the synchronous HTTP
-   call at MicrobotPluginClient.java:142 with a CompletableFuture so the
+   call at CupidBotPluginClient.java:142 with a CompletableFuture so the
    plugin hub UI thread doesn't stall on slow networks" is useful.
 
 PROCESS
@@ -248,38 +248,38 @@ been raised in each section.
 Step 2 — Pick ONE area not yet covered. Suggested rotation (skip any that
 appear in "Reviewed Areas"):
 
-  - runelite-client/.../microbot/util/bank
-  - runelite-client/.../microbot/util/inventory
-  - runelite-client/.../microbot/util/equipment
-  - runelite-client/.../microbot/util/walker
-  - runelite-client/.../microbot/util/cache
-  - runelite-client/.../microbot/util/coords
-  - runelite-client/.../microbot/util/npc
-  - runelite-client/.../microbot/util/gameobject
-  - runelite-client/.../microbot/util/grounditem
-  - runelite-client/.../microbot/util/combat
-  - runelite-client/.../microbot/util/magic
-  - runelite-client/.../microbot/util/prayer
-  - runelite-client/.../microbot/util/widget
-  - runelite-client/.../microbot/util/dialogues
-  - runelite-client/.../microbot/util/tabs
-  - runelite-client/.../microbot/util/loginscreen
-  - runelite-client/.../microbot/util/antiban
-  - runelite-client/.../microbot/util/mouse
-  - runelite-client/.../microbot/util/keyboard
-  - runelite-client/.../microbot/util/grandexchange
-  - runelite-client/.../microbot/util/shop
-  - runelite-client/.../microbot/util/depositbox
-  - runelite-client/.../microbot/util/farming
-  - runelite-client/.../microbot/util/poh
-  - runelite-client/.../microbot/api (queryable API)
-  - runelite-client/.../microbot/agentserver
-  - runelite-client/.../microbot/testing
-  - runelite-client/.../microbot/ui (panels including MicrobotPluginHubPanel)
-  - runelite-client/.../microbot/breakhandler
-  - runelite-client/.../microbot/externalplugins (MicrobotPluginManager)
-  - core: Microbot.java, Script.java, BlockingEventManager
-  - microbot-cli (the bash CLI script + its server-side handlers)
+  - runelite-client/.../cupidbot/util/bank
+  - runelite-client/.../cupidbot/util/inventory
+  - runelite-client/.../cupidbot/util/equipment
+  - runelite-client/.../cupidbot/util/walker
+  - runelite-client/.../cupidbot/util/cache
+  - runelite-client/.../cupidbot/util/coords
+  - runelite-client/.../cupidbot/util/npc
+  - runelite-client/.../cupidbot/util/gameobject
+  - runelite-client/.../cupidbot/util/grounditem
+  - runelite-client/.../cupidbot/util/combat
+  - runelite-client/.../cupidbot/util/magic
+  - runelite-client/.../cupidbot/util/prayer
+  - runelite-client/.../cupidbot/util/widget
+  - runelite-client/.../cupidbot/util/dialogues
+  - runelite-client/.../cupidbot/util/tabs
+  - runelite-client/.../cupidbot/util/loginscreen
+  - runelite-client/.../cupidbot/util/antiban
+  - runelite-client/.../cupidbot/util/mouse
+  - runelite-client/.../cupidbot/util/keyboard
+  - runelite-client/.../cupidbot/util/grandexchange
+  - runelite-client/.../cupidbot/util/shop
+  - runelite-client/.../cupidbot/util/depositbox
+  - runelite-client/.../cupidbot/util/farming
+  - runelite-client/.../cupidbot/util/poh
+  - runelite-client/.../cupidbot/api (queryable API)
+  - runelite-client/.../cupidbot/agentserver
+  - runelite-client/.../cupidbot/testing
+  - runelite-client/.../cupidbot/ui (panels including CupidBotPluginHubPanel)
+  - runelite-client/.../cupidbot/breakhandler
+  - runelite-client/.../cupidbot/externalplugins (CupidBotPluginManager)
+  - core: CupidBot.java, Script.java, BlockingEventManager
+  - cupidbot-cli (the bash CLI script + its server-side handlers)
 
 If every area on the list has already been covered, revisit the area with
 the FEWEST findings recorded in REVIEW_FINDINGS.md and look for a
@@ -355,7 +355,7 @@ Begin now by reading REVIEW_FINDINGS.md.
 PROMPT_EOF
 }
 
-log "===== Microbot review loop starting ====="
+log "===== CupidBot review loop starting ====="
 log "Project dir: $PROJECT_DIR"
 log "Findings file: $FINDINGS_FILE"
 log "Iterations: $MAX_ITER, interval: ${INTERVAL_SECONDS}s, per-iter timeout: ${ITER_TIMEOUT}s"
@@ -450,7 +450,7 @@ done
 
 # --- Final summary --------------------------------------------------------
 final_counts=$(count_findings "$FINDINGS_FILE")
-log "===== Microbot review loop complete ====="
+log "===== CupidBot review loop complete ====="
 log "Findings file: $FINDINGS_FILE"
 log "Baseline:  $baseline_counts"
 log "Final:     $final_counts"

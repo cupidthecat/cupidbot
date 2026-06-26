@@ -56,9 +56,9 @@ import net.runelite.client.input.KeyListener;
 import net.runelite.client.input.MouseAdapter;
 import net.runelite.client.input.MouseListener;
 import net.runelite.client.input.MouseManager;
-import net.runelite.client.plugins.microbot.Microbot;
-import net.runelite.client.plugins.microbot.questhelper.QuestHelperConfig;
-import net.runelite.client.plugins.microbot.util.walker.Rs2Walker;
+import net.runelite.client.plugins.cupidbot.CupidBot;
+import net.runelite.client.plugins.cupidbot.questhelper.QuestHelperConfig;
+import net.runelite.client.plugins.cupidbot.util.walker.Rs2Walker;
 import net.runelite.client.ui.laf.RuneLiteLAF;
 import net.runelite.client.ui.laf.RuneLiteRootPaneUI;
 import net.runelite.client.util.HotkeyListener;
@@ -103,8 +103,8 @@ public class ClientUI
 	private static final String CONFIG_CLIENT_BOUNDS = "clientBounds";
 	private static final String CONFIG_CLIENT_MAXIMIZED = "clientMaximized";
 	private static final String CONFIG_CLIENT_SIDEBAR_CLOSED = "clientSidebarClosed";
-	public static final BufferedImage ICON_128 = ImageUtil.loadImageResource(Microbot.class, "microbot_logo.png");
-	public static final BufferedImage ICON_16 = ImageUtil.loadImageResource(Microbot.class, "microbot_logo.png");
+	public static final BufferedImage ICON_128 = ImageUtil.loadImageResource(CupidBot.class, "cupidbot_logo.png");
+	public static final BufferedImage ICON_16 = ImageUtil.loadImageResource(CupidBot.class, "cupidbot_logo.png");
 	public static String proxyMessage = "";
 	@Getter
 	private TrayIcon trayIcon;
@@ -603,8 +603,8 @@ public class ClientUI
 					toolbarPanel.createSidebarPanel());
 			}
 
-			questIconOn = net.runelite.client.plugins.microbot.questhelper.tools.Icon.QUEST_ICON_ON.getImage();
-			questIconOff = net.runelite.client.plugins.microbot.questhelper.tools.Icon.QUEST_ICON_OFF.getImage();
+			questIconOn = net.runelite.client.plugins.cupidbot.questhelper.tools.Icon.QUEST_ICON_ON.getImage();
+			questIconOff = net.runelite.client.plugins.cupidbot.questhelper.tools.Icon.QUEST_ICON_OFF.getImage();
 			questHelperNavBtn = toolbarPanel.add(
 				NavigationButton.builder()
 					.icon(configManager.getConfiguration(QuestHelperConfig.QUEST_HELPER_GROUP, "TurnOn", Boolean.class) ? questIconOn : questIconOff)

@@ -67,8 +67,8 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.microbot.Microbot;
-import net.runelite.client.plugins.microbot.util.models.RS2Item;
+import net.runelite.client.plugins.cupidbot.CupidBot;
+import net.runelite.client.plugins.cupidbot.util.models.RS2Item;
 import net.runelite.client.plugins.xptracker.XpTrackerPlugin;
 import net.runelite.client.plugins.xptracker.XpTrackerService;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -270,7 +270,7 @@ public class AgilityPlugin extends Plugin
 
 		if (item.getId() == ItemID.GRACE)
 		{
-			RS2Item rs2Item = new RS2Item(Microbot.getItemManager().getItemComposition(item.getId()), tile, item);
+			RS2Item rs2Item = new RS2Item(CupidBot.getItemManager().getItemComposition(item.getId()), tile, item);
 			marksOfGrace.add(rs2Item);
 		}
 

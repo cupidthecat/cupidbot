@@ -1,4 +1,4 @@
-# Microbot
+# CupidBot
 
 This is the documentation entry point. Keep it short: it should route readers to the owner docs instead of duplicating commands, API examples, or volatile implementation details.
 
@@ -9,12 +9,12 @@ This is the documentation entry point. Keep it short: it should route readers to
 ## For Developers
 - Local setup and build commands: [development.md](development.md)
 - Runtime architecture: [ARCHITECTURE.md](ARCHITECTURE.md)
-- Queryable cache guide: [../runelite-client/src/main/java/net/runelite/client/plugins/microbot/api/QUERYABLE_API.md](../runelite-client/src/main/java/net/runelite/client/plugins/microbot/api/QUERYABLE_API.md)
+- Queryable cache guide: [../runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/api/QUERYABLE_API.md](../runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/api/QUERYABLE_API.md)
 - Entity utility gotchas: [entity-guides/README.md](entity-guides/README.md)
 - Architecture decisions: [decisions/](decisions/)
 
 ## Runtime Agent Tools
-- CLI wrapper: [MICROBOT_CLI.md](MICROBOT_CLI.md)
+- CLI wrapper: [CUPIDBOT_CLI.md](CUPIDBOT_CLI.md)
 - HTTP server: [AGENT_SERVER.md](AGENT_SERVER.md)
 - Test protocol: [AGENTIC_TESTING_LOOP.md](AGENTIC_TESTING_LOOP.md)
 - Full tool reference: [AGENT_SCRIPT_TOOLS.md](AGENT_SCRIPT_TOOLS.md)

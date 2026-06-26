@@ -13,7 +13,7 @@ How to build/test
 
 Key invariants/constraints
 - API surface must stay compatible with the client; changes here ripple to `runelite-client` and plugin code.
-- Avoid Microbot-specific types creeping into the shared API unless intentionally upstreamed.
+- Avoid CupidBot-specific types creeping into the shared API unless intentionally upstreamed.
 
 Links
 - Architecture: `../docs/ARCHITECTURE.md`

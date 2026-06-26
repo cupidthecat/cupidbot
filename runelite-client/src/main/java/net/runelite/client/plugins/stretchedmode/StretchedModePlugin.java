@@ -75,7 +75,7 @@ public class StretchedModePlugin extends Plugin
 		client.setStretchedEnabled(true);
 		updateConfig();
 
-		//Microbot.showMessage("ALERT! Microbot has noticed that your StretchMode plugin is enabled. Please disable this plugin to avoid weird behavior.");
+		//CupidBot.showMessage("ALERT! CupidBot has noticed that your StretchMode plugin is enabled. Please disable this plugin to avoid weird behavior.");
 	}
 
 	@Override

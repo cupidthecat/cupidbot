@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.RuneLite;
-import net.runelite.client.plugins.microbot.util.security.LoginManager;
+import net.runelite.client.plugins.cupidbot.util.security.LoginManager;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -55,7 +55,7 @@ import net.runelite.client.RuneLite;
 @RequiredArgsConstructor(onConstructor = @__(@Inject))
 @Slf4j
 public class ProfileManager {
-    private static final File PROFILES_DIR = new File(RuneLite.RUNELITE_DIR, "microbot-profiles");
+    private static final File PROFILES_DIR = new File(RuneLite.RUNELITE_DIR, "cupidbot-profiles");
     private static final File PROFILES = new File(PROFILES_DIR, "profiles.json");
 
     private final Gson gson;

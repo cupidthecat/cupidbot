@@ -10,7 +10,7 @@ Verifies the full lifecycle:
   5. Confirm the plugin descriptor reflects v2 (proves new code is active)
   6. Undeploy and confirm it is gone
 
-Requires the Microbot client to be running with the Agent Server plugin active.
+Requires the CupidBot client to be running with the Agent Server plugin active.
 Run with:  python3 scripts/test_hot_reload.py
 """
 
@@ -23,8 +23,8 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
-HOST = os.environ.get("MICROBOT_HOST", "127.0.0.1")
-PORT = os.environ.get("MICROBOT_PORT", "8081")
+HOST = os.environ.get("CUPIDBOT_HOST", "127.0.0.1")
+PORT = os.environ.get("CUPIDBOT_PORT", "8081")
 BASE_URL = f"http://{HOST}:{PORT}"
 SCRIPT_NAME = "hot-reload-test"
 
@@ -106,8 +106,8 @@ public class HotReloadTestPlugin extends Plugin {
 def get_token() -> str | None:
     for candidate in (
         Path.home() / ".runelite" / ".agent-token",
-        Path.home() / ".runelite" / "microbot" / "agent-token",
-        Path.home() / ".microbot" / "agent-token",
+        Path.home() / ".runelite" / "cupidbot" / "agent-token",
+        Path.home() / ".cupidbot" / "agent-token",
     ):
         if candidate.exists():
             value = candidate.read_text().strip()
@@ -158,7 +158,7 @@ def assert_server_reachable():
     status, resp = api("GET", "/scripts/deploy")
     if status == 0:
         print(f"ERROR: Cannot reach agent server at {BASE_URL}")
-        print("       Start the Microbot client and enable the Agent Server plugin, then retry.")
+        print("       Start the CupidBot client and enable the Agent Server plugin, then retry.")
         sys.exit(2)
 
 
@@ -168,7 +168,7 @@ def main():
 
     failures: list[str] = []
 
-    with tempfile.TemporaryDirectory(prefix="microbot-hotreload-") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="cupidbot-hotreload-") as tmpdir:
         src_dir = Path(tmpdir)
         java_file = src_dir / "HotReloadTestPlugin.java"
 

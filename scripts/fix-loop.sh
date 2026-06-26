@@ -288,7 +288,7 @@ build_prompt() {
   done_title=$(to_done_title "$title")
 
   cat > "$PROMPT_FILE" <<PROMPT_EOF
-You are running iteration $iter of an autonomous fix loop over the Microbot
+You are running iteration $iter of an autonomous fix loop over the CupidBot
 codebase. Your job: implement ONE finding from REVIEW_FINDINGS.md, verify the
 fix compiles, then mark the finding as done.
 
@@ -367,7 +367,7 @@ PROMPT_EOF
 
 # --- Main loop ------------------------------------------------------------
 
-log "===== Microbot fix loop starting ====="
+log "===== CupidBot fix loop starting ====="
 log "Project dir: $PROJECT_DIR"
 log "Findings file: $FINDINGS_FILE"
 log "Priority order: $PRIORITY_ORDER"
@@ -476,7 +476,7 @@ while [ "$iter" -lt "$MAX_ITER" ]; do
 done
 
 # --- Final summary --------------------------------------------------------
-log "===== Microbot fix loop complete ====="
+log "===== CupidBot fix loop complete ====="
 log "Iterations run: $iter"
 log "Fixed by claude: $fixed_count"
 log "Force-marked (no fix detected): $skipped_count"

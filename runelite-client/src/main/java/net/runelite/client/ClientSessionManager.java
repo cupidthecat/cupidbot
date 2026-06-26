@@ -29,7 +29,7 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ClientShutdown;
-import net.runelite.client.plugins.microbot.MicrobotApi;
+import net.runelite.client.plugins.cupidbot.CupidBotApi;
 import net.runelite.client.util.RunnableExceptionLogger;
 
 import javax.inject.Inject;
@@ -54,19 +54,19 @@ public class ClientSessionManager
 	private ScheduledFuture<?> scheduledFutureMicroBot;
 
 	private UUID sessionId = UUID.randomUUID();
-	private UUID microbotSessionId;
-	private MicrobotApi microbotApi;
+	private UUID cupidbotSessionId;
+	private CupidBotApi cupidbotApi;
 
 	@Inject
 	ClientSessionManager(ScheduledExecutorService executorService,
 		Client client,
-		SessionClient sessionClient, MicrobotApi microbotApi,
+		SessionClient sessionClient, CupidBotApi cupidbotApi,
         @Named("disableTelemetry") boolean disableTelemetry)
 	{
 		this.executorService = executorService;
 		this.client = client;
 		this.sessionClient = sessionClient;
-		this.microbotApi = microbotApi;
+		this.cupidbotApi = cupidbotApi;
 		this.disableTelemetry = disableTelemetry;
 	}
 
@@ -81,7 +81,7 @@ public class ClientSessionManager
 			try
 			{
 				sessionId = sessionClient.open();
-				microbotSessionId = microbotApi.microbotOpen();
+				cupidbotSessionId = cupidbotApi.cupidbotOpen();
 				log.debug("Opened session {}", sessionId);
 			}
 			catch (IOException ex)
@@ -91,7 +91,7 @@ public class ClientSessionManager
 		});
         scheduledFuture = executorService.scheduleWithFixedDelay(RunnableExceptionLogger.wrap(this::ping), (int) (5 * 60 * Math.random()), 10 * 60, TimeUnit.SECONDS);
 		scheduledFutureMicroBot = executorService.scheduleWithFixedDelay(
-				RunnableExceptionLogger.wrap(this::microbotPing), 1, 10, TimeUnit.MINUTES);
+				RunnableExceptionLogger.wrap(this::cupidbotPing), 1, 10, TimeUnit.MINUTES);
 	}
 
 	@Subscribe
@@ -109,10 +109,10 @@ public class ClientSessionManager
 				{
 					sessionClient.delete(localUuid);
 				}
-				UUID localMicrobotUuid = microbotSessionId;
-				if (localMicrobotUuid != null)
+				UUID localCupidBotUuid = cupidbotSessionId;
+				if (localCupidBotUuid != null)
 				{
-					microbotApi.microbotDelete(localMicrobotUuid);
+					cupidbotApi.cupidbotDelete(localCupidBotUuid);
 				}
 			}
 			catch (IOException ex)
@@ -143,12 +143,12 @@ public class ClientSessionManager
 		}
 	}
 
-	private void microbotPing()
+	private void cupidbotPing()
 	{
 		try
 		{
-			if (microbotSessionId == null) {
-				microbotSessionId = microbotApi.microbotOpen();
+			if (cupidbotSessionId == null) {
+				cupidbotSessionId = cupidbotApi.cupidbotOpen();
 				return;
 			}
 		}
@@ -167,7 +167,7 @@ public class ClientSessionManager
 
 		try
 		{
-			microbotApi.microbotPing(microbotSessionId, loggedIn);
+			cupidbotApi.cupidbotPing(cupidbotSessionId, loggedIn);
 		}
 		catch (IOException ex)
 		{

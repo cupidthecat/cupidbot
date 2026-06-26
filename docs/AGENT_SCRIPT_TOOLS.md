@@ -1,8 +1,8 @@
 # Agent Script Development Tools
 
-A single-page reference for every tool available when **creating or debugging** a Microbot script. Aimed at LLM agents and developers working in a terminal.
+A single-page reference for every tool available when **creating or debugging** a CupidBot script. Aimed at LLM agents and developers working in a terminal.
 
-> **This is a task-oriented index.** It tells you *which* tool to reach for and *when*. For full parameter details see [MICROBOT_CLI.md](MICROBOT_CLI.md) (CLI) and [AGENT_SERVER.md](AGENT_SERVER.md) (HTTP API).
+> **This is a task-oriented index.** It tells you *which* tool to reach for and *when*. For full parameter details see [CUPIDBOT_CLI.md](CUPIDBOT_CLI.md) (CLI) and [AGENT_SERVER.md](AGENT_SERVER.md) (HTTP API).
 
 ---
 
@@ -18,7 +18,7 @@ The **Agent Server** plugin (port 8081, localhost) must be enabled for any CLI/H
 
 ```bash
 # Quick connectivity check
-./microbot-cli state
+./cupidbot-cli state
 ```
 
 ---
@@ -31,7 +31,7 @@ The **Agent Server** plugin (port 8081, localhost) must be enabled for any CLI/H
 |------|---------|
 | `./gradlew :client:compileJava` | Fast compile check (~15 s) |
 | `./gradlew :client:runUnitTests` | CI-safe tests incl. client-thread guardrail |
-| `./microbot-cli ct <method>` | Thread-safety lookup for any RuneLite API method |
+| `./cupidbot-cli ct <method>` | Thread-safety lookup for any RuneLite API method |
 | `./gradlew :client:runClientThreadScanner` | Regenerate thread-safety manifest + TSV |
 | `./gradlew :client:regenerateClientThreadGuardrailBaseline` | Update guardrail allow-list after intentional refactors |
 
@@ -131,16 +131,16 @@ Includes `ClientThreadGuardrailTest` — fails if an `Rs2*` utility or query API
 
 ```bash
 # Exact method name
-./microbot-cli ct Player.getName
+./cupidbot-cli ct Player.getName
 
 # Substring match
-./microbot-cli ct getItem --like
+./cupidbot-cli ct getItem --like
 
 # Filter by evidence kind
-./microbot-cli ct getItems --evidence ASSERT
+./cupidbot-cli ct getItems --evidence ASSERT
 
 # JSON output for programmatic use
-./microbot-cli ct getItems --json
+./cupidbot-cli ct getItems --json
 ```
 
 **Verdicts:** `REQUIRED (asserted)` · `Strongly indicated (N signals)` · `Likely (single signal)`. Absence from the manifest does **not** prove a method is safe — it means no evidence was found by the scanner.
@@ -153,7 +153,7 @@ Before writing or modifying any script, check the relevant docs:
 
 | What you're doing | Read first |
 |-------------------|-----------|
-| Any script work | `runelite-client/.../microbot/CLAUDE.md` — threading, Rs2* utilities, cache, lifecycle |
+| Any script work | `runelite-client/.../cupidbot/CLAUDE.md` — threading, Rs2* utilities, cache, lifecycle |
 | State machine scripts | `runelite-client/.../statemachine/CLAUDE.md` — when/how to use, best practices |
 | Item interactions | `docs/entity-guides/items.md` — known gotchas for Rs2Inventory, Rs2Bank, etc. |
 | Cache/queryable usage | `runelite-client/.../api/QUERYABLE_API.md` — singleton pattern, fluent queries |
@@ -167,25 +167,25 @@ Before writing or modifying any script, check the relevant docs:
 
 ```bash
 # List all profiles (shows active indicator)
-./microbot-cli profile
+./cupidbot-cli profile
 
 # Switch to a different profile
-./microbot-cli profile switch "my-alt"
+./cupidbot-cli profile switch "my-alt"
 
 # Then login with that profile
-./microbot-cli login now --world 381
+./cupidbot-cli login now --world 381
 ```
 
-Profiles are stored in `~/.runelite/microbot-profiles/profiles.json`. The switch is **synchronous** — the profile is active immediately, safe to call `login now` right after.
+Profiles are stored in `~/.runelite/cupidbot-profiles/profiles.json`. The switch is **synchronous** — the profile is active immediately, safe to call `login now` right after.
 
 ### Login Control
 
 ```bash
 # Check login status
-./microbot-cli login
+./cupidbot-cli login
 
 # Login and block until complete (default 60s timeout)
-./microbot-cli login now --world 381 --timeout 60
+./cupidbot-cli login now --world 381 --timeout 60
 ```
 
 The login endpoint auto-detects errors: non-member on members world, bans, auth failures. It auto-dismisses error dialogs on retry — no manual intervention needed.
@@ -194,16 +194,16 @@ The login endpoint auto-detects errors: non-member on members world, bans, auth 
 
 ```bash
 # List all plugins
-./microbot-cli scripts
+./cupidbot-cli scripts
 
 # Start by fully qualified class name
-./microbot-cli scripts start --class "net.runelite.client.plugins.microbot.fishing.FishingPlugin"
+./cupidbot-cli scripts start --class "net.runelite.client.plugins.cupidbot.fishing.FishingPlugin"
 
 # Start by display name
-./microbot-cli scripts start --name "Auto Fishing"
+./cupidbot-cli scripts start --name "Auto Fishing"
 
 # Stop a plugin
-./microbot-cli scripts stop --class "net.runelite.client.plugins.microbot.fishing.FishingPlugin"
+./cupidbot-cli scripts stop --class "net.runelite.client.plugins.cupidbot.fishing.FishingPlugin"
 ```
 
 ### Plugin Configuration
@@ -212,10 +212,10 @@ Read or write any `@ConfigGroup` key without restarting:
 
 ```bash
 # Read
-./microbot-cli plugin-config get "micro-fishing" "fishingSpot"
+./cupidbot-cli plugin-config get "micro-fishing" "fishingSpot"
 
 # Write
-./microbot-cli plugin-config set "micro-fishing" "fishingSpot" "SHRIMP"
+./cupidbot-cli plugin-config set "micro-fishing" "fishingSpot" "SHRIMP"
 ```
 
 ---
@@ -228,17 +228,17 @@ Step-by-step playbooks for common debugging scenarios. Each shows the commands t
 
 ```bash
 # 1. Is the plugin running?
-./microbot-cli scripts
+./cupidbot-cli scripts
 
 # 2. Check runtime status
-./microbot-cli scripts status --class "com.example.MyPlugin"
+./cupidbot-cli scripts status --class "com.example.MyPlugin"
 
 # 3. Is the loop stalled? (check heartbeat age)
-./microbot-cli scripts health --class "com.example.MyPlugin"
+./cupidbot-cli scripts health --class "com.example.MyPlugin"
 # → If lastLoopMs is very old, the script loop is stuck or crashed
 
 # 4. Take a screenshot to see visual state
-./microbot-cli screenshot save --label "debug-stuck"
+./cupidbot-cli screenshot save --label "debug-stuck"
 
 # 5. For state machine scripts — get the full snapshot
 curl -s http://127.0.0.1:8081/debug/snapshot | python3 -m json.tool
@@ -259,13 +259,13 @@ curl -s http://127.0.0.1:8081/debug/snapshot
 # - "traceBuffer": did a transition fire but error?
 
 # Check the guard conditions manually:
-./microbot-cli inventory          # Is the inventory state what the guard expects?
-./microbot-cli state              # Player position, health, animation
-./microbot-cli skills --name Mining   # Skill levels
+./cupidbot-cli inventory          # Is the inventory state what the guard expects?
+./cupidbot-cli state              # Player position, health, animation
+./cupidbot-cli skills --name Mining   # Skill levels
 ```
 
 **Common causes:**
-- Guard depends on game state that hasn't loaded yet → add a `Microbot.isLoggedIn()` check
+- Guard depends on game state that hasn't loaded yet → add a `CupidBot.isLoggedIn()` check
 - Guard reads a varbit that's 0 on login → use `sleepUntil` before evaluating
 - All transitions have `() -> true` guards → use `actionDone` flag pattern (see statemachine CLAUDE.md, best practice #7)
 
@@ -275,26 +275,26 @@ Don't hardcode widget IDs across updates. Use the search → describe → click 
 
 ```bash
 # 1. Search by keywords
-./microbot-cli widgets search "deposit,bank"
+./cupidbot-cli widgets search "deposit,bank"
 
 # 2. Drill into the match
-./microbot-cli widgets describe 12 0 --depth 3
+./cupidbot-cli widgets describe 12 0 --depth 3
 
 # 3. Click the target
-./microbot-cli widgets click 12 42
+./cupidbot-cli widgets click 12 42
 
 # Or click by text (more resilient)
-./microbot-cli widgets click --text "Deposit inventory"
+./cupidbot-cli widgets click --text "Deposit inventory"
 ```
 
 ### "Bank/inventory interaction fails silently"
 
 ```bash
 # Check current inventory
-./microbot-cli inventory
+./cupidbot-cli inventory
 
 # Check if bank is open
-./microbot-cli bank
+./cupidbot-cli bank
 
 # Read entity gotchas FIRST
 # → docs/entity-guides/items.md
@@ -309,33 +309,33 @@ Never navigate settings tabs by index — they shift on game updates. Use the se
 
 ```bash
 # 1. Open Settings tab
-./microbot-cli widgets click 548 52
+./cupidbot-cli widgets click 548 52
 sleep 1
 
 # 2. Click "All Settings"
-./microbot-cli widgets click --text "All Settings"
+./cupidbot-cli widgets click --text "All Settings"
 sleep 1
 
 # 3. Click Search bar
-./microbot-cli widgets click 134 11
+./cupidbot-cli widgets click 134 11
 sleep 1
 
 # 4. Type the setting name
-./microbot-cli keyboard type "level-up"
+./cupidbot-cli keyboard type "level-up"
 sleep 1
 
 # 5. Click the setting option
-./microbot-cli widgets click --text "Show level only"
+./cupidbot-cli widgets click --text "Show level only"
 
 # 6. VERIFY via varbit (critical!)
-./microbot-cli varbit 13994
+./cupidbot-cli varbit 13994
 ```
 
 ### "Thread safety violation in CI"
 
 ```bash
 # 1. Look up the method in question
-./microbot-cli ct Player.getName
+./cupidbot-cli ct Player.getName
 
 # 2. If verdict is "REQUIRED" — must use clientThread
 # Wrap the call:
@@ -350,7 +350,7 @@ sleep 1
 
 ```bash
 # Get test results from a running or completed test
-./microbot-cli scripts results --class "com.example.MyPlugin"
+./cupidbot-cli scripts results --class "com.example.MyPlugin"
 
 # Check for result files on disk
 ls ~/.runelite/test-results/
@@ -424,15 +424,15 @@ For fully autonomous test-fix-rebuild cycles, see [AGENTIC_TESTING_LOOP.md](AGEN
 
 | Layer | What it does |
 |-------|-------------|
-| **Inner harness** (JVM) | Runs inside Microbot — auto-login, start script, capture results + screenshots |
+| **Inner harness** (JVM) | Runs inside CupidBot — auto-login, start script, capture results + screenshots |
 | **Outer loop** (agent) | Reads results, analyzes failures, edits code, rebuilds, re-launches |
 
 Activate test mode:
 
 ```bash
-java -jar microbot.jar \
-  -Dmicrobot.test.mode=true \
-  -Dmicrobot.test.script=MyPlugin
+java -jar cupidbot.jar \
+  -Dcupidbot.test.mode=true \
+  -Dcupidbot.test.script=MyPlugin
 ```
 
 | Exit code | Meaning |
@@ -454,7 +454,7 @@ All docs an agent should know about, organized by topic.
 ### Script Authoring
 | Document | What's in it |
 |----------|-------------|
-| `runelite-client/.../microbot/CLAUDE.md` | **The canonical guide** — threading model, Rs2* utilities, cache system, plugin-script lifecycle (2300+ lines) |
+| `runelite-client/.../cupidbot/CLAUDE.md` | **The canonical guide** — threading model, Rs2* utilities, cache system, plugin-script lifecycle (2300+ lines) |
 | `runelite-client/.../statemachine/CLAUDE.md` | State machine framework — when to use, quick start, best practices |
 | `runelite-client/.../statemachine/AGENTS.md` | Architecture and design decisions for the state machine |
 | `runelite-client/.../api/QUERYABLE_API.md` | Singleton cache pattern, fluent query builders |
@@ -469,7 +469,7 @@ All docs an agent should know about, organized by topic.
 ### CLI & HTTP API
 | Document | What's in it |
 |----------|-------------|
-| [MICROBOT_CLI.md](MICROBOT_CLI.md) | Full CLI command reference with examples |
+| [CUPIDBOT_CLI.md](CUPIDBOT_CLI.md) | Full CLI command reference with examples |
 | [AGENT_SERVER.md](AGENT_SERVER.md) | HTTP API — every endpoint, request/response schemas, error codes |
 
 ### Architecture
@@ -478,7 +478,7 @@ All docs an agent should know about, organized by topic.
 | `docs/ARCHITECTURE.md` | System architecture overview |
 | `docs/decisions/adr-*.md` | Architecture Decision Records (composite builds, queryable cache, shaded packaging) |
 | `docs/client-thread-manifest.md` | Human-readable thread safety verdicts for 1000+ RuneLite APIs |
-| `docs/client-thread-lookup.tsv` | Machine-readable companion (used by `./microbot-cli ct`) |
+| `docs/client-thread-lookup.tsv` | Machine-readable companion (used by `./cupidbot-cli ct`) |
 
 ### Testing
 | Document | What's in it |

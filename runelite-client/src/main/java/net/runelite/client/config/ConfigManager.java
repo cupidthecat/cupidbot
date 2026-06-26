@@ -44,10 +44,10 @@ import net.runelite.client.account.SessionManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.*;
-import net.runelite.client.plugins.microbot.Microbot;
-import net.runelite.client.plugins.microbot.inventorysetups.ConfigInventorySetupDataManager;
-import net.runelite.client.plugins.microbot.inventorysetups.InventorySetup;
-import net.runelite.client.plugins.microbot.util.security.LoginManager;
+import net.runelite.client.plugins.cupidbot.CupidBot;
+import net.runelite.client.plugins.cupidbot.inventorysetups.ConfigInventorySetupDataManager;
+import net.runelite.client.plugins.cupidbot.inventorysetups.InventorySetup;
+import net.runelite.client.plugins.cupidbot.util.security.LoginManager;
 import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.RunnableExceptionLogger;
 import net.runelite.http.api.config.ConfigPatch;
@@ -1400,7 +1400,7 @@ public class ConfigManager
 					// Guice holds references to all jitted types.
 					// To allow class unloading, use a temporary child injector
 					// and use it to get the instance, and cache it a weak map.
-					serializer = Microbot.getInjector()
+					serializer = CupidBot.getInjector()
 						.createChildInjector()
 						.getInstance(serializerClass);
 					serializers.put(type, serializer);
@@ -1476,7 +1476,7 @@ public class ConfigManager
 				Serializer serializer = serializers.get(serializerClass);
 				if (serializer == null)
 				{
-					serializer = Microbot.getInjector()
+					serializer = CupidBot.getInjector()
 						.createChildInjector()
 						.getInstance(serializerClass);
 					serializers.put(serializerClass, serializer);

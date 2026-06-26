@@ -8,11 +8,11 @@ Local setup, build commands, and script authoring entry points.
 - IntelliJ IDEA is recommended. Open the root `build.gradle.kts` as a Gradle project.
 
 ## Project Layout
-- Core plugin: `runelite-client/src/main/java/net/runelite/client/plugins/microbot`
-- Helpers/utilities: `runelite-client/src/main/java/net/runelite/client/plugins/microbot/util`
-- Queryable API: `runelite-client/src/main/java/net/runelite/client/plugins/microbot/api`
-- Config UI: `runelite-client/src/main/java/net/runelite/client/plugins/microbot/ui/MicrobotConfigPanel`
-- Runtime agent server: `runelite-client/src/main/java/net/runelite/client/plugins/microbot/agentserver`
+- Core plugin: `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot`
+- Helpers/utilities: `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/util`
+- Queryable API: `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/api`
+- Config UI: `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/ui/CupidBotConfigPanel`
+- Runtime agent server: `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/agentserver`
 - Composite build members: `cache`, `runelite-api`, `runelite-gradle-plugin`, `runelite-jshell`, and `:client`
 
 ## Build & Run
@@ -31,21 +31,21 @@ Local setup, build commands, and script authoring entry points.
 4. Create a Gradle run configuration for `:client:run` when launching from the IDE.
 
 ## Developing Scripts
-- Place new scripts inside the microbot plugin folder: `runelite-client/src/main/java/net/runelite/client/plugins/microbot`.
-- Reusable helpers belong in `microbot/util`.
-- Config UI goes in `microbot/ui/MicrobotConfigPanel`.
-- Never instantiate caches or queryables directly. Use `Microbot.getRs2XxxCache().query()` or `.getStream()`.
+- Place new scripts inside the cupidbot plugin folder: `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot`.
+- Reusable helpers belong in `cupidbot/util`.
+- Config UI goes in `cupidbot/ui/CupidBotConfigPanel`.
+- Never instantiate caches or queryables directly. Use `CupidBot.getRs2XxxCache().query()` or `.getStream()`.
 - When a filter resolves live names or widget text, prefer the `*OnClientThread` terminal helpers.
-- Use `runelite-client/src/main/java/net/runelite/client/plugins/microbot/AGENTS.md` for script/threading rules.
-- Use `runelite-client/src/main/java/net/runelite/client/plugins/microbot/statemachine/AGENTS.md` for scripts with three or more phases.
+- Use `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/AGENTS.md` for script/threading rules.
+- Use `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/statemachine/AGENTS.md` for scripts with three or more phases.
 
 ## Guardrails
-- Client-thread guardrail: `./gradlew :client:runUnitTests --tests net.runelite.client.plugins.microbot.threadsafety.ClientThreadGuardrailTest`
+- Client-thread guardrail: `./gradlew :client:runUnitTests --tests net.runelite.client.plugins.cupidbot.threadsafety.ClientThreadGuardrailTest`
 - Regenerate client-thread baseline only after reviewing the diff: `./gradlew :client:regenerateClientThreadGuardrailBaseline`
-- Queryable terminal guardrail: `./gradlew :client:runUnitTests --tests net.runelite.client.plugins.microbot.threadsafety.QueryableTerminalGuardrailTest`
-- Offline API lookup: `./microbot-cli ct <method>`
+- Queryable terminal guardrail: `./gradlew :client:runUnitTests --tests net.runelite.client.plugins.cupidbot.threadsafety.QueryableTerminalGuardrailTest`
+- Offline API lookup: `./cupidbot-cli ct <method>`
 
 ## Additional References
 - Installation steps and launcher notes: `docs/installation.md`
-- API guide and examples: `runelite-client/src/main/java/net/runelite/client/plugins/microbot/api`
-- Example scripts: `runelite-client/src/main/java/net/runelite/client/plugins/microbot/example/`
+- API guide and examples: `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/api`
+- Example scripts: `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/example/`

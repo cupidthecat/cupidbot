@@ -1,9 +1,9 @@
 # Rs2Npc Class Documentation
 ## [Back](development.md)
 
-> **Deprecated:** `Rs2Npc` is deprecated and marked for removal. Use the **Queryable API** via `Microbot.getRs2NpcCache().query()` instead. It provides a fluent, type-safe interface with better performance through tick-based caching.
+> **Deprecated:** `Rs2Npc` is deprecated and marked for removal. Use the **Queryable API** via `CupidBot.getRs2NpcCache().query()` instead. It provides a fluent, type-safe interface with better performance through tick-based caching.
 >
-> See the [Queryable API Documentation & Migration Guide](../../runelite-client/src/main/java/net/runelite/client/plugins/microbot/api/QUERYABLE_API.md#migration-guide) for migration steps and side-by-side examples.
+> See the [Queryable API Documentation & Migration Guide](../../runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/api/QUERYABLE_API.md#migration-guide) for migration steps and side-by-side examples.
 >
 > **Quick comparison:**
 > ```java
@@ -12,7 +12,7 @@
 > Rs2Npc.interact(banker, "Bank");
 >
 > // Queryable API (recommended)
-> Rs2NpcModel banker = Microbot.getRs2NpcCache().query()
+> Rs2NpcModel banker = CupidBot.getRs2NpcCache().query()
 >     .withName("Banker")
 >     .where(npc -> !npc.isInteracting())
 >     .nearest();
@@ -74,4 +74,4 @@ The `Rs2Npc` class provides a comprehensive suite of methods for interacting wit
 - **NPC Interaction**: This class is central for tasks that require direct NPC interaction, providing both high-level methods for complex actions and low-level methods for precise control.
 
 ## Conclusion
-The `Rs2Npc` class is an essential component of the Microbot client, facilitating advanced NPC interaction capabilities for automation tasks. Its methods are designed to handle various aspects of NPC engagement, from basic interactions to complex behaviors like combat and pathfinding.
+The `Rs2Npc` class is an essential component of the CupidBot client, facilitating advanced NPC interaction capabilities for automation tasks. Its methods are designed to handle various aspects of NPC engagement, from basic interactions to complex behaviors like combat and pathfinding.

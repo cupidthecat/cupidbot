@@ -3,7 +3,7 @@
 - Status: Accepted (2026-02-08)
 
 ## Context
-Contributors need a lightweight, traceable way to capture architectural choices across the RuneLite+Microbot composite build without scattering rationale in PRs.
+Contributors need a lightweight, traceable way to capture architectural choices across the RuneLite+CupidBot composite build without scattering rationale in PRs.
 
 ## Decision
 Adopt Architecture Decision Records (ADRs) stored under `docs/decisions/` with sequential numbering, concise rationale, and links from `docs/INDEX.md`.

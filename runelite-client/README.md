@@ -1,11 +1,11 @@
 # runelite-client
 
-What it does: Main RuneLite client fork that embeds the hidden, always-on Microbot plugin, overlays, and config panels. Builds shaded artifacts for end users.
+What it does: Main RuneLite client fork that embeds the hidden, always-on CupidBot plugin, overlays, and config panels. Builds shaded artifacts for end users.
 
 Public entry points
 - `net.runelite.client.RuneLite` (application main class)
-- `net.runelite.client.plugins.microbot.MicrobotPlugin` (plugin descriptor/boot)
-- Gradle tasks: `:client:runDebug`, `:client:assemble` (`shadowJar` + `microbotReleaseJar`)
+- `net.runelite.client.plugins.cupidbot.CupidBotPlugin` (plugin descriptor/boot)
+- Gradle tasks: `:client:runDebug`, `:client:assemble` (`shadowJar` + `cupidbotReleaseJar`)
 
 How to run/test
 - Fast compile: `./gradlew :client:compileJava`
@@ -15,11 +15,11 @@ How to run/test
 
 Key invariants/constraints
 - Never block/sleep on the client thread; use script/executor threads and `ClientThread.runOnClientThreadOptional` for client access.
-- Use Queryable caches only via `Microbot.getRs2XxxCache().query()`/`.getStream()`; do not instantiate caches/queryables manually.
-- Preserve hidden/always-on plugin descriptor and Microbot config panel wiring.
+- Use Queryable caches only via `CupidBot.getRs2XxxCache().query()`/`.getStream()`; do not instantiate caches/queryables manually.
+- Preserve hidden/always-on plugin descriptor and CupidBot config panel wiring.
 - Version and commit values are injected during `processResources`; keep `gradle.properties` values in sync when packaging.
 
 Links
 - Architecture: `../docs/ARCHITECTURE.md`
 - ADRs: `../docs/decisions/`
-- API guide: `src/main/java/net/runelite/client/plugins/microbot/api/QUERYABLE_API.md`
+- API guide: `src/main/java/net/runelite/client/plugins/cupidbot/api/QUERYABLE_API.md`

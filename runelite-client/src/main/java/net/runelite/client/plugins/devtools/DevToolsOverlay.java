@@ -31,9 +31,9 @@ import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.client.plugins.microbot.globval.enums.InterfaceTab;
-import net.runelite.client.plugins.microbot.util.tabs.Rs2Tab;
-import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
+import net.runelite.client.plugins.cupidbot.globval.enums.InterfaceTab;
+import net.runelite.client.plugins.cupidbot.util.tabs.Rs2Tab;
+import net.runelite.client.plugins.cupidbot.util.widget.Rs2Widget;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -261,7 +261,7 @@ class DevToolsOverlay extends Overlay {
     }
 
     /**
-     * Renders the amount of memory the Microbot Client is using
+     * Renders the amount of memory the CupidBot Client is using
      * @param graphics
      */
     private void renderMemory(Graphics2D graphics) {

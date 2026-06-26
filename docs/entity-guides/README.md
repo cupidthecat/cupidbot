@@ -1,6 +1,6 @@
 # Entity Guides
 
-Per-entity gotchas, footguns, and patterns for LLMs (and humans) writing or modifying Microbot code.
+Per-entity gotchas, footguns, and patterns for LLMs (and humans) writing or modifying CupidBot code.
 
 Each guide lists known pitfalls when working with one specific game entity type. **Read the relevant guide before implementing or modifying any code that interacts with that entity** — these documents capture lessons learned from real bugs that escaped review because the assumption was invisible at the call site.
 
@@ -35,7 +35,7 @@ Each entity guide is a numbered list of gotchas. Each entry follows this structu
 
 1. Create `<entity>.md` in this directory using the format above.
 2. Add the guide to the table at the top of this file.
-3. Cross-reference it from `AGENTS.md` (top-level) and `runelite-client/src/main/java/net/runelite/client/plugins/microbot/CLAUDE.md` so future agent invocations discover it via the entry-point docs.
+3. Cross-reference it from `AGENTS.md` (top-level) and `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/CLAUDE.md` so future agent invocations discover it via the entry-point docs.
 
 ## Adding a new gotcha to an existing guide
 

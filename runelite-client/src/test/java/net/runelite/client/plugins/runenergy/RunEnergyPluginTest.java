@@ -42,7 +42,7 @@ import net.runelite.api.gameval.ItemID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.config.ConfigManager;
-import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.cupidbot.CupidBot;
 import net.runelite.client.ui.overlay.OverlayManager;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
@@ -86,11 +86,11 @@ public class RunEnergyPluginTest
 		Guice.createInjector(BoundFieldModule.of(this)).injectMembers(this);
 		when(configManager.getRSProfileConfiguration(RunEnergyConfig.GROUP_NAME, "ringOfEnduranceCharges", Integer.class)).thenReturn(1);
 
-		Field clientField = Microbot.class.getDeclaredField("client");
+		Field clientField = CupidBot.class.getDeclaredField("client");
 		clientField.setAccessible(true);
 		clientField.set(null, client);
 
-		Field configManagerField = Microbot.class.getDeclaredField("configManager");
+		Field configManagerField = CupidBot.class.getDeclaredField("configManager");
 		configManagerField.setAccessible(true);
 		configManagerField.set(null, configManager);
 	}

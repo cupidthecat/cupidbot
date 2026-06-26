@@ -30,7 +30,7 @@ import java.util.function.Predicate;
 import javax.inject.Singleton;
 import lombok.AccessLevel;
 import lombok.Getter;
-import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.cupidbot.CupidBot;
 
 @Singleton
 public class WorldMapPointManager

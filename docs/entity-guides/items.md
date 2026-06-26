@@ -3,12 +3,12 @@
 Gotchas when interacting with items in inventory, bank, ground, equipment, shops, or deposit box.
 
 Covers utilities under:
-- `runelite-client/src/main/java/net/runelite/client/plugins/microbot/util/inventory/`
-- `runelite-client/src/main/java/net/runelite/client/plugins/microbot/util/bank/`
-- `runelite-client/src/main/java/net/runelite/client/plugins/microbot/util/equipment/`
-- `runelite-client/src/main/java/net/runelite/client/plugins/microbot/util/grounditem/`
-- `runelite-client/src/main/java/net/runelite/client/plugins/microbot/util/shop/`
-- `runelite-client/src/main/java/net/runelite/client/plugins/microbot/util/depositbox/`
+- `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/util/inventory/`
+- `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/util/bank/`
+- `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/util/equipment/`
+- `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/util/grounditem/`
+- `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/util/shop/`
+- `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/util/depositbox/`
 
 ---
 
@@ -101,7 +101,7 @@ When you know the *intent* (consume, equip, drop) but not the verb the game uses
 
 ## 5. Optional inventory-setup validation (Tier A.3)
 
-Set JVM flag `-Dmicrobot.bank.validateInventorySetup=true` so `Rs2InventorySetup.loadInventory` warns once per issue: invalid id, missing `ItemComposition`, id/name mismatch vs cache, and a **single inventory row** with quantity greater than 1 for a **non-stackable** item (same rule as withdraw grouping: use one row per unstacked item or fuzzy mode).
+Set JVM flag `-Dcupidbot.bank.validateInventorySetup=true` so `Rs2InventorySetup.loadInventory` warns once per issue: invalid id, missing `ItemComposition`, id/name mismatch vs cache, and a **single inventory row** with quantity greater than 1 for a **non-stackable** item (same rule as withdraw grouping: use one row per unstacked item or fuzzy mode).
 
 **Where this applies:** `Rs2InventorySetup.validateInventorySetupAgainstDefsIfEnabled`.
 

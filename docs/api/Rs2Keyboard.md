@@ -6,7 +6,7 @@ The `Rs2Keyboard` class simulates keyboard actions such as typing strings, press
 ## Methods
 
 ### `getCanvas`
-- **Description**: Retrieves the game canvas from the Microbot client.
+- **Description**: Retrieves the game canvas from the CupidBot client.
 - **Returns**: `Canvas` - The game's canvas used for dispatching keyboard events.
 
 ### `typeString`

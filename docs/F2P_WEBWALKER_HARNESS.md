@@ -2,7 +2,7 @@
 
 This harness runs live in-game webwalker regression routes for a fresh F2P account after Tutorial Island. It uses `Rs2Walker.walkWithState(...)` for both setup movement and the route under test.
 
-The Microbot CLI may be used while investigating a failure to read state, nearby objects, nearby NPCs, screenshots, or logs. Do not use `./microbot-cli walk` or any other manual movement command to place the player at the destination.
+The CupidBot CLI may be used while investigating a failure to read state, nearby objects, nearby NPCs, screenshots, or logs. Do not use `./cupidbot-cli walk` or any other manual movement command to place the player at the destination.
 
 ## Run
 
@@ -27,18 +27,18 @@ The script compiles the client, starts RuneLite in test mode with AutoLogin enab
 Override the timeout or output directory:
 
 ```bash
-MICROBOT_WEBWALKER_TIMEOUT_MS=2400000 \
-MICROBOT_WEBWALKER_LEG_TIMEOUT_MS=300000 \
-MICROBOT_WEBWALKER_OUTPUT_DIR=/tmp/f2p-webwalker \
+CUPIDBOT_WEBWALKER_TIMEOUT_MS=2400000 \
+CUPIDBOT_WEBWALKER_LEG_TIMEOUT_MS=300000 \
+CUPIDBOT_WEBWALKER_OUTPUT_DIR=/tmp/f2p-webwalker \
 scripts/run-f2p-webwalker-harness.sh F2P-15
 ```
 
-The runner forwards route settings through `microbot.test.webwalker.*` system properties because the Gradle `runTest` task only propagates `microbot.test.*` properties into the launched client JVM.
+The runner forwards route settings through `cupidbot.test.webwalker.*` system properties because the Gradle `runTest` task only propagates `cupidbot.test.*` properties into the launched client JVM.
 
 ## Agent Loop
 
 1. Run the full suite.
-2. If a route fails, inspect `result.json`, `~/.runelite/logs/client.log`, and optional observational CLI output such as `./microbot-cli state`, `objects`, `npcs`, or screenshots.
+2. If a route fails, inspect `result.json`, `~/.runelite/logs/client.log`, and optional observational CLI output such as `./cupidbot-cli state`, `objects`, `npcs`, or screenshots.
 3. Understand whether the failure was setup movement or the route itself.
 4. Patch the walker or supporting path data.
 5. Rebuild and rerun only the failed route, for example `scripts/run-f2p-webwalker-harness.sh F2P-15`.

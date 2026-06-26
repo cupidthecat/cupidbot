@@ -1,7 +1,7 @@
-# Microbot Client-Thread Manifest
+# CupidBot Client-Thread Manifest
 
 Generated: 2026-04-09  
-Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/threadsafety/ClientThreadScannerTest.java`
+Source: `runelite-client/src/test/java/net/runelite/client/plugins/cupidbot/threadsafety/ClientThreadScannerTest.java`
 
 > Manually regenerate with `./gradlew :client:runClientThreadScanner`. Commit the diff to track how RuneLite's client-thread surface evolves between revisions.
 
@@ -46,24 +46,24 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 
 - `generatePassphrase(): String`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.MInventorySetupsPlugin`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.MInventorySetupsPlugin`**
 
 - `getCurrentSpellbook(): int`
 - `getNormalizedContainer(int): List`
 
-**`net.runelite.client.plugins.microbot.util.bank.Rs2Bank`**
+**`net.runelite.client.plugins.cupidbot.util.bank.Rs2Bank`**
 
 - `updateLocalBank(ItemContainerChanged): void`
 
-**`net.runelite.client.plugins.microbot.util.equipment.Rs2Equipment`**
+**`net.runelite.client.plugins.cupidbot.util.equipment.Rs2Equipment`**
 
 - `storeEquipmentItemsInMemory(ItemContainerChanged): void`
 
-**`net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory`**
+**`net.runelite.client.plugins.cupidbot.util.inventory.Rs2Inventory`**
 
 - `storeInventoryItemsInMemory(ItemContainerChanged): void`
 
-**`net.runelite.client.plugins.microbot.util.inventory.Rs2RunePouch`**
+**`net.runelite.client.plugins.cupidbot.util.inventory.Rs2RunePouch`**
 
 - `onVarbitChanged(VarbitChanged): void`
 - `onWidgetLoaded(WidgetLoaded): void`
@@ -84,21 +84,21 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `invoke(Supplier): Object`
 - `runOnClientThreadOptional(Callable): Optional`
 
-**`net.runelite.client.plugins.microbot.Microbot`**
+**`net.runelite.client.plugins.cupidbot.CupidBot`**
 
 - `click(Rectangle): void`
 - `click(Rectangle, NewMenuEntry): void`
 - `drag(Rectangle, Rectangle): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.managers.QuestManager`**
+**`net.runelite.client.plugins.cupidbot.questhelper.managers.QuestManager`**
 
 - `startUpQuest(QuestHelper, boolean): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.util.Utils`**
+**`net.runelite.client.plugins.cupidbot.questhelper.util.Utils`**
 
 - `addChatMessage(Client, String): void`
 
-**`net.runelite.client.plugins.microbot.util.Global`**
+**`net.runelite.client.plugins.cupidbot.util.Global`**
 
 - `sleep(int): void`
 - `sleepUntil(BooleanSupplier, Runnable, long, int): boolean`
@@ -109,16 +109,16 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `sleepUntilTrue(BooleanSupplier, BooleanSupplier, int, int): boolean`
 - `sleepUntilTrue(BooleanSupplier, int, int): boolean`
 
-**`net.runelite.client.plugins.microbot.util.mouse.VirtualMouse`**
+**`net.runelite.client.plugins.cupidbot.util.mouse.VirtualMouse`**
 
 - `click(Point, boolean): Mouse`
 - `click(Point, boolean, NewMenuEntry): Mouse`
 
-**`net.runelite.client.plugins.microbot.util.mouse.naturalmouse.NaturalMouse`**
+**`net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.NaturalMouse`**
 
 - `moveTo(int, int): void`
 
-**`net.runelite.client.plugins.microbot.util.walker.Rs2Walker`**
+**`net.runelite.client.plugins.cupidbot.util.walker.Rs2Walker`**
 
 - `restartPathfinding(WorldPoint, Set): boolean`
 - `setStart(WorldPoint): void`
@@ -426,11 +426,11 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `shutDown(): void`
 - `startUp(): void`
 
-**`net.runelite.client.plugins.microbot.GameChatAppender`**
+**`net.runelite.client.plugins.cupidbot.GameChatAppender`**
 
 - `append(ILoggingEvent): void`
 
-**`net.runelite.client.plugins.microbot.Microbot`**
+**`net.runelite.client.plugins.cupidbot.CupidBot`**
 
 - `getDBRowsByValue(int, int, int, Object): List`
 - `getDBTableField(int, int, int): Object[]`
@@ -441,23 +441,23 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$openPopUp$16(String, String): void`
 - `openPopUp(String, String): void`
 
-**`net.runelite.client.plugins.microbot.MicrobotPlugin`**
+**`net.runelite.client.plugins.cupidbot.CupidBotPlugin`**
 
 - `hasWidgetOverlapWithBounds(Rectangle): boolean`
 
-**`net.runelite.client.plugins.microbot.agentserver.handler.SkillsHandler`**
+**`net.runelite.client.plugins.cupidbot.agentserver.handler.SkillsHandler`**
 
 - `handleRequest(HttpExchange): void`
 
-**`net.runelite.client.plugins.microbot.agentserver.handler.StateHandler`**
+**`net.runelite.client.plugins.cupidbot.agentserver.handler.StateHandler`**
 
 - `handleRequest(HttpExchange): void`
 
-**`net.runelite.client.plugins.microbot.agentserver.handler.WidgetInvokeHandler`**
+**`net.runelite.client.plugins.cupidbot.agentserver.handler.WidgetInvokeHandler`**
 
 - `handleRequest(HttpExchange): void`
 
-**`net.runelite.client.plugins.microbot.api.AbstractEntityQueryable`**
+**`net.runelite.client.plugins.cupidbot.api.AbstractEntityQueryable`**
 
 - `firstOnClientThread(): IEntity`
 - `nearestOnClientThread(): IEntity`
@@ -465,7 +465,7 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `nearestOnClientThread(int): IEntity`
 - `toListOnClientThread(): List`
 
-**`net.runelite.client.plugins.microbot.api.actor.Rs2ActorModel`**
+**`net.runelite.client.plugins.cupidbot.api.actor.Rs2ActorModel`**
 
 - `getCameraFocus(): LocalPoint`
 - `getCombatLevel(): int`
@@ -476,12 +476,12 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `getWorldLocation(): WorldPoint`
 - `getWorldView(): WorldView`
 
-**`net.runelite.client.plugins.microbot.api.boat.Rs2BoatCache`**
+**`net.runelite.client.plugins.cupidbot.api.boat.Rs2BoatCache`**
 
 - `getBoat(Rs2PlayerModel): Rs2BoatModel`
 - `getLocalBoat(): Rs2BoatModel`
 
-**`net.runelite.client.plugins.microbot.api.boat.models.Rs2BoatModel`**
+**`net.runelite.client.plugins.cupidbot.api.boat.models.Rs2BoatModel`**
 
 - `getCameraFocus(): LocalPoint`
 - `getConfig(): WorldEntityConfig`
@@ -498,7 +498,7 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `setHeading(Heading): void`
 - `transformToMainWorld(LocalPoint): LocalPoint`
 
-**`net.runelite.client.plugins.microbot.api.npc.models.Rs2NpcModel`**
+**`net.runelite.client.plugins.cupidbot.api.npc.models.Rs2NpcModel`**
 
 - `click(String): boolean`
 - `getDistanceFromPlayer(): int`
@@ -506,7 +506,7 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `isMoving(): boolean`
 - `isWithinDistanceFromPlayer(int): boolean`
 
-**`net.runelite.client.plugins.microbot.api.player.models.Rs2PlayerModel`**
+**`net.runelite.client.plugins.cupidbot.api.player.models.Rs2PlayerModel`**
 
 - `getOverheadIcon(): HeadIcon`
 - `getSkullIcon(): int`
@@ -514,13 +514,13 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `isFriend(): boolean`
 - `isFriendsChatMember(): boolean`
 
-**`net.runelite.client.plugins.microbot.api.playerstate.Rs2PlayerStateCache`**
+**`net.runelite.client.plugins.cupidbot.api.playerstate.Rs2PlayerStateCache`**
 
 - `populateQuests(): void`
 - `updateVarbitValue(int): int`
 - `updateVarpValue(int): int`
 
-**`net.runelite.client.plugins.microbot.api.tileitem.models.Rs2TileItemModel`**
+**`net.runelite.client.plugins.cupidbot.api.tileitem.models.Rs2TileItemModel`**
 
 - `click(String): boolean`
 - `getName(): String`
@@ -532,28 +532,28 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `isStackable(): boolean`
 - `isTradeable(): boolean`
 
-**`net.runelite.client.plugins.microbot.api.tileobject.models.Rs2TileObjectModel`**
+**`net.runelite.client.plugins.cupidbot.api.tileobject.models.Rs2TileObjectModel`**
 
 - `getName(): String`
 - `getObjectComposition(): ObjectComposition`
 - `isReachable(): boolean`
 
-**`net.runelite.client.plugins.microbot.example.ExampleScript`**
+**`net.runelite.client.plugins.cupidbot.example.ExampleScript`**
 
 - `lambda$checkEquipment$31(): void`
 - `lambda$checkWorldViewAndThreading$13(): void`
 - `lambda$checkWorldViewAndThreading$15(): void`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.InventorySetupsAmmoHandler`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.InventorySetupsAmmoHandler`**
 
 - `handleSpecialHighlighting(InventorySetup, List, List): void`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.InventorySetupsBankSearch`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.InventorySetupsBankSearch`**
 
 - `initSearch(): void`
 - `reset(boolean): void`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.MInventorySetupsPlugin`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.MInventorySetupsPlugin`**
 
 - `addAdditionalFilteredItem(int, InventorySetup, Map): void`
 - `addInventorySetup(): void`
@@ -588,71 +588,71 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `updateSlotFromSearchHelper(InventorySetupsSlot, InventorySetupsItem, InventorySetupsItem, List, boolean): void`
 - `updateSpellbookInSetup(int): void`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.ui.InventorySetupsPluginPanel`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.ui.InventorySetupsPluginPanel`**
 
 - `setCurrentInventorySetup(InventorySetup, boolean): void`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.ui.InventorySetupsSpellbookPanel`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.ui.InventorySetupsSpellbookPanel`**
 
 - `<init>(ItemManager, MInventorySetupsPlugin): void`
 - `highlightSlots(List, InventorySetup): void`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.ui.InventorySetupsStandardPanel`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.ui.InventorySetupsStandardPanel`**
 
 - `lambda$new$1(MInventorySetupsPlugin, InventorySetupsPluginPanel, ActionEvent): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.QuestHelperPlugin`**
+**`net.runelite.client.plugins.cupidbot.questhelper.QuestHelperPlugin`**
 
 - `onConfigChanged(ConfigChanged): void`
 - `onGameStateChanged(GameStateChanged): void`
 - `refreshBank(): void`
 - `startUp(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.QuestScript`**
+**`net.runelite.client.plugins.cupidbot.questhelper.QuestScript`**
 
 - `chooseCorrectNPCOption(QuestStep, Rs2NpcModel): String`
 - `chooseCorrectObjectOption(QuestStep, Rs2TileObjectModel): String`
 - `lambda$run$8(QuestHelperConfig, QuestHelperPlugin): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.bank.banktab.QuestBankTab`**
+**`net.runelite.client.plugins.cupidbot.questhelper.bank.banktab.QuestBankTab`**
 
 - `onScriptPostFired(ScriptPostFired): void`
 - `shutDown(): void`
 - `sortBankTabItems(Widget, Widget[], List): void`
 - `startUp(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.bank.banktab.QuestBankTabInterface`**
+**`net.runelite.client.plugins.cupidbot.questhelper.bank.banktab.QuestBankTabInterface`**
 
 - `init(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.bank.banktab.QuestGrandExchangeInterface`**
+**`net.runelite.client.plugins.cupidbot.questhelper.bank.banktab.QuestGrandExchangeInterface`**
 
 - `activateTab(): void`
 - `closeOptions(): void`
 - `onceOffActivateTab(Widget): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.mischelpers.farmruns.TreeRun`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.mischelpers.farmruns.TreeRun`**
 
 - `onConfigChanged(ConfigChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.akingdomdivided.StonePuzzleStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.akingdomdivided.StonePuzzleStep`**
 
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.demonslayer.IncantationStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.demonslayer.IncantationStep`**
 
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.shadowofthestorm.IncantationStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.shadowofthestorm.IncantationStep`**
 
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.songoftheelves.BaxtorianPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.songoftheelves.BaxtorianPuzzle`**
 
 - `onGraphicsObjectCreated(GraphicsObjectCreated): void`
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.managers.QuestManager`**
+**`net.runelite.client.plugins.cupidbot.questhelper.managers.QuestManager`**
 
 - `getAllItemRequirements(): void`
 - `handleConfigChanged(): void`
@@ -662,39 +662,39 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `startUpQuest(QuestHelper, boolean): void`
 - `updateAllItemsHelper(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.questhelpers.BasicQuestHelper`**
+**`net.runelite.client.plugins.cupidbot.questhelper.questhelpers.BasicQuestHelper`**
 
 - `setSelectedStateOverride(Integer): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.runeliteobjects.extendedruneliteobjects.ExtendedRuneliteObject`**
+**`net.runelite.client.plugins.cupidbot.questhelper.runeliteobjects.extendedruneliteobjects.ExtendedRuneliteObject`**
 
 - `update(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.runeliteobjects.extendedruneliteobjects.FakeNpc`**
+**`net.runelite.client.plugins.cupidbot.questhelper.runeliteobjects.extendedruneliteobjects.FakeNpc`**
 
 - `update(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.runeliteobjects.extendedruneliteobjects.RuneliteObjectManager`**
+**`net.runelite.client.plugins.cupidbot.questhelper.runeliteobjects.extendedruneliteobjects.RuneliteObjectManager`**
 
 - `lambda$onWidgetLoaded$26(WidgetLoaded, String, ExtendedRuneliteObjects): void`
 - `removeGroupAndSubgroups(String): void`
 - `replaceWidgetsForReplacedNpcs(ReplacedNpc, WidgetLoaded): void`
 - `shutDown(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.steps.QuestStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.steps.QuestStep`**
 
 - `onWidgetLoaded(WidgetLoaded): void`
 - `startUp(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.steps.playermadesteps.RuneliteObjectStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.steps.playermadesteps.RuneliteObjectStep`**
 
 - `shutDown(): void`
 
-**`net.runelite.client.plugins.microbot.shortestpath.ShortestPathPlugin`**
+**`net.runelite.client.plugins.cupidbot.shortestpath.ShortestPathPlugin`**
 
 - `restartPathfinding(WorldPoint, Set, boolean): void`
 
-**`net.runelite.client.plugins.microbot.util.ActorModel`**
+**`net.runelite.client.plugins.cupidbot.util.ActorModel`**
 
 - `getCameraFocus(): LocalPoint`
 - `getCombatLevel(): int`
@@ -706,64 +706,64 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `getWorldArea(): WorldArea`
 - `getWorldLocation(): WorldPoint`
 
-**`net.runelite.client.plugins.microbot.util.Global`**
+**`net.runelite.client.plugins.cupidbot.util.Global`**
 
 - `sleepUntilOnClientThread(BooleanSupplier, int): void`
 
-**`net.runelite.client.plugins.microbot.util.bank.Rs2Bank`**
+**`net.runelite.client.plugins.cupidbot.util.bank.Rs2Bank`**
 
 - `getItems(): List`
 - `getTabs(): List`
 - `scrollBankToSlot(int): boolean`
 - `withdrawLootItems(String, List): boolean`
 
-**`net.runelite.client.plugins.microbot.util.bank.Rs2BankData`**
+**`net.runelite.client.plugins.cupidbot.util.bank.Rs2BankData`**
 
 - `rebuildBankItemsList(): void`
 
-**`net.runelite.client.plugins.microbot.util.camera.Rs2Camera`**
+**`net.runelite.client.plugins.cupidbot.util.camera.Rs2Camera`**
 
 - `setZoom(int): void`
 
-**`net.runelite.client.plugins.microbot.util.combat.Rs2Combat`**
+**`net.runelite.client.plugins.cupidbot.util.combat.Rs2Combat`**
 
 - `inCombat(): boolean`
 
-**`net.runelite.client.plugins.microbot.util.combat.models.Rs2DropSource`**
+**`net.runelite.client.plugins.cupidbot.util.combat.models.Rs2DropSource`**
 
 - `getItemComposition(): ItemComposition`
 
-**`net.runelite.client.plugins.microbot.util.farming.Rs2Farming`**
+**`net.runelite.client.plugins.cupidbot.util.farming.Rs2Farming`**
 
 - `getPatchByRegionAndVarbit(String, int): Optional`
 - `getPatchesByTab(Tab): List`
 - `isFarmingSystemReady(): boolean`
 - `predictPatchState(FarmingPatch): CropState`
 
-**`net.runelite.client.plugins.microbot.util.gameobject.Rs2Cannon`**
+**`net.runelite.client.plugins.cupidbot.util.gameobject.Rs2Cannon`**
 
 - `lambda$refill$2(): boolean`
 - `refill(int): boolean`
 
-**`net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject`**
+**`net.runelite.client.plugins.cupidbot.util.gameobject.Rs2GameObject`**
 
 - `clickObject(TileObject, String): boolean`
 - `convertToObjectCompositionInternal(int, boolean): ObjectComposition`
 - `getObjectComposition(int): ObjectComposition`
 - `getSceneObjects(Function): Stream`
 
-**`net.runelite.client.plugins.microbot.util.gameobject.Rs2ObjectModel`**
+**`net.runelite.client.plugins.cupidbot.util.gameobject.Rs2ObjectModel`**
 
 - `getDistanceFromPlayer(): int`
 - `getObjectComposition(): ObjectComposition`
 - `getTicksSinceCreation(): int`
 
-**`net.runelite.client.plugins.microbot.util.grandexchange.Rs2GrandExchange`**
+**`net.runelite.client.plugins.cupidbot.util.grandexchange.Rs2GrandExchange`**
 
 - `getSearchResultWidget(String, boolean): Pair`
 - `setChatboxValue(int): void`
 
-**`net.runelite.client.plugins.microbot.util.grounditem.Rs2GroundItem`**
+**`net.runelite.client.plugins.cupidbot.util.grounditem.Rs2GroundItem`**
 
 - `getAllAt(int, int): RS2Item[]`
 - `getAllFromWorldPoint(int, WorldPoint): RS2Item[]`
@@ -772,26 +772,26 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$lootItemBasedOnValue$10(int, RS2Item): boolean`
 - `lootAllItemBasedOnValue(int, int): boolean`
 
-**`net.runelite.client.plugins.microbot.util.grounditem.models.Rs2SpawnLocation`**
+**`net.runelite.client.plugins.cupidbot.util.grounditem.models.Rs2SpawnLocation`**
 
 - `getItemComposition(): ItemComposition`
 
-**`net.runelite.client.plugins.microbot.util.inventory.Rs2FuzzyItem`**
+**`net.runelite.client.plugins.cupidbot.util.inventory.Rs2FuzzyItem`**
 
 - `getItemName(int): String`
 
-**`net.runelite.client.plugins.microbot.util.inventory.Rs2Gembag`**
+**`net.runelite.client.plugins.cupidbot.util.inventory.Rs2Gembag`**
 
 - `getGemItemModel(String): Rs2ItemModel`
 
-**`net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory`**
+**`net.runelite.client.plugins.cupidbot.util.inventory.Rs2Inventory`**
 
 - `getInventory(): Widget`
 - `invokeMenu(Rs2ItemModel, String): void`
 - `items(): Stream`
 - `lambda$dropAllExcept$24(int, Rs2ItemModel): boolean`
 
-**`net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel`**
+**`net.runelite.client.plugins.cupidbot.util.inventory.Rs2ItemModel`**
 
 - `<init>(int, int, int): void`
 - `ensureCompositionLoaded(): void`
@@ -801,27 +801,27 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `initializeFromComposition(ItemComposition): void`
 - `isHaProfitable(): boolean`
 
-**`net.runelite.client.plugins.microbot.util.item.Rs2EnsouledHead`**
+**`net.runelite.client.plugins.cupidbot.util.item.Rs2EnsouledHead`**
 
 - `lambda$reanimate$1(): boolean`
 
-**`net.runelite.client.plugins.microbot.util.item.Rs2ItemManager`**
+**`net.runelite.client.plugins.cupidbot.util.item.Rs2ItemManager`**
 
 - `getItemComposition(int): ItemComposition`
 - `searchItem(String): List`
 
-**`net.runelite.client.plugins.microbot.util.magic.Rs2Magic`**
+**`net.runelite.client.plugins.cupidbot.util.magic.Rs2Magic`**
 
 - `lambda$alch$10(): boolean`
 - `lambda$alch$8(): boolean`
 - `lambda$superHeat$12(): boolean`
 
-**`net.runelite.client.plugins.microbot.util.misc.Rs2UiHelper`**
+**`net.runelite.client.plugins.cupidbot.util.misc.Rs2UiHelper`**
 
 - `getActorClickbox(Actor): Rectangle`
 - `getObjectClickbox(TileObject): Rectangle`
 
-**`net.runelite.client.plugins.microbot.util.npc.Rs2Npc`**
+**`net.runelite.client.plugins.cupidbot.util.npc.Rs2Npc`**
 
 - `getAvailableAction(Rs2NpcModel, List): String`
 - `getNpcs(Predicate): Stream`
@@ -829,14 +829,14 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `interact(Rs2NpcModel, String): boolean`
 - `isMoving(NPC): boolean`
 
-**`net.runelite.client.plugins.microbot.util.npc.Rs2NpcModel`**
+**`net.runelite.client.plugins.cupidbot.util.npc.Rs2NpcModel`**
 
 - `getDistanceFromPlayer(): int`
 - `isInteractingWithPlayer(): boolean`
 - `isMoving(): boolean`
 - `isWithinDistanceFromPlayer(int): boolean`
 
-**`net.runelite.client.plugins.microbot.util.player.Rs2Player`**
+**`net.runelite.client.plugins.cupidbot.util.player.Rs2Player`**
 
 - `getAnimation(): int`
 - `getBoostedSkillLevel(Skill): int`
@@ -851,46 +851,46 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `isMoving(Rs2PlayerModel): boolean`
 - `updateCombatTime(): void`
 
-**`net.runelite.client.plugins.microbot.util.reachable.Rs2Reachable`**
+**`net.runelite.client.plugins.cupidbot.util.reachable.Rs2Reachable`**
 
 - `getReachableTiles(WorldPoint): IntSet`
 
-**`net.runelite.client.plugins.microbot.util.reflection.Rs2Reflection`**
+**`net.runelite.client.plugins.cupidbot.util.reflection.Rs2Reflection`**
 
 - `invokeMenu(int, int, int, int, int, int, String, String, int, int): void`
 
-**`net.runelite.client.plugins.microbot.util.settings.Rs2Settings`**
+**`net.runelite.client.plugins.cupidbot.util.settings.Rs2Settings`**
 
 - `findSettingsSearchClickable(String[]): Widget`
 
-**`net.runelite.client.plugins.microbot.util.shop.Rs2Shop`**
+**`net.runelite.client.plugins.cupidbot.util.shop.Rs2Shop`**
 
 - `invokeMenu(Rs2ItemModel, String): void`
 
-**`net.runelite.client.plugins.microbot.util.shop.models.Rs2ShopItem`**
+**`net.runelite.client.plugins.cupidbot.util.shop.models.Rs2ShopItem`**
 
 - `getItemComposition(): ItemComposition`
 
-**`net.runelite.client.plugins.microbot.util.skills.slayer.Rs2Slayer`**
+**`net.runelite.client.plugins.cupidbot.util.skills.slayer.Rs2Slayer`**
 
 - `getSlayerTaskWeaknessName(): String`
 
-**`net.runelite.client.plugins.microbot.util.tileobject.Rs2TileObjectModel`**
+**`net.runelite.client.plugins.cupidbot.util.tileobject.Rs2TileObjectModel`**
 
 - `getName(): String`
 - `getObjectComposition(): ObjectComposition`
 
-**`net.runelite.client.plugins.microbot.util.walker.Rs2MiniMap`**
+**`net.runelite.client.plugins.cupidbot.util.walker.Rs2MiniMap`**
 
 - `getMinimapClipArea(double): Shape`
 - `localToMinimap(LocalPoint): Point`
 - `worldToMinimap(WorldPoint): Point`
 
-**`net.runelite.client.plugins.microbot.util.walker.Rs2Walker`**
+**`net.runelite.client.plugins.cupidbot.util.walker.Rs2Walker`**
 
 - `handleCharterShip(Transport): boolean`
 
-**`net.runelite.client.plugins.microbot.util.widget.Rs2Widget`**
+**`net.runelite.client.plugins.cupidbot.util.widget.Rs2Widget`**
 
 - `clickChildWidget(int, int): boolean`
 - `clickWidget(String, Optional, int, boolean): boolean`
@@ -909,7 +909,7 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `isWidgetVisible(int, int): boolean`
 - `lambda$waitForWidget$27(String): boolean`
 
-**`net.runelite.client.plugins.microbot.util.widget.Rs2WidgetInspector`**
+**`net.runelite.client.plugins.cupidbot.util.widget.Rs2WidgetInspector`**
 
 - `describeWidget(int, int, int): List`
 - `getVisibleInterfaces(): List`
@@ -1833,7 +1833,7 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.MicrobotPlugin`**
+**`net.runelite.client.plugins.cupidbot.CupidBotPlugin`**
 
 - `onAnimationChanged(AnimationChanged): void`
 - `onChatMessage(ChatMessage): void`
@@ -1854,28 +1854,28 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `onWorldViewLoaded(WorldViewLoaded): void`
 - `onWorldViewUnloaded(WorldViewUnloaded): void`
 
-**`net.runelite.client.plugins.microbot.api.playerstate.Rs2PlayerStateCache`**
+**`net.runelite.client.plugins.cupidbot.api.playerstate.Rs2PlayerStateCache`**
 
 - `onGameStateChanged(GameStateChanged): void`
 - `onVarbitChanged(VarbitChanged): void`
 
-**`net.runelite.client.plugins.microbot.breakhandler.BreakHandlerPlugin`**
+**`net.runelite.client.plugins.cupidbot.breakhandler.BreakHandlerPlugin`**
 
 - `onConfigChanged(ConfigChanged): void`
 
-**`net.runelite.client.plugins.microbot.breakhandler.breakhandlerv2.BreakHandlerV2Plugin`**
+**`net.runelite.client.plugins.cupidbot.breakhandler.breakhandlerv2.BreakHandlerV2Plugin`**
 
 - `onGameStateChanged(GameStateChanged): void`
 
-**`net.runelite.client.plugins.microbot.example.ExamplePlugin`**
+**`net.runelite.client.plugins.cupidbot.example.ExamplePlugin`**
 
 - `onConfigChanged(ConfigChanged): void`
 
-**`net.runelite.client.plugins.microbot.externalplugins.MicrobotPluginManager`**
+**`net.runelite.client.plugins.cupidbot.externalplugins.CupidBotPluginManager`**
 
 - `onClientShutdown(ClientShutdown): void`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.MInventorySetupsPlugin`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.MInventorySetupsPlugin`**
 
 - `onConfigChanged(ConfigChanged): void`
 - `onGameStateChanged(GameStateChanged): void`
@@ -1890,12 +1890,12 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `onWidgetClosed(WidgetClosed): void`
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.mouserecorder.MouseMacroRecorderPlugin`**
+**`net.runelite.client.plugins.cupidbot.mouserecorder.MouseMacroRecorderPlugin`**
 
 - `onConfigChanged(ConfigChanged): void`
 - `onMenuOptionClicked(MenuOptionClicked): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.QuestHelperPlugin`**
+**`net.runelite.client.plugins.cupidbot.questhelper.QuestHelperPlugin`**
 
 - `onChatMessage(ChatMessage): void`
 - `onClientShutdown(ClientShutdown): void`
@@ -1908,12 +1908,12 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `onRuneScapeProfileChanged(RuneScapeProfileChanged): void`
 - `onVarbitChanged(VarbitChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.bank.banktab.PotionStorage`**
+**`net.runelite.client.plugins.cupidbot.questhelper.bank.banktab.PotionStorage`**
 
 - `onClientTick(ClientTick): void`
 - `onVarbitChanged(VarbitChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.bank.banktab.QuestBankTab`**
+**`net.runelite.client.plugins.cupidbot.questhelper.bank.banktab.QuestBankTab`**
 
 - `onGrandExchangeSearched(GrandExchangeSearched): void`
 - `onMenuOptionClicked(MenuOptionClicked): void`
@@ -1922,337 +1922,337 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `onScriptPreFired(ScriptPreFired): void`
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.achievementdiaries.kourend.KourendMedium`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.achievementdiaries.kourend.KourendMedium`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.miniquests.curseoftheemptylord.CurseOfTheEmptyLord`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.miniquests.curseoftheemptylord.CurseOfTheEmptyLord`**
 
 - `onVarbitChanged(VarbitChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.miniquests.enchantedkey.EnchantedKeyDigStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.miniquests.enchantedkey.EnchantedKeyDigStep`**
 
 - `onChatMessage(ChatMessage): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.miniquests.hisfaithfulservants.BarrowsHelper`**
-
-- `onChatMessage(ChatMessage): void`
-- `onGameTick(GameTick): void`
-- `onVarbitChanged(VarbitChanged): void`
-
-**`net.runelite.client.plugins.microbot.questhelper.helpers.miniquests.hisfaithfulservants.HisFaithfulServants`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.miniquests.hisfaithfulservants.BarrowsHelper`**
 
 - `onChatMessage(ChatMessage): void`
 - `onGameTick(GameTick): void`
 - `onVarbitChanged(VarbitChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.miniquests.themagearenaii.MageArenaBossStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.miniquests.hisfaithfulservants.HisFaithfulServants`**
+
+- `onChatMessage(ChatMessage): void`
+- `onGameTick(GameTick): void`
+- `onVarbitChanged(VarbitChanged): void`
+
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.miniquests.themagearenaii.MageArenaBossStep`**
 
 - `onChatMessage(ChatMessage): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.mischelpers.farmruns.HerbRun`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.mischelpers.farmruns.HerbRun`**
 
 - `onConfigChanged(ConfigChanged): void`
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.mischelpers.farmruns.TreeRun`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.mischelpers.farmruns.TreeRun`**
 
 - `onConfigChanged(ConfigChanged): void`
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.akingdomdivided.StatuePuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.akingdomdivided.StatuePuzzle`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.akingdomdivided.StonePuzzleStep`**
-
-- `onGameTick(GameTick): void`
-- `onWidgetLoaded(WidgetLoaded): void`
-
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.beneathcursedsands.TombRiddle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.akingdomdivided.StonePuzzleStep`**
 
 - `onGameTick(GameTick): void`
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.betweenarock.PuzzleStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.beneathcursedsands.TombRiddle`**
+
+- `onGameTick(GameTick): void`
+- `onWidgetLoaded(WidgetLoaded): void`
+
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.betweenarock.PuzzleStep`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.biohazard.GiveIngredientsToHelpersStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.biohazard.GiveIngredientsToHelpersStep`**
 
 - `onGameTick(GameTick): void`
 - `onInteractingChanged(InteractingChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.deserttreasureii.ChestCodeStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.deserttreasureii.ChestCodeStep`**
 
 - `onVarClientIntChanged(VarClientIntChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.deserttreasureii.GolemPuzzleStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.deserttreasureii.GolemPuzzleStep`**
 
 - `onVarbitChanged(VarbitChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.dragonslayerii.CryptPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.dragonslayerii.CryptPuzzle`**
 
 - `onGameTick(GameTick): void`
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.dragonslayerii.MapPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.dragonslayerii.MapPuzzle`**
 
 - `onVarbitChanged(VarbitChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.dreammentor.SelectingCombatGear`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.dreammentor.SelectingCombatGear`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.enlightenedjourney.BalloonFlightStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.enlightenedjourney.BalloonFlightStep`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.enlightenedjourney.GiveAugusteItems`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.enlightenedjourney.GiveAugusteItems`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.ghostsahoy.DyeShipSteps`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.ghostsahoy.DyeShipSteps`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.hazeelcult.HazeelValves`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.hazeelcult.HazeelValves`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.icthlarinslittlehelper.DoorPuzzleStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.icthlarinslittlehelper.DoorPuzzleStep`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.inaidofthemyreque.FillBurghCrate`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.inaidofthemyreque.FillBurghCrate`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.insearchofknowledge.FeedingAimeri`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.insearchofknowledge.FeedingAimeri`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.kingsransom.LockpickPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.kingsransom.LockpickPuzzle`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.lunardiplomacy.ChanceChallenge`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.lunardiplomacy.ChanceChallenge`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.lunardiplomacy.MemoryChallenge`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.lunardiplomacy.MemoryChallenge`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.monkeymadnessii.AgilityDungeonSteps`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.monkeymadnessii.AgilityDungeonSteps`**
 
 - `onChatMessage(ChatMessage): void`
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.myarmsbigadventure.AddCompost`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.myarmsbigadventure.AddCompost`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.myarmsbigadventure.AddDung`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.myarmsbigadventure.AddDung`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.olafsquest.PaintingWall`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.olafsquest.PaintingWall`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.priestinperil.BringDrezelPureEssenceStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.priestinperil.BringDrezelPureEssenceStep`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.ragandboneman.RagAndBoneManI`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.ragandboneman.RagAndBoneManI`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.ragandboneman.RagAndBoneManII`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.ragandboneman.RagAndBoneManII`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.ratcatchers.RatCharming`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.ratcatchers.RatCharming`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.recipefordisaster.AskAboutFishCake`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.recipefordisaster.AskAboutFishCake`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.recipefordisaster.GetRohakDrunk`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.recipefordisaster.GetRohakDrunk`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.recipefordisaster.MakeEvilStew`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.recipefordisaster.MakeEvilStew`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.recipefordisaster.QuizSteps`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.recipefordisaster.QuizSteps`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.recruitmentdrive.DoorPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.recruitmentdrive.DoorPuzzle`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.rumdeal.SlugSteps`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.rumdeal.SlugSteps`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.secretsofthenorth.ArrowChestPuzzleStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.secretsofthenorth.ArrowChestPuzzleStep`**
 
 - `onVarClientIntChanged(VarClientIntChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.secretsofthenorth.AskAboutRitual`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.secretsofthenorth.AskAboutRitual`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.secretsofthenorth.SolveChestCode`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.secretsofthenorth.SolveChestCode`**
 
 - `onVarClientIntChanged(VarClientIntChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.secretsofthenorth.SolveDoorCode`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.secretsofthenorth.SolveDoorCode`**
 
 - `onVarClientIntChanged(VarClientIntChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.secretsofthenorth.TellAboutMurder`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.secretsofthenorth.TellAboutMurder`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.shadowofthestorm.IncantationStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.shadowofthestorm.IncantationStep`**
 
 - `onMenuOptionClicked(MenuOptionClicked): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.shadowofthestorm.SearchKilns`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.shadowofthestorm.SearchKilns`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.sheepshearer.SheepShearer`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.sheepshearer.SheepShearer`**
 
 - `onItemContainerChanged(ItemContainerChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.sinsofthefather.DoorPuzzleStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.sinsofthefather.DoorPuzzleStep`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.sinsofthefather.ValveStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.sinsofthefather.ValveStep`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.songoftheelves.BaxtorianPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.songoftheelves.BaxtorianPuzzle`**
 
 - `onGameTick(GameTick): void`
 - `onGraphicsObjectCreated(GraphicsObjectCreated): void`
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.swansong.FishMonkfish`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.swansong.FishMonkfish`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.swansong.FixWall`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.swansong.FixWall`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.templeoftheeye.RuneEnergyStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.templeoftheeye.RuneEnergyStep`**
 
 - `onChatMessage(ChatMessage): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.thecurseofarrav.MetalDoorSolver`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.thecurseofarrav.MetalDoorSolver`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.thecurseofarrav.TilePuzzleSolver`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.thecurseofarrav.TilePuzzleSolver`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.thecurseofarrav.rubblesolvers.RubbleSolver`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.thecurseofarrav.rubblesolvers.RubbleSolver`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.theeyesofglouphrie.PuzzleStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.theeyesofglouphrie.PuzzleStep`**
 
 - `onGameTick(GameTick): void`
 - `onItemContainerChanged(ItemContainerChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.thefinaldawn.TheFinalDawn`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.thefinaldawn.TheFinalDawn`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.theforsakentower.AltarPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.theforsakentower.AltarPuzzle`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.theforsakentower.JugPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.theforsakentower.JugPuzzle`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.theforsakentower.PotionPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.theforsakentower.PotionPuzzle`**
 
 - `onGameTick(GameTick): void`
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.theforsakentower.PowerPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.theforsakentower.PowerPuzzle`**
 
 - `onVarbitChanged(VarbitChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.thefremennikisles.KillTrolls`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.thefremennikisles.KillTrolls`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.thefremenniktrials.CombinationPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.thefremenniktrials.CombinationPuzzle`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.thegreatbrainrobbery.TheGreatBrainRobbery`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.thegreatbrainrobbery.TheGreatBrainRobbery`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.theheartofdarkness.ChestCodeStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.theheartofdarkness.ChestCodeStep`**
 
 - `onVarClientIntChanged(VarClientIntChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.theheartofdarkness.LockedChestPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.theheartofdarkness.LockedChestPuzzle`**
 
 - `onGameTick(GameTick): void`
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.theheartofdarkness.TheHeartOfDarkness`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.theheartofdarkness.TheHeartOfDarkness`**
 
 - `onChatMessage(ChatMessage): void`
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.thepathofglouphrie.MonolithPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.thepathofglouphrie.MonolithPuzzle`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.thepathofglouphrie.YewnocksPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.thepathofglouphrie.YewnocksPuzzle`**
 
 - `onGameTick(GameTick): void`
 - `onItemContainerChanged(ItemContainerChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.theslugmenace.PuzzleStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.theslugmenace.PuzzleStep`**
 
 - `onVarbitChanged(VarbitChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.tribaltotem.PuzzleStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.tribaltotem.PuzzleStep`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.troubledtortugans.RepairTown`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.troubledtortugans.RepairTown`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.watchtower.SkavidChoice`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.watchtower.SkavidChoice`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.whileguthixsleeps.WeightStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.whileguthixsleeps.WeightStep`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.requirements.RequirementValidator`**
+**`net.runelite.client.plugins.cupidbot.questhelper.requirements.RequirementValidator`**
 
 - `onChatMessage(ChatMessage): void`
 - `onGameStateChanged(GameStateChanged): void`
@@ -2261,7 +2261,7 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `onNpcDespawned(NpcDespawned): void`
 - `onNpcSpawned(NpcSpawned): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.runeliteobjects.extendedruneliteobjects.RuneliteObjectManager`**
+**`net.runelite.client.plugins.cupidbot.questhelper.runeliteobjects.extendedruneliteobjects.RuneliteObjectManager`**
 
 - `onClientTick(ClientTick): void`
 - `onGameStateChanged(GameStateChanged): void`
@@ -2271,17 +2271,17 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `onNpcSpawned(NpcSpawned): void`
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.statemanagement.AchievementDiaryStepManager`**
+**`net.runelite.client.plugins.cupidbot.questhelper.statemanagement.AchievementDiaryStepManager`**
 
 - `onNpcLootReceived(NpcLootReceived): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.statemanagement.PlayerStateManager`**
+**`net.runelite.client.plugins.cupidbot.questhelper.statemanagement.PlayerStateManager`**
 
 - `onChatMessage(ChatMessage): void`
 - `onGameTick(GameTick): void`
 - `onVarbitChanged(VarbitChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.steps.ConditionalStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.steps.ConditionalStep`**
 
 - `onChatMessage(ChatMessage): void`
 - `onGameStateChanged(GameStateChanged): void`
@@ -2290,7 +2290,7 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `onNpcDespawned(NpcDespawned): void`
 - `onNpcSpawned(NpcSpawned): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.steps.DetailedQuestStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.steps.DetailedQuestStep`**
 
 - `onGameStateChanged(GameStateChanged): void`
 - `onGameTick(GameTick): void`
@@ -2298,17 +2298,17 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `onItemSpawned(ItemSpawned): void`
 - `onWorldMapAreaChanged(WorldMapAreaChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.steps.DigStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.steps.DigStep`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.steps.NpcStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.steps.NpcStep`**
 
 - `onNpcChanged(NpcChanged): void`
 - `onNpcDespawned(NpcDespawned): void`
 - `onNpcSpawned(NpcSpawned): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.steps.ObjectStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.steps.ObjectStep`**
 
 - `onDecorativeObjectDespawned(DecorativeObjectDespawned): void`
 - `onDecorativeObjectSpawned(DecorativeObjectSpawned): void`
@@ -2320,22 +2320,22 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `onWallObjectDespawned(WallObjectDespawned): void`
 - `onWallObjectSpawned(WallObjectSpawned): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.steps.PuzzleStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.steps.PuzzleStep`**
 
 - `onGameTick(GameTick): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.steps.QuestStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.steps.QuestStep`**
 
 - `onChatMessage(ChatMessage): void`
 - `onVarbitChanged(VarbitChanged): void`
 - `onWidgetLoaded(WidgetLoaded): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.util.worldmap.WorldMapAreaManager`**
+**`net.runelite.client.plugins.cupidbot.questhelper.util.worldmap.WorldMapAreaManager`**
 
 - `onScriptPostFired(ScriptPostFired): void`
 - `onScriptPreFired(ScriptPreFired): void`
 
-**`net.runelite.client.plugins.microbot.shortestpath.ShortestPathPlugin`**
+**`net.runelite.client.plugins.cupidbot.shortestpath.ShortestPathPlugin`**
 
 - `onConfigChanged(ConfigChanged): void`
 - `onGameTick(GameTick): void`
@@ -2343,34 +2343,34 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `onMenuOpened(MenuOpened): void`
 - `onPluginMessage(PluginMessage): void`
 
-**`net.runelite.client.plugins.microbot.testing.TestRunnerPlugin`**
+**`net.runelite.client.plugins.cupidbot.testing.TestRunnerPlugin`**
 
 - `onGameStateChanged(GameStateChanged): void`
 
-**`net.runelite.client.plugins.microbot.ui.MicrobotConfigPanel`**
+**`net.runelite.client.plugins.cupidbot.ui.CupidBotConfigPanel`**
 
 - `onExternalPluginsChanged(ExternalPluginsChanged): void`
 - `onPluginChanged(PluginChanged): void`
 - `onProfileChanged(ProfileChanged): void`
 
-**`net.runelite.client.plugins.microbot.ui.MicrobotPluginHubPanel`**
+**`net.runelite.client.plugins.cupidbot.ui.CupidBotPluginHubPanel`**
 
 - `onExternalPluginsChanged(ExternalPluginsChanged): void`
 
-**`net.runelite.client.plugins.microbot.ui.MicrobotPluginListPanel`**
+**`net.runelite.client.plugins.cupidbot.ui.CupidBotPluginListPanel`**
 
 - `onExternalPluginsChanged(ExternalPluginsChanged): void`
 - `onPluginChanged(PluginChanged): void`
 - `onProfileChanged(ProfileChanged): void`
 
-**`net.runelite.client.plugins.microbot.ui.MicrobotProfilePanel`**
+**`net.runelite.client.plugins.cupidbot.ui.CupidBotProfilePanel`**
 
 - `onProfileChanged(ProfileChanged): void`
 - `onRuneScapeProfileChanged(RuneScapeProfileChanged): void`
 - `onSessionClose(SessionClose): void`
 - `onSessionOpen(SessionOpen): void`
 
-**`net.runelite.client.plugins.microbot.util.antiban.AntibanPlugin`**
+**`net.runelite.client.plugins.cupidbot.util.antiban.AntibanPlugin`**
 
 - `onChatMessage(ChatMessage): void`
 - `onGameStateChanged(GameStateChanged): void`
@@ -3230,11 +3230,11 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$shutDown$1(): void`
 - `lambda$startUp$0(): void`
 
-**`net.runelite.client.plugins.microbot.GameChatAppender`**
+**`net.runelite.client.plugins.cupidbot.GameChatAppender`**
 
 - `lambda$append$0(String): MessageNode`
 
-**`net.runelite.client.plugins.microbot.Microbot`**
+**`net.runelite.client.plugins.cupidbot.CupidBot`**
 
 - `lambda$getDBRowsByValue$4(int, int, int, Object): List`
 - `lambda$getDBTableField$3(int, int, int): Object[]`
@@ -3245,23 +3245,23 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$openPopUp$15(WidgetNode): boolean`
 - `lambda$openPopUp$16(String, String): void`
 
-**`net.runelite.client.plugins.microbot.MicrobotPlugin`**
+**`net.runelite.client.plugins.cupidbot.CupidBotPlugin`**
 
 - `lambda$hasWidgetOverlapWithBounds$4(Rectangle, int, int): Boolean`
 
-**`net.runelite.client.plugins.microbot.agentserver.handler.SkillsHandler`**
+**`net.runelite.client.plugins.cupidbot.agentserver.handler.SkillsHandler`**
 
 - `lambda$handleRequest$0(String): List`
 
-**`net.runelite.client.plugins.microbot.agentserver.handler.StateHandler`**
+**`net.runelite.client.plugins.cupidbot.agentserver.handler.StateHandler`**
 
 - `lambda$handleRequest$0(Map): Object`
 
-**`net.runelite.client.plugins.microbot.agentserver.handler.WidgetInvokeHandler`**
+**`net.runelite.client.plugins.cupidbot.agentserver.handler.WidgetInvokeHandler`**
 
 - `lambda$handleRequest$0(int, int): Rectangle`
 
-**`net.runelite.client.plugins.microbot.api.AbstractEntityQueryable`**
+**`net.runelite.client.plugins.cupidbot.api.AbstractEntityQueryable`**
 
 - `lambda$firstOnClientThread$16(): IEntity`
 - `lambda$nearestOnClientThread$17(): IEntity`
@@ -3269,16 +3269,16 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$nearestOnClientThread$19(WorldPoint, int): IEntity`
 - `lambda$toListOnClientThread$20(): List`
 
-**`net.runelite.client.plugins.microbot.api.actor.Rs2ActorModel`**
+**`net.runelite.client.plugins.cupidbot.api.actor.Rs2ActorModel`**
 
 - `lambda$getWorldLocation$0(): WorldPoint`
 
-**`net.runelite.client.plugins.microbot.api.boat.Rs2BoatCache`**
+**`net.runelite.client.plugins.cupidbot.api.boat.Rs2BoatCache`**
 
 - `lambda$getBoat$1(Rs2PlayerModel): WorldEntity`
 - `lambda$getLocalBoat$0(): WorldEntity`
 
-**`net.runelite.client.plugins.microbot.api.boat.models.Rs2BoatModel`**
+**`net.runelite.client.plugins.cupidbot.api.boat.models.Rs2BoatModel`**
 
 - `lambda$getPlayerBoatLocation$3(float[]): WorldPoint`
 - `lambda$getPlayerBoatLocation$4(): WorldPoint`
@@ -3286,7 +3286,7 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$setHeading$9(): WorldView`
 - `lambda$transformToMainWorld$1(LocalPoint): LocalPoint`
 
-**`net.runelite.client.plugins.microbot.api.npc.models.Rs2NpcModel`**
+**`net.runelite.client.plugins.cupidbot.api.npc.models.Rs2NpcModel`**
 
 - `lambda$click$6(): NPCComposition`
 - `lambda$getDistanceFromPlayer$1(): Integer`
@@ -3294,13 +3294,13 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$isMoving$3(): Boolean`
 - `lambda$isWithinDistanceFromPlayer$0(int): Boolean`
 
-**`net.runelite.client.plugins.microbot.api.playerstate.Rs2PlayerStateCache`**
+**`net.runelite.client.plugins.cupidbot.api.playerstate.Rs2PlayerStateCache`**
 
 - `lambda$populateQuests$2(): void`
 - `lambda$updateVarbitValue$3(int): Integer`
 - `lambda$updateVarpValue$4(int): Integer`
 
-**`net.runelite.client.plugins.microbot.api.tileitem.models.Rs2TileItemModel`**
+**`net.runelite.client.plugins.cupidbot.api.tileitem.models.Rs2TileItemModel`**
 
 - `lambda$click$8(): ItemComposition`
 - `lambda$getName$0(): String`
@@ -3312,19 +3312,19 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$isStackable$2(): Boolean`
 - `lambda$isTradeable$5(): Boolean`
 
-**`net.runelite.client.plugins.microbot.api.tileobject.models.Rs2TileObjectModel`**
+**`net.runelite.client.plugins.cupidbot.api.tileobject.models.Rs2TileObjectModel`**
 
 - `lambda$getName$0(): String`
 - `lambda$getObjectComposition$1(): ObjectComposition`
 - `lambda$isReachable$2(): WorldView`
 
-**`net.runelite.client.plugins.microbot.example.ExampleScript`**
+**`net.runelite.client.plugins.cupidbot.example.ExampleScript`**
 
 - `lambda$checkEquipment$30(): ItemContainer`
 - `lambda$checkWorldViewAndThreading$12(Player): WorldView`
 - `lambda$checkWorldViewAndThreading$14(): String`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.InventorySetupsAmmoHandler`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.InventorySetupsAmmoHandler`**
 
 - `lambda$handleSpecialHighlighting$10(InventorySetup): void`
 - `lambda$handleSpecialHighlighting$11(InventorySetup, Set): void`
@@ -3332,12 +3332,12 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$handleSpecialHighlighting$8(InventorySetup): void`
 - `lambda$handleSpecialHighlighting$9(InventorySetup): void`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.InventorySetupsBankSearch`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.InventorySetupsBankSearch`**
 
 - `lambda$initSearch$0(): void`
 - `lambda$reset$1(boolean): void`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.MInventorySetupsPlugin`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.MInventorySetupsPlugin`**
 
 - `lambda$addAdditionalFilteredItem$43(int, Map, InventorySetup): void`
 - `lambda$addInventorySetup$31(String): void`
@@ -3370,44 +3370,44 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$updateSlotFromSearchHelper$55(boolean, InventorySetupsItem, InventorySetupsItem, InventorySetupsSlot, List): void`
 - `lambda$updateSpellbookInSetup$61(int): void`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.ui.InventorySetupsPluginPanel`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.ui.InventorySetupsPluginPanel`**
 
 - `doHighlighting(): void`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.ui.InventorySetupsSpellbookPanel`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.ui.InventorySetupsSpellbookPanel`**
 
 - `lambda$highlightSlots$2(InventorySetup): void`
 - `lambda$new$0(MInventorySetupsPlugin): boolean`
 
-**`net.runelite.client.plugins.microbot.inventorysetups.ui.InventorySetupsStandardPanel`**
+**`net.runelite.client.plugins.cupidbot.inventorysetups.ui.InventorySetupsStandardPanel`**
 
 - `lambda$new$0(MInventorySetupsPlugin, InventorySetupsPluginPanel): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.QuestHelperPlugin`**
+**`net.runelite.client.plugins.cupidbot.questhelper.QuestHelperPlugin`**
 
 - `lambda$onGameStateChanged$4(): void`
 - `lambda$refreshBank$5(): void`
 - `lambda$startUp$2(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.QuestScript`**
+**`net.runelite.client.plugins.cupidbot.questhelper.QuestScript`**
 
 - `lambda$chooseCorrectNPCOption$31(Rs2NpcModel): NPCComposition`
 - `lambda$chooseCorrectObjectOption$29(Rs2TileObjectModel): ObjectComposition`
 - `lambda$run$3(): Boolean`
 
-**`net.runelite.client.plugins.microbot.questhelper.bank.banktab.QuestBankTab`**
+**`net.runelite.client.plugins.cupidbot.questhelper.bank.banktab.QuestBankTab`**
 
 - `lambda$onScriptPostFired$1(Widget, Widget[]): void`
 - `lambda$sortBankTabItems$2(int): void`
 - `removeAddedWidgets(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.bank.banktab.QuestBankTabInterface`**
+**`net.runelite.client.plugins.cupidbot.questhelper.bank.banktab.QuestBankTabInterface`**
 
 - `destroy(): void`
 - `init(): void`
 - `lambda$init$0(boolean): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.bank.banktab.QuestGrandExchangeInterface`**
+**`net.runelite.client.plugins.cupidbot.questhelper.bank.banktab.QuestGrandExchangeInterface`**
 
 - `destroy(): void`
 - `init(): void`
@@ -3415,29 +3415,29 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$closeOptions$0(): void`
 - `lambda$onceOffActivateTab$2(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.mischelpers.farmruns.TreeRun`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.mischelpers.farmruns.TreeRun`**
 
 - `lambda$onConfigChanged$2(ConfigChanged): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.akingdomdivided.StonePuzzleStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.akingdomdivided.StonePuzzleStep`**
 
 - `lambda$onWidgetLoaded$0(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.demonslayer.IncantationStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.demonslayer.IncantationStep`**
 
 - `resetIncarnationIfRequired(): void`
 - `updateChoiceIfRequired(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.shadowofthestorm.IncantationStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.shadowofthestorm.IncantationStep`**
 
 - `updateChoiceIfRequired(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.helpers.quests.songoftheelves.BaxtorianPuzzle`**
+**`net.runelite.client.plugins.cupidbot.questhelper.helpers.quests.songoftheelves.BaxtorianPuzzle`**
 
 - `lambda$onGraphicsObjectCreated$0(GraphicsObject): void`
 - `lambda$onWidgetLoaded$1(Widget): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.managers.QuestManager`**
+**`net.runelite.client.plugins.cupidbot.questhelper.managers.QuestManager`**
 
 - `lambda$getAllItemRequirements$10(): void`
 - `lambda$handleConfigChanged$1(): void`
@@ -3448,39 +3448,39 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$updateAllItemsHelper$11(): void`
 - `updateQuestList(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.questhelpers.BasicQuestHelper`**
+**`net.runelite.client.plugins.cupidbot.questhelper.questhelpers.BasicQuestHelper`**
 
 - `updateQuest(): boolean`
 
-**`net.runelite.client.plugins.microbot.questhelper.runeliteobjects.extendedruneliteobjects.ExtendedRuneliteObject`**
+**`net.runelite.client.plugins.cupidbot.questhelper.runeliteobjects.extendedruneliteobjects.ExtendedRuneliteObject`**
 
 - `lambda$update$0(): boolean`
 
-**`net.runelite.client.plugins.microbot.questhelper.runeliteobjects.extendedruneliteobjects.FakeNpc`**
+**`net.runelite.client.plugins.cupidbot.questhelper.runeliteobjects.extendedruneliteobjects.FakeNpc`**
 
 - `lambda$update$0(): boolean`
 
-**`net.runelite.client.plugins.microbot.questhelper.runeliteobjects.extendedruneliteobjects.RuneliteObjectManager`**
+**`net.runelite.client.plugins.cupidbot.questhelper.runeliteobjects.extendedruneliteobjects.RuneliteObjectManager`**
 
 - `lambda$onWidgetLoaded$25(ExtendedRuneliteObject, WidgetLoaded): void`
 - `lambda$removeGroupAndSubgroups$11(String): void`
 - `lambda$replaceWidgetsForReplacedNpcs$27(Widget, Widget, ReplacedNpc): void`
 - `removeRuneliteObjects(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.steps.QuestStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.steps.QuestStep`**
 
 - `highlightChoice(): void`
 - `highlightWidgetChoice(): void`
 
-**`net.runelite.client.plugins.microbot.questhelper.steps.playermadesteps.RuneliteObjectStep`**
+**`net.runelite.client.plugins.cupidbot.questhelper.steps.playermadesteps.RuneliteObjectStep`**
 
 - `removeRuneliteNpcs(): void`
 
-**`net.runelite.client.plugins.microbot.shortestpath.ShortestPathPlugin`**
+**`net.runelite.client.plugins.cupidbot.shortestpath.ShortestPathPlugin`**
 
 - `lambda$restartPathfinding$0(Set, boolean, WorldPoint, ExecutorService): void`
 
-**`net.runelite.client.plugins.microbot.util.bank.Rs2Bank`**
+**`net.runelite.client.plugins.cupidbot.util.bank.Rs2Bank`**
 
 - `lambda$getItems$54(): List`
 - `lambda$getTabs$53(): List`
@@ -3488,53 +3488,53 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$withdrawLootItems$48(LootTrackerItem): ItemComposition`
 - `lambda$withdrawLootItems$50(int): ItemComposition`
 
-**`net.runelite.client.plugins.microbot.util.bank.Rs2BankData`**
+**`net.runelite.client.plugins.cupidbot.util.bank.Rs2BankData`**
 
 - `lambda$rebuildBankItemsList$0(): Boolean`
 
-**`net.runelite.client.plugins.microbot.util.camera.Rs2Camera`**
+**`net.runelite.client.plugins.cupidbot.util.camera.Rs2Camera`**
 
 - `lambda$setZoom$4(int): void`
 
-**`net.runelite.client.plugins.microbot.util.combat.Rs2Combat`**
+**`net.runelite.client.plugins.cupidbot.util.combat.Rs2Combat`**
 
 - `lambda$inCombat$5(Actor, Player): Boolean`
 
-**`net.runelite.client.plugins.microbot.util.combat.models.Rs2DropSource`**
+**`net.runelite.client.plugins.cupidbot.util.combat.models.Rs2DropSource`**
 
 - `lambda$getItemComposition$0(): ItemComposition`
 
-**`net.runelite.client.plugins.microbot.util.farming.Rs2Farming`**
+**`net.runelite.client.plugins.cupidbot.util.farming.Rs2Farming`**
 
 - `lambda$getPatchByRegionAndVarbit$12(int, String): Optional`
 - `lambda$getPatchesByTab$0(Tab): List`
 - `lambda$isFarmingSystemReady$14(): Boolean`
 - `lambda$predictPatchState$4(FarmingPatch): CropState`
 
-**`net.runelite.client.plugins.microbot.util.gameobject.Rs2Cannon`**
+**`net.runelite.client.plugins.cupidbot.util.gameobject.Rs2Cannon`**
 
 - `lambda$refill$0(): Integer`
 - `lambda$refill$1(): Integer`
 
-**`net.runelite.client.plugins.microbot.util.gameobject.Rs2GameObject`**
+**`net.runelite.client.plugins.cupidbot.util.gameobject.Rs2GameObject`**
 
 - `lambda$clickObject$92(): WorldView`
 - `lambda$convertToObjectCompositionInternal$90(int, boolean): ObjectComposition`
 - `lambda$getObjectComposition$93(int): ObjectComposition`
 - `lambda$getSceneObjects$84(): Triple`
 
-**`net.runelite.client.plugins.microbot.util.gameobject.Rs2ObjectModel`**
+**`net.runelite.client.plugins.cupidbot.util.gameobject.Rs2ObjectModel`**
 
 - `lambda$getDistanceFromPlayer$1(): Integer`
 - `lambda$getObjectComposition$2(): ObjectComposition`
 - `lambda$getTicksSinceCreation$0(): Integer`
 
-**`net.runelite.client.plugins.microbot.util.grandexchange.Rs2GrandExchange`**
+**`net.runelite.client.plugins.cupidbot.util.grandexchange.Rs2GrandExchange`**
 
 - `lambda$getSearchResultWidget$21(): Widget`
 - `lambda$setChatboxValue$32(int): Object`
 
-**`net.runelite.client.plugins.microbot.util.grounditem.Rs2GroundItem`**
+**`net.runelite.client.plugins.cupidbot.util.grounditem.Rs2GroundItem`**
 
 - `lambda$getAllAt$3(int, int): RS2Item[]`
 - `lambda$getAllFromWorldPoint$6(WorldPoint, int): RS2Item[]`
@@ -3544,26 +3544,26 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$lootAllItemBasedOnValue$27(RS2Item): Integer`
 - `lambda$lootItemBasedOnValue$9(RS2Item): Integer`
 
-**`net.runelite.client.plugins.microbot.util.grounditem.models.Rs2SpawnLocation`**
+**`net.runelite.client.plugins.cupidbot.util.grounditem.models.Rs2SpawnLocation`**
 
 - `lambda$getItemComposition$0(): ItemComposition`
 
-**`net.runelite.client.plugins.microbot.util.inventory.Rs2FuzzyItem`**
+**`net.runelite.client.plugins.cupidbot.util.inventory.Rs2FuzzyItem`**
 
 - `lambda$getItemName$2(int): String`
 
-**`net.runelite.client.plugins.microbot.util.inventory.Rs2Gembag`**
+**`net.runelite.client.plugins.cupidbot.util.inventory.Rs2Gembag`**
 
 - `lambda$getGemItemModel$8(int, String): Rs2ItemModel`
 
-**`net.runelite.client.plugins.microbot.util.inventory.Rs2Inventory`**
+**`net.runelite.client.plugins.cupidbot.util.inventory.Rs2Inventory`**
 
 - `lambda$dropAllExcept$23(Rs2ItemModel): Integer`
 - `lambda$getInventory$69(): Widget`
 - `lambda$invokeMenu$66(): Boolean`
 - `lambda$items$0(): Object`
 
-**`net.runelite.client.plugins.microbot.util.inventory.Rs2ItemModel`**
+**`net.runelite.client.plugins.cupidbot.util.inventory.Rs2ItemModel`**
 
 - `lambda$ensureCompositionLoaded$1(): ItemComposition`
 - `lambda$getNotedId$12(int): ItemComposition`
@@ -3574,26 +3574,26 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$isHaProfitable$4(): Integer`
 - `lambda$new$0(int): ItemComposition`
 
-**`net.runelite.client.plugins.microbot.util.item.Rs2EnsouledHead`**
+**`net.runelite.client.plugins.cupidbot.util.item.Rs2EnsouledHead`**
 
 - `lambda$reanimate$0(): Boolean`
 
-**`net.runelite.client.plugins.microbot.util.item.Rs2ItemManager`**
+**`net.runelite.client.plugins.cupidbot.util.item.Rs2ItemManager`**
 
 - `lambda$getItemComposition$1(int): ItemComposition`
 - `lambda$searchItem$0(String): List`
 
-**`net.runelite.client.plugins.microbot.util.magic.Rs2Magic`**
+**`net.runelite.client.plugins.cupidbot.util.magic.Rs2Magic`**
 
 - `lambda$alch$7(): Boolean`
 - `lambda$alch$9(): Boolean`
 - `lambda$superHeat$11(): Boolean`
 
-**`net.runelite.client.plugins.microbot.util.misc.Rs2UiHelper`**
+**`net.runelite.client.plugins.cupidbot.util.misc.Rs2UiHelper`**
 
 - `lambda$getActorClickbox$0(Actor, LocalPoint): Shape`
 
-**`net.runelite.client.plugins.microbot.util.npc.Rs2Npc`**
+**`net.runelite.client.plugins.cupidbot.util.npc.Rs2Npc`**
 
 - `lambda$getAvailableAction$43(Rs2NpcModel): NPCComposition`
 - `lambda$getNpcs$13(Predicate): Rs2NpcModel[]`
@@ -3601,14 +3601,14 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$interact$34(Rs2NpcModel): NPCComposition`
 - `lambda$isMoving$1(NPC): Boolean`
 
-**`net.runelite.client.plugins.microbot.util.npc.Rs2NpcModel`**
+**`net.runelite.client.plugins.cupidbot.util.npc.Rs2NpcModel`**
 
 - `lambda$getDistanceFromPlayer$1(): Integer`
 - `lambda$isInteractingWithPlayer$2(): Boolean`
 - `lambda$isMoving$3(): Boolean`
 - `lambda$isWithinDistanceFromPlayer$0(int): Boolean`
 
-**`net.runelite.client.plugins.microbot.util.player.Rs2Player`**
+**`net.runelite.client.plugins.cupidbot.util.player.Rs2Player`**
 
 - `lambda$getAnimation$41(): Integer`
 - `lambda$getBoostedSkillLevel$44(Skill): Integer`
@@ -3623,47 +3623,47 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$isMoving$7(Rs2PlayerModel): Boolean`
 - `lambda$updateCombatTime$26(): Object`
 
-**`net.runelite.client.plugins.microbot.util.reachable.Rs2Reachable`**
+**`net.runelite.client.plugins.cupidbot.util.reachable.Rs2Reachable`**
 
 - `lambda$getReachableTiles$0(int, WorldPoint): IntSet`
 
-**`net.runelite.client.plugins.microbot.util.reflection.Rs2Reflection`**
+**`net.runelite.client.plugins.cupidbot.util.reflection.Rs2Reflection`**
 
 - `lambda$invokeMenu$2(int, int, int, int, int, String, String): void`
 - `lambda$invokeMenu$3(int, int, int, int, int, int, String, String, int, int): Object`
 
-**`net.runelite.client.plugins.microbot.util.settings.Rs2Settings`**
+**`net.runelite.client.plugins.cupidbot.util.settings.Rs2Settings`**
 
 - `lambda$findSettingsSearchClickable$6(String[]): Widget`
 
-**`net.runelite.client.plugins.microbot.util.shop.Rs2Shop`**
+**`net.runelite.client.plugins.cupidbot.util.shop.Rs2Shop`**
 
 - `lambda$invokeMenu$8(Rs2ItemModel): ItemComposition`
 
-**`net.runelite.client.plugins.microbot.util.shop.models.Rs2ShopItem`**
+**`net.runelite.client.plugins.cupidbot.util.shop.models.Rs2ShopItem`**
 
 - `lambda$getItemComposition$0(): ItemComposition`
 
-**`net.runelite.client.plugins.microbot.util.skills.slayer.Rs2Slayer`**
+**`net.runelite.client.plugins.cupidbot.util.skills.slayer.Rs2Slayer`**
 
 - `lambda$getSlayerTaskWeaknessName$1(int): String`
 
-**`net.runelite.client.plugins.microbot.util.tileobject.Rs2TileObjectModel`**
+**`net.runelite.client.plugins.cupidbot.util.tileobject.Rs2TileObjectModel`**
 
 - `lambda$getName$0(): String`
 - `lambda$getObjectComposition$1(): ObjectComposition`
 
-**`net.runelite.client.plugins.microbot.util.walker.Rs2MiniMap`**
+**`net.runelite.client.plugins.cupidbot.util.walker.Rs2MiniMap`**
 
 - `lambda$getMinimapClipArea$2(boolean): BufferedImage`
 - `lambda$localToMinimap$0(LocalPoint): Point`
 - `lambda$worldToMinimap$1(LocalPoint): Point`
 
-**`net.runelite.client.plugins.microbot.util.walker.Rs2Walker`**
+**`net.runelite.client.plugins.cupidbot.util.walker.Rs2Walker`**
 
 - `lambda$handleCharterShip$103(Widget): Boolean`
 
-**`net.runelite.client.plugins.microbot.util.widget.Rs2Widget`**
+**`net.runelite.client.plugins.cupidbot.util.widget.Rs2Widget`**
 
 - `lambda$clickChildWidget$12(int): Widget`
 - `lambda$clickWidget$11(int): Widget`
@@ -3682,7 +3682,7 @@ Source: `runelite-client/src/test/java/net/runelite/client/plugins/microbot/thre
 - `lambda$isWidgetVisible$5(int, int): Boolean`
 - `lambda$waitForWidget$26(String): Boolean`
 
-**`net.runelite.client.plugins.microbot.util.widget.Rs2WidgetInspector`**
+**`net.runelite.client.plugins.cupidbot.util.widget.Rs2WidgetInspector`**
 
 - `lambda$describeWidget$1(int, int, int): List`
 - `lambda$getVisibleInterfaces$0(): List`

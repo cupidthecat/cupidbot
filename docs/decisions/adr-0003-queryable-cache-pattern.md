@@ -6,7 +6,7 @@
 Scripts frequently need fast, thread-safe access to NPCs, players, tile objects/items, and boat state. Direct RuneLite API traversal on script threads is error-prone and can violate client-thread rules.
 
 ## Decision
-Expose entity data through Guice-managed caches (`Rs2NpcCache`, `Rs2PlayerCache`, `Rs2TileObjectCache`, `Rs2TileItemCache`, `Rs2BoatCache`, `Rs2PlayerStateCache`) accessed only via `Microbot.getRs2XxxCache().query()` or `.getStream()`. Caches refresh per game tick and support world-view queries for boat contexts.
+Expose entity data through Guice-managed caches (`Rs2NpcCache`, `Rs2PlayerCache`, `Rs2TileObjectCache`, `Rs2TileItemCache`, `Rs2BoatCache`, `Rs2PlayerStateCache`) accessed only via `CupidBot.getRs2XxxCache().query()` or `.getStream()`. Caches refresh per game tick and support world-view queries for boat contexts.
 
 ## Consequences
 - Scripts must not instantiate caches/queryables directly; tests and new utilities should follow the same pattern.

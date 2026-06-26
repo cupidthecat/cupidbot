@@ -49,8 +49,8 @@ public class RuneLiteProperties
 	private static final String API_BASE = "runelite.api.base";
 	private static final String RUNELITE_CONFIG = "runelite.config";
 	private static final String OSRS_TWITTER_LINK = "runelite.osrstwitter.link";
-	private static final String MICROBOT_VERSION = "microbot.version";
-	private static final String MICROBOT_COMMIT = "microbot.commit";
+	private static final String CUPIDBOT_VERSION = "cupidbot.version";
+	private static final String CUPIDBOT_COMMIT = "cupidbot.commit";
 
 
 	@Getter(AccessLevel.PACKAGE)
@@ -150,13 +150,13 @@ public class RuneLiteProperties
 		return properties.getProperty(OSRS_TWITTER_LINK);
 	}
 
-	public static String getMicrobotVersion()
+	public static String getCupidBotVersion()
 	{
-		return properties.getProperty(MICROBOT_VERSION);
+		return properties.getProperty(CUPIDBOT_VERSION);
 	}
 
-	public static String getMicrobotCommit()
+	public static String getCupidBotCommit()
 	{
-		return properties.getProperty(MICROBOT_COMMIT);
+		return properties.getProperty(CUPIDBOT_COMMIT);
 	}
 }

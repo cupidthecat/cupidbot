@@ -1,6 +1,6 @@
 # Rs2LeaguesTransport
 
-**Source:** `runelite-client/.../microbot/util/leaguetransport/Rs2LeaguesTransport.java`  
+**Source:** `runelite-client/.../cupidbot/util/leaguetransport/Rs2LeaguesTransport.java`
 **Related:** `LeaguesRegion`, `LeagueTransportWidgets`
 
 API driver for Leagues area teleports via UI chain:

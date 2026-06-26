@@ -48,7 +48,7 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.cupidbot.CupidBot;
 import net.runelite.client.ui.overlay.OverlayManager;
 import org.apache.commons.lang3.StringUtils;
 
@@ -151,7 +151,7 @@ public class RunEnergyPlugin extends Plugin
 	}
 
 	static Integer getRingOfEnduranceCharges() {
-		return Microbot.getConfigManager().getRSProfileConfiguration(RunEnergyConfig.GROUP_NAME, "ringOfEnduranceCharges", Integer.class);
+		return CupidBot.getConfigManager().getRSProfileConfiguration(RunEnergyConfig.GROUP_NAME, "ringOfEnduranceCharges", Integer.class);
 	}
 
 	void setRingOfEnduranceCharges(int charges)
@@ -161,7 +161,7 @@ public class RunEnergyPlugin extends Plugin
 
 	static boolean isRingOfEnduranceEquipped()
 	{
-		final ItemContainer equipment = Microbot.getClient().getItemContainer(InventoryID.WORN);
+		final ItemContainer equipment = CupidBot.getClient().getItemContainer(InventoryID.WORN);
 		return equipment != null && equipment.count(ItemID.RING_OF_ENDURANCE) == 1;
 	}
 
@@ -311,7 +311,7 @@ public class RunEnergyPlugin extends Plugin
 
 	public static int getGracefulRecoveryBoost()
 	{
-		final ItemContainer equipment = Microbot.getClient().getItemContainer(InventoryID.WORN);
+		final ItemContainer equipment = CupidBot.getClient().getItemContainer(InventoryID.WORN);
 
 		if (equipment == null)
 		{
@@ -346,13 +346,13 @@ public class RunEnergyPlugin extends Plugin
 	}
 
 	static int getEstimatedRecoverTimeRemaining() {
-		final int agilityLevel = Microbot.getClient().getBoostedSkillLevel(Skill.AGILITY);
+		final int agilityLevel = CupidBot.getClient().getBoostedSkillLevel(Skill.AGILITY);
 
 		// Calculate the amount of energy recovered every second
-		double recoveryRate = 25 +  Microbot.getClient().getBoostedSkillLevel(Skill.AGILITY) / 6.0;
+		double recoveryRate = 25 +  CupidBot.getClient().getBoostedSkillLevel(Skill.AGILITY) / 6.0;
 		recoveryRate *= 1.0 + getGracefulRecoveryBoost() / 100.0;
 
-		final double secondsLeft = (10000 - Microbot.getClient().getEnergy()) / recoveryRate;
+		final double secondsLeft = (10000 - CupidBot.getClient().getEnergy()) / recoveryRate;
 		return (int) Math.ceil(secondsLeft);
 	}
 
@@ -383,12 +383,12 @@ public class RunEnergyPlugin extends Plugin
 		final int tilesPerTickWalking = 1; // Walking covers 1 tile per tick
 
 		// Weight clamping: Treat negative weight as 0 and weights above 64 as 64
-		final int weight = Math.min(Math.max(Microbot.getClient().getWeight(), 0), 64);
-		final int agilityLevel = Microbot.getClient().getBoostedSkillLevel(Skill.AGILITY);
+		final int weight = Math.min(Math.max(CupidBot.getClient().getWeight(), 0), 64);
+		final int agilityLevel = CupidBot.getClient().getBoostedSkillLevel(Skill.AGILITY);
 
 		// Energy depletion rate per tick
 		double drainRate = (60 + (67 * weight / 64.0)) * (1 - (agilityLevel / 300.0));
-		if (Microbot.getClient().getVarbitValue(Varbits.RUN_SLOWED_DEPLETION_ACTIVE) != 0) {
+		if (CupidBot.getClient().getVarbitValue(Varbits.RUN_SLOWED_DEPLETION_ACTIVE) != 0) {
 			drainRate *= 0.3; // Stamina effect
 		} else if (isRingOfEnduranceEquipped()) {
 			Integer charges = getRingOfEnduranceCharges();
@@ -402,7 +402,7 @@ public class RunEnergyPlugin extends Plugin
 		recoveryRate *= 1.0 + (getGracefulRecoveryBoost() / 100.0);
 
 		// Initial energy and ticks
-		double currentEnergy = Microbot.getClient().getEnergy();
+		double currentEnergy = CupidBot.getClient().getEnergy();
 		int runningTicks = 0;
 		int walkingTicks = 0;
 		int remainingPath = pathLength;

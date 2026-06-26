@@ -11,7 +11,7 @@ How to build/test
 
 Key invariants/constraints
 - Keep alignment with RuneLite client versions to avoid classpath mismatches.
-- No Microbot-specific logic should leak here; it must stay a generic JShell helper module.
+- No CupidBot-specific logic should leak here; it must stay a generic JShell helper module.
 
 Links
 - Architecture: `../docs/ARCHITECTURE.md`

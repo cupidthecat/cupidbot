@@ -41,9 +41,9 @@ import net.runelite.client.discord.DiscordService;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 import net.runelite.client.plugins.PluginManager;
-import net.runelite.client.plugins.microbot.Microbot;
-import net.runelite.client.plugins.microbot.MicrobotClientLoader;
-import net.runelite.client.plugins.microbot.externalplugins.MicrobotPluginManager;
+import net.runelite.client.plugins.cupidbot.CupidBot;
+import net.runelite.client.plugins.cupidbot.CupidBotClientLoader;
+import net.runelite.client.plugins.cupidbot.externalplugins.CupidBotPluginManager;
 import net.runelite.client.proxy.ProxyChecker;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.FatalErrorDialog;
@@ -149,7 +149,7 @@ public class RuneLiteDebug {
     private TelemetryClient telemetryClient;
 
     @Inject
-    private MicrobotPluginManager microbotPluginManager;
+    private CupidBotPluginManager cupidbotPluginManager;
 
     public static List<Class<?>> pluginsToDebug = new ArrayList<>();
 
@@ -160,7 +160,7 @@ public class RuneLiteDebug {
         parser.accepts("clean-jagex-launcher", "Enable jagex launcher"); // will remove the credentials.properties file in .runelite folder
         parser.accepts("developer-mode", "Enable developer tools");
         parser.accepts("debug", "Show extra debugging output");
-        parser.accepts("microbot-debug", "Enables debug features for microbot");
+        parser.accepts("cupidbot-debug", "Enables debug features for cupidbot");
         parser.accepts("safe-mode", "Disables external plugins and the GPU plugin");
         parser.accepts("insecure-skip-tls-verification", "Disables TLS verification");
         parser.accepts("jav_config", "jav_config url")
@@ -223,7 +223,7 @@ public class RuneLiteDebug {
         if (options.has(proxyInfo)) {
             String ip = ProxyChecker.getDetectedIp(okHttpClient);
             if (ip.isEmpty()) {
-                Microbot.showMessage("Failed to detect external IP address, check your proxy settings. \n\n Make sure to use the format scheme://user:pass@host:port");
+                CupidBot.showMessage("Failed to detect external IP address, check your proxy settings. \n\n Make sure to use the format scheme://user:pass@host:port");
                 System.exit(1);
             }
 
@@ -235,11 +235,11 @@ public class RuneLiteDebug {
         boolean startupFailed = false;
         try {
             final RuntimeConfigLoader runtimeConfigLoader = new RuntimeConfigLoader(okHttpClient);
-            final MicrobotClientLoader microbotClientLoader = new MicrobotClientLoader(okHttpClient, runtimeConfigLoader, (String) options.valueOf("jav_config"));
+            final CupidBotClientLoader cupidbotClientLoader = new CupidBotClientLoader(okHttpClient, runtimeConfigLoader, (String) options.valueOf("jav_config"));
 
             new Thread(() ->
             {
-                microbotClientLoader.get();
+                cupidbotClientLoader.get();
                 ClassPreloader.preload();
             }, "Preloader").start();
 
@@ -270,11 +270,11 @@ public class RuneLiteDebug {
             final long start = System.currentTimeMillis();
             injector = Guice.createInjector(new RuneLiteModule(
                     okHttpClient,
-                    microbotClientLoader,
+                    cupidbotClientLoader,
                     runtimeConfigLoader,
                     developerMode,
                     options.has("safe-mode"),
-                    options.has("disable-telemetry"),
+                    isCupidBotTelemetryDisabled(),
                     options.has("disable-walker-update"),
                     options.valueOf(sessionfile),
                     (String) options.valueOf("profile"),
@@ -350,8 +350,8 @@ public class RuneLiteDebug {
         // Load user configuration
         configManager.load();
 
-		// Initialize MicrobotPluginManager after configManager is loaded
-		microbotPluginManager.init();
+		// Initialize CupidBotPluginManager after configManager is loaded
+		cupidbotPluginManager.init();
 
         // Update check requires ConfigManager to be ready before it runs
         Updater updater = injector.getInstance(Updater.class);
@@ -379,7 +379,7 @@ public class RuneLiteDebug {
         eventBus.register(clientUI);
         eventBus.register(pluginManager);
         eventBus.register(externalPluginManager);
-		eventBus.register(microbotPluginManager);
+		eventBus.register(cupidbotPluginManager);
         eventBus.register(overlayManager);
         eventBus.register(configManager);
         eventBus.register(discordService);
@@ -395,13 +395,13 @@ public class RuneLiteDebug {
 
         pluginManager.loadCoreRunelitePlugins();
 
-        microbotPluginManager.loadCorePlugins(pluginsToDebug);
+        cupidbotPluginManager.loadCorePlugins(pluginsToDebug);
 
         pluginManager.startPlugins();
 
         client.unblockStartup();
 
-        if (telemetryClient != null) {
+        if (!isCupidBotTelemetryDisabled() && telemetryClient != null) {
             telemetryClient.submitTelemetry();
             telemetryClient.submitVmErrors(LOGS_DIR);
         }
@@ -664,4 +664,12 @@ public class RuneLiteDebug {
         okHttpClientBuilder.sslSocketFactory(sc.getSocketFactory(), trustManager);
     }
     // endregion
+
+    static boolean isCupidBotTelemetryDisabled() {
+        return true;
+    }
+
+    static boolean isCupidBotLauncherUpdateDisabled() {
+        return false;
+    }
 }

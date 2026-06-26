@@ -58,7 +58,7 @@ import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.plugins.gpu.config.AntiAliasingMode;
 import net.runelite.client.plugins.gpu.config.UIScalingMode;
 import net.runelite.client.plugins.gpu.template.Template;
-import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.cupidbot.CupidBot;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.DrawManager;
 import net.runelite.rlawt.AWTContext;
@@ -1431,7 +1431,7 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 		{
 			// Notice that for some machines the GPU plugin might crash after long session
 			// Pause all scripts if this happens to avoid getting stuck
-			Microbot.pauseAllScripts.compareAndSet(false, true);
+			CupidBot.pauseAllScripts.compareAndSet(false, true);
 			// this is always fatal
 			if (!canvas.isValid())
 			{

@@ -6,11 +6,11 @@
 
 `Rs2HuntKit` automates the **Huntsman's kit** interface: a **bank-like** withdraw flow (`CC_OP` on the kit item grid) and **deposit** actions on the side inventory while the kit UI is open. It keeps an in-memory **cache** of kit contents for `InventoryID.HUNTSMANS_KIT` (855), updated from `ItemContainerChanged` the same way as bank/inventory helpers.
 
-**Source:** `runelite-client/src/main/java/net/runelite/client/plugins/microbot/util/huntkit/Rs2HuntKit.java`
+**Source:** `runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/util/huntkit/Rs2HuntKit.java`
 
-## Event cache and MicrobotPlugin
+## Event cache and CupidBotPlugin
 
-When the **Microbot** parent plugin is enabled, `MicrobotPlugin.onItemContainerChanged` forwards kit container events to `Rs2HuntKit.updateLocalKit(event)`. External (e.g. Hub) plugins **must not** also `@Subscribe` to the same container for the same cache update — duplicate work and racey double rebuilds. Call `updateLocalKit` yourself only if you run **outside** that forwarding path.
+When the **CupidBot** parent plugin is enabled, `CupidBotPlugin.onItemContainerChanged` forwards kit container events to `Rs2HuntKit.updateLocalKit(event)`. External (e.g. Hub) plugins **must not** also `@Subscribe` to the same container for the same cache update — duplicate work and racey double rebuilds. Call `updateLocalKit` yourself only if you run **outside** that forwarding path.
 
 Off the client thread, updates schedule `rebuildKitFromCurrentClient` via `invokeLater` (event payload is not reused across ticks).
 
@@ -30,7 +30,7 @@ Like `Rs2Bank`, the kit UI uses `MenuAction.CC_OP` on widgets. **The `identifier
 
 ### Dev shell / client thread note
 
-Many Microbot “Rs2*” utilities are designed to be called from script/executor threads (not the RuneLite client thread). If you drive them from a `GameTick` subscription in the dev shell, avoid blocking waits and expect some helpers (like `openView()`) to behave differently than in real scripts (notably: `Global.sleepUntil(...)` is a no-op on the client thread). For **Deposit-X / Withdraw-X**, the “Enter amount:” wait matches `Rs2Bank` (`sleepUntil` on a widget predicate); script-thread callers are still best for reliable keyboard entry.
+Many CupidBot “Rs2*” utilities are designed to be called from script/executor threads (not the RuneLite client thread). If you drive them from a `GameTick` subscription in the dev shell, avoid blocking waits and expect some helpers (like `openView()`) to behave differently than in real scripts (notably: `Global.sleepUntil(...)` is a no-op on the client thread). For **Deposit-X / Withdraw-X**, the “Enter amount:” wait matches `Rs2Bank` (`sleepUntil` on a widget predicate); script-thread callers are still best for reliable keyboard entry.
 
 ## Reading the cache
 
@@ -55,5 +55,5 @@ Uses **`KIT_SIDE_INVENTORY_PACKED_ID`** (side panel items) and resolves **Deposi
 
 ## Related documentation
 
-- Cursor skill: `.cursor/skills/microbot-api/SKILL.md` and `reference.md`
-- Plugin & script rules: `runelite-client/.../microbot/AGENTS.md`
+- Cursor skill: `.cursor/skills/cupidbot-api/SKILL.md` and `reference.md`
+- Plugin & script rules: `runelite-client/.../cupidbot/AGENTS.md`

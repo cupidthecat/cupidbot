@@ -19,7 +19,7 @@ log() {
 cd "$PROJECT_DIR"
 
 cat > "$PROMPT_FILE" <<PROMPT_EOF
-You are an autonomous Microbot development agent. Follow docs/AGENTIC_TESTING_LOOP.md for reference.
+You are an autonomous CupidBot development agent. Follow docs/AGENTIC_TESTING_LOOP.md for reference.
 
 Project dir: $PROJECT_DIR
 Max iterations: $MAX_ITER
@@ -42,12 +42,12 @@ IMPORTANT RULES:
    Use the CLI to observe actual game state (widgets, inventory, position) and take screenshots
    to visually confirm. Reading a config file or checking a boolean is NOT verification.
 
-3. IF YOU NOTICE A BUG IN THE MICROBOT CLI API, FIX IT BEFORE CONTINUING. While using the
-   microbot-cli, if a command returns wrong data, crashes, hangs, mis-parses arguments, has
+3. IF YOU NOTICE A BUG IN THE CUPIDBOT CLI API, FIX IT BEFORE CONTINUING. While using the
+   cupidbot-cli, if a command returns wrong data, crashes, hangs, mis-parses arguments, has
    broken output formatting, or otherwise behaves incorrectly, STOP using the CLI to verify
    your original goal. First:
    - Locate the offending CLI command source (typically under runelite-client/.../agentserver/
-     or the microbot-cli script + its server-side handler).
+     or the cupidbot-cli script + its server-side handler).
    - Fix the bug at the root cause — do not work around it, do not switch to a different CLI
      command just to bypass it, and do not silently tolerate the broken behavior.
    - Recompile (./gradlew :client:compileJava), relaunch the client, and confirm the CLI
@@ -71,7 +71,7 @@ You have up to $MAX_ITER iterations to achieve the goal.
 
 You have two approaches. Pick whichever fits the goal best, or combine them.
 
-### Approach A: Launch client in background + use Microbot CLI to verify
+### Approach A: Launch client in background + use CupidBot CLI to verify
 
 This is best when you want to inspect game state, poke at widgets, or verify something interactively.
 
@@ -81,21 +81,21 @@ This is best when you want to inspect game state, poke at widgets, or verify som
 
   2. Wait for the client to start and the player to log in:
      sleep 30
-     $PROJECT_DIR/microbot-cli login wait --timeout 120
+     $PROJECT_DIR/cupidbot-cli login wait --timeout 120
 
   3. Use the CLI to verify your changes:
-     $PROJECT_DIR/microbot-cli state
-     $PROJECT_DIR/microbot-cli widgets search "level-up,notification"
-     $PROJECT_DIR/microbot-cli widgets describe <groupId> <childId> --depth 3
-     $PROJECT_DIR/microbot-cli widgets click <groupId> <childId>
-     $PROJECT_DIR/microbot-cli inventory
-     $PROJECT_DIR/microbot-cli skills
-     $PROJECT_DIR/microbot-cli scripts
+     $PROJECT_DIR/cupidbot-cli state
+     $PROJECT_DIR/cupidbot-cli widgets search "level-up,notification"
+     $PROJECT_DIR/cupidbot-cli widgets describe <groupId> <childId> --depth 3
+     $PROJECT_DIR/cupidbot-cli widgets click <groupId> <childId>
+     $PROJECT_DIR/cupidbot-cli inventory
+     $PROJECT_DIR/cupidbot-cli skills
+     $PROJECT_DIR/cupidbot-cli scripts
 
-     See docs/MICROBOT_CLI.md for all available commands.
+     See docs/CUPIDBOT_CLI.md for all available commands.
 
   4. Take screenshots to see what the client looks like:
-     $PROJECT_DIR/microbot-cli screenshot save --label mystep
+     $PROJECT_DIR/cupidbot-cli screenshot save --label mystep
      This saves a PNG to ~/.runelite/test-results/screenshots/ and returns the path.
      You can then read the screenshot image to see the client state visually.
      TAKE A SCREENSHOT whenever:
@@ -113,15 +113,15 @@ This is best when you want to inspect game state, poke at widgets, or verify som
 This is best when you need automated assertions that run inside the client.
 
 The ExampleScript at:
-  runelite-client/src/main/java/net/runelite/client/plugins/microbot/example/ExampleScript.java
+  runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/example/ExampleScript.java
 
 is a script that runs inside the game client. You can REPLACE its contents with custom verification
-code. The script extends Script and has access to the full Microbot API (Rs2Widget, Rs2Inventory,
-Rs2Player, etc). See the CLAUDE.md in the microbot directory for the full API reference.
+code. The script extends Script and has access to the full CupidBot API (Rs2Widget, Rs2Inventory,
+Rs2Player, etc). See the CLAUDE.md in the cupidbot directory for the full API reference.
 
 To launch:
   1. rm -f \$HOME/.runelite/test-results/result.json
-  2. ./gradlew :client:runTest -Dmicrobot.test.mode=true -Dmicrobot.test.script='Example' -Dmicrobot.test.timeout=120000
+  2. ./gradlew :client:runTest -Dcupidbot.test.mode=true -Dcupidbot.test.script='Example' -Dcupidbot.test.timeout=120000
   3. Read results from \$HOME/.runelite/test-results/result.json
   4. Exit codes: 0=pass, 1=fail, 2=timeout, 3=crash
 
@@ -132,10 +132,10 @@ background, then use the CLI to inspect state while the ExampleScript runs.
 
 ## Gotchas
 
-### Microbot.showMessage() blocks the client
-Microbot.showMessage() opens a JOptionPane dialog that BLOCKS the entire client until someone
+### CupidBot.showMessage() blocks the client
+CupidBot.showMessage() opens a JOptionPane dialog that BLOCKS the entire client until someone
 clicks OK. If you see the client hanging and not responding to CLI commands, a showMessage dialog
-may be open. Do NOT use Microbot.showMessage() in any code you write for the ExampleScript.
+may be open. Do NOT use CupidBot.showMessage() in any code you write for the ExampleScript.
 If existing code calls showMessage() and it blocks you, you need to either:
 - Remove or bypass the showMessage() call in the source code
 - Or, on Linux X11 only, use xdotool to send a Return keypress to dismiss the dialog:
@@ -144,7 +144,7 @@ If existing code calls showMessage() and it blocks you, you need to either:
 
 ### Client takes time to start
 After launching ./gradlew :client:run, the client needs ~30-60 seconds to fully start
-and log in. Always wait and confirm with ./microbot-cli state or login wait before proceeding.
+and log in. Always wait and confirm with ./cupidbot-cli state or login wait before proceeding.
 
 ### Agent Server plugin must be enabled
 The CLI only works when the Agent Server plugin is enabled in the client. If CLI calls fail with

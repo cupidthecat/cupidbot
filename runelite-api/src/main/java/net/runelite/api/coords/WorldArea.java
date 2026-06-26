@@ -772,7 +772,7 @@ public class WorldArea
 	}
 
 	/**
-	 * Custom method for microbot
+	 * Custom method for cupidbot
 	 * @param other
 	 * @return
 	 */

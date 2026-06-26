@@ -28,7 +28,7 @@ import com.google.inject.Inject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
-import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.cupidbot.CupidBot;
 
 import javax.inject.Singleton;
 import java.util.Iterator;
@@ -76,7 +76,7 @@ public class ClientThread
 			try {
 				return Optional.ofNullable(method.call());
 			} catch (Exception e) {
-				if (!Microbot.isDebug()) {
+				if (!CupidBot.isDebug()) {
 					log.error("Exception in client thread execution: {}\n{}", e.getMessage(),e);
 				}
 				return Optional.empty();
@@ -92,7 +92,7 @@ public class ClientThread
 				return Optional.empty();
 			}			
 			task.cancel(true);
-			if (!Microbot.isDebug()) {
+			if (!CupidBot.isDebug()) {
 				log.error("Exception during task execution: {}: {}\n{}", e.getClass().getSimpleName(), e.getMessage(),e);
 			}
 			return Optional.empty();

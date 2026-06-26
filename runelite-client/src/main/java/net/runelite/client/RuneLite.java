@@ -81,8 +81,8 @@ import net.runelite.client.discord.DiscordService;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 import net.runelite.client.plugins.PluginManager;
-import net.runelite.client.plugins.microbot.Microbot;
-import net.runelite.client.plugins.microbot.externalplugins.MicrobotPluginManager;
+import net.runelite.client.plugins.cupidbot.CupidBot;
+import net.runelite.client.plugins.cupidbot.externalplugins.CupidBotPluginManager;
 import net.runelite.client.proxy.ProxyChecker;
 import net.runelite.client.proxy.ProxyConfiguration;
 import net.runelite.client.rs.ClientLoader;
@@ -202,7 +202,7 @@ public class RuneLite
 	private TelemetryClient telemetryClient;
 
     @Inject
-    private MicrobotPluginManager microbotPluginManager;
+    private CupidBotPluginManager cupidbotPluginManager;
 
 	@Inject
 	private ScheduledExecutorService scheduledExecutorService;
@@ -308,7 +308,7 @@ public class RuneLite
 		if (options.has(proxyInfo)) {
 			String ip = ProxyChecker.getDetectedIp(okHttpClient);
 			if (ip.isEmpty()) {
-				Microbot.showMessage("Failed to detect external IP address, check your proxy settings. \n\n Make sure to use the format scheme://user:pass@host:port");
+				CupidBot.showMessage("Failed to detect external IP address, check your proxy settings. \n\n Make sure to use the format scheme://user:pass@host:port");
 				System.exit(1);
 			}
 
@@ -364,7 +364,7 @@ public class RuneLite
 				runtimeConfigLoader,
 				developerMode,
 				options.has("safe-mode"),
-				options.has("disable-telemetry"),
+				isCupidBotTelemetryDisabled(),
 				options.has("disable-walker-update"),
 				options.valueOf(sessionfile),
 				(String) options.valueOf("profile"),
@@ -388,11 +388,11 @@ public class RuneLite
 			{
 				if (SplashScreen.isOpen())
 				{
-					SplashScreen.showError("Microbot failed to start", crashSummary, crashDetails);
+					SplashScreen.showError("CupidBot failed to start", crashSummary, crashDetails);
 				}
 				else
 				{
-					new FatalErrorDialog("Microbot has encountered an unexpected error during startup.")
+					new FatalErrorDialog("CupidBot has encountered an unexpected error during startup.")
 						.setContent(crashDetails)
 						.addCopyButton("Copy error details")
 						.addHelpButtons()
@@ -421,44 +421,11 @@ public class RuneLite
             JOptionPane.showMessageDialog(
                     null,
                     "Your Java version is " + javaVersion + ".\n"
-                            + "This application requires Java 11 or higher." +
-                            "The application might not work correctly!\n\n"
-                            + "A webpage will now open where you can download the latest Java version.",
+                            + "This application requires Java 11 or higher.\n"
+                            + "Install Java locally, then restart CupidBot.",
                     "Unsupported Java Version",
                     JOptionPane.ERROR_MESSAGE
             );
-            if (Desktop.isDesktopSupported()) {
-                String osName = System.getProperty("os.name").toLowerCase();
-                String downloadLink;
-                // Map OS to download links
-                Map<String, String> downloadLinks = new HashMap<>();
-                downloadLinks.put("windows", "https://www.oracle.com/java/technologies/downloads/#jdk23-windows");
-                downloadLinks.put("mac", "https://www.oracle.com/java/technologies/downloads/#jdk23-mac");
-                downloadLinks.put("linux", "https://www.oracle.com/java/technologies/downloads/#jdk23-linux");
-
-                if (osName.contains("win")) {
-                    downloadLink = downloadLinks.get("windows");
-                } else if (osName.contains("mac")) {
-                    downloadLink = downloadLinks.get("mac");
-                } else if (osName.contains("nux") || osName.contains("nix")) {
-                    downloadLink = downloadLinks.get("linux");
-                } else {
-                    downloadLink = "https://www.oracle.com/java/technologies/downloads/";
-                    System.out.println("OS not recognized, defaulting to general download page.");
-                }
-
-                try {
-                    if (Desktop.isDesktopSupported()) {
-                        Desktop.getDesktop().browse(new URI(downloadLink));
-                    } else {
-                        System.err.println("Desktop operations are not supported on this platform.");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                System.err.println("Desktop is not supported on this platform.");
-            }
         }
     }
 
@@ -486,8 +453,8 @@ public class RuneLite
 		// Load user configuration
 		configManager.load();
 
-		// Initialize MicrobotPluginManager after configManager is loaded
-		microbotPluginManager.init();
+		// Initialize CupidBotPluginManager after configManager is loaded
+		cupidbotPluginManager.init();
 
 		// Update check requires ConfigManager to be ready before it runs
 		Updater updater = injector.getInstance(Updater.class);
@@ -499,7 +466,7 @@ public class RuneLite
 		pluginManager.loadSideLoadPlugins();
 		externalPluginManager.loadExternalPlugins();
 
-        microbotPluginManager.loadSideLoadPlugins();
+        cupidbotPluginManager.loadSideLoadPlugins();
 
         SplashScreen.stage(.70, null, "Finalizing configuration");
 
@@ -523,7 +490,7 @@ public class RuneLite
 		eventBus.register(clientUI);
 		eventBus.register(pluginManager);
 		eventBus.register(externalPluginManager);
-		eventBus.register(microbotPluginManager);
+		eventBus.register(cupidbotPluginManager);
 		eventBus.register(overlayManager);
 		eventBus.register(configManager);
 		eventBus.register(discordService);
@@ -542,7 +509,7 @@ public class RuneLite
 
 		client.unblockStartup();
 
-		if (telemetryClient != null)
+		if (!isCupidBotTelemetryDisabled() && telemetryClient != null)
 		{
 			scheduledExecutorService.execute(() ->
 			{
@@ -559,6 +526,16 @@ public class RuneLite
 	public static void setInjector(Injector injector)
 	{
 		RuneLite.injector = injector;
+	}
+
+	static boolean isCupidBotTelemetryDisabled()
+	{
+		return true;
+	}
+
+	static boolean isCupidBotLauncherUpdateDisabled()
+	{
+		return false;
 	}
 
 	private static class ConfigFileConverter implements ValueConverter<File>

@@ -44,7 +44,7 @@ import net.runelite.api.Player;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.client.plugins.microbot.util.player.Rs2Player;
+import net.runelite.client.plugins.cupidbot.util.player.Rs2Player;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -80,6 +80,10 @@ class KourendLibraryOverlay extends Overlay
 		}
 
 		WorldPoint playerLoc = Rs2Player.getWorldLocation();
+		if (playerLoc == null)
+		{
+			return null;
+		}
 
 		if (playerLoc.getRegionID() != KourendLibraryPlugin.REGION)
 		{

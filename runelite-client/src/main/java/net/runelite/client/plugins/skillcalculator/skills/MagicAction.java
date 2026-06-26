@@ -28,8 +28,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.runelite.api.SpriteID;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.plugins.microbot.util.magic.Rs2Spellbook;
-import net.runelite.client.plugins.microbot.util.widget.Rs2Widget;
+import net.runelite.client.plugins.cupidbot.util.magic.Rs2Spellbook;
+import net.runelite.client.plugins.cupidbot.util.widget.Rs2Widget;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

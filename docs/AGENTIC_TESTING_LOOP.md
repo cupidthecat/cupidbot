@@ -1,12 +1,12 @@
 # Agentic Testing Loop Architecture
 
-An autonomous feedback loop where an AI agent launches the Microbot client, runs scripts, reads results, fixes code, and repeats until the script works correctly — no human in the loop.
+An autonomous feedback loop where an AI agent launches the CupidBot client, runs scripts, reads results, fixes code, and repeats until the script works correctly — no human in the loop.
 
 ---
 
 ## Problem
 
-Testing Microbot scripts requires a human to:
+Testing CupidBot scripts requires a human to:
 1. Build the client
 2. Launch it and log in
 3. Enable a plugin and observe behavior
@@ -35,7 +35,7 @@ This is slow and doesn't scale. We want an agent (Claude Code) to close this loo
         ▼                          │
 ┌─────────────────────────────────────────────────────┐
 │                INNER HARNESS (JVM)                   │
-│            Microbot Client + TestRunner              │
+│            CupidBot Client + TestRunner              │
 │                                                     │
 │  AutoLogin ──► Start Script ──► Monitor ──► Capture │
 │                                                     │
@@ -50,35 +50,35 @@ This is slow and doesn't scale. We want an agent (Claude Code) to close this loo
 
 ## Layer 1: Inner Harness (Java-side)
 
-The inner harness runs inside the Microbot JVM. It orchestrates a test session: login, run a target script, capture results, and exit.
+The inner harness runs inside the CupidBot JVM. It orchestrates a test session: login, run a target script, capture results, and exit.
 
 ### Activation
 
 Via JVM system properties — no code changes needed to switch between normal and test mode:
 
 ```bash
-java -jar microbot.jar \
-  -Dmicrobot.test.mode=true \
-  -Dmicrobot.test.script=ExampleScript \
-  -Dmicrobot.test.timeout=120000 \
-  -Dmicrobot.test.output=~/.runelite/test-results
+java -jar cupidbot.jar \
+  -Dcupidbot.test.mode=true \
+  -Dcupidbot.test.script=ExampleScript \
+  -Dcupidbot.test.timeout=120000 \
+  -Dcupidbot.test.output=~/.runelite/test-results
 ```
 
 | Property | Description | Default |
 |---|---|---|
-| `microbot.test.mode` | Enable test harness | `false` |
-| `microbot.test.script` | Plugin descriptor name to auto-enable | required |
-| `microbot.test.timeout` | Max runtime in ms before forced exit | `120000` |
-| `microbot.test.output` | Directory for results/screenshots | `~/.runelite/test-results` |
+| `cupidbot.test.mode` | Enable test harness | `false` |
+| `cupidbot.test.script` | Plugin descriptor name to auto-enable | required |
+| `cupidbot.test.timeout` | Max runtime in ms before forced exit | `120000` |
+| `cupidbot.test.output` | Directory for results/screenshots | `~/.runelite/test-results` |
 
 ### Components
 
 #### TestRunnerPlugin
 
-A hidden, always-on plugin that activates only when `microbot.test.mode=true`. Responsibilities:
+A hidden, always-on plugin that activates only when `cupidbot.test.mode=true`. Responsibilities:
 
 1. **Wait for login** — Subscribe to `GameStateChanged`, proceed when `LOGGED_IN`.
-2. **Enable target plugin** — Use `PluginManager` to find and start the plugin matching `microbot.test.script`.
+2. **Enable target plugin** — Use `PluginManager` to find and start the plugin matching `cupidbot.test.script`.
 3. **Monitor execution** — Watch the target script's `isRunning()` state. Capture screenshots at configurable intervals.
 4. **Detect completion** — The target script calls `shutdown()` (success), the timeout fires (hang), or an uncaught exception propagates (crash).
 5. **Write results** — Serialize `TestResult` to JSON, save screenshots, then `System.exit(code)`.
@@ -87,7 +87,7 @@ A hidden, always-on plugin that activates only when `microbot.test.mode=true`. R
 @PluginDescriptor(name = "Test Runner", hidden = true, alwaysOn = true)
 public class TestRunnerPlugin extends Plugin {
 
-    private static final String TEST_MODE = "microbot.test.mode";
+    private static final String TEST_MODE = "cupidbot.test.mode";
 
     @Override
     protected void startUp() {
@@ -128,7 +128,7 @@ For headless/CI environments, use Xvfb:
 ```bash
 Xvfb :99 -screen 0 1280x720x24 &
 export DISPLAY=:99
-java -jar microbot.jar -Dmicrobot.test.mode=true ...
+java -jar cupidbot.jar -Dcupidbot.test.mode=true ...
 ```
 
 #### Structured Output
@@ -143,7 +143,7 @@ The harness writes a JSON result file that the outer agent can parse determinist
   "exit_reason": "completed",
   "exit_code": 0,
   "checks": [
-    { "name": "Microbot.isLoggedIn()", "passed": true, "error": null },
+    { "name": "CupidBot.isLoggedIn()", "passed": true, "error": null },
     { "name": "Rs2NpcCache stream has entries", "passed": false, "error": "no NPCs in cache" }
   ],
   "screenshots": [
@@ -217,14 +217,14 @@ If compilation fails, the agent reads the compiler errors, fixes the code, and r
 
 ```bash
 ./gradlew :client:runTest \
-  -Dmicrobot.test.mode=true \
-  -Dmicrobot.test.script="Guard Killer Test" \
-  -Dmicrobot.test.timeout=120000
+  -Dcupidbot.test.mode=true \
+  -Dcupidbot.test.script="Guard Killer Test" \
+  -Dcupidbot.test.timeout=120000
 EXIT_CODE=$?
 ```
 
 This blocks until the JVM exits. The flow inside the client:
-1. `TestRunnerPlugin` (alwaysOn, hidden) detects `-Dmicrobot.test.mode=true`
+1. `TestRunnerPlugin` (alwaysOn, hidden) detects `-Dcupidbot.test.mode=true`
 2. `AutoLoginPlugin` logs in using the configured profile
 3. On `LOGGED_IN`, TestRunner auto-enables the target test plugin via `PluginManager`
 4. The test script runs, writes `result.json`, then calls `System.exit(code)`
@@ -290,12 +290,12 @@ SCRIPT_NAME="${1:-ExampleScript}"
 MAX_ITER="${2:-5}"
 
 claude -p "
-You are running the Microbot agentic test loop. Follow docs/AGENTIC_TESTING_LOOP.md.
+You are running the CupidBot agentic test loop. Follow docs/AGENTIC_TESTING_LOOP.md.
 Target script: $SCRIPT_NAME. Max iterations: $MAX_ITER.
 
 For each iteration:
 1. ./gradlew :client:compileJava
-2. Launch client with -Dmicrobot.test.mode=true -Dmicrobot.test.script=$SCRIPT_NAME
+2. Launch client with -Dcupidbot.test.mode=true -Dcupidbot.test.script=$SCRIPT_NAME
 3. Wait for ~/.runelite/test-results/result.json
 4. Read result.json and any screenshots in ~/.runelite/test-results/screenshots/
 5. If failures, fix the code and loop back to step 1
@@ -346,12 +346,12 @@ For long-lived headless environments (CI servers), use `claude setup-token` to c
 
 All core infrastructure is implemented and compiles:
 
-**Testing harness** (`microbot/testing/`):
+**Testing harness** (`cupidbot/testing/`):
 - `TestResult.java` — Result data model (checks, errors, screenshots, exit codes)
 - `TestResultWriter.java` — JSON serialization to `~/.runelite/test-results/result.json`
-- `TestRunnerPlugin.java` — Hidden `alwaysOn` plugin that auto-enables the target test plugin when `-Dmicrobot.test.mode=true`
+- `TestRunnerPlugin.java` — Hidden `alwaysOn` plugin that auto-enables the target test plugin when `-Dcupidbot.test.mode=true`
 
-**Guard Killer example** (`microbot/guardkiller/`):
+**Guard Killer example** (`cupidbot/guardkiller/`):
 - `GuardKillerScript.java` — Combat loop: attack guards, loot bones, eat food, bury
 - `GuardKillerPlugin.java` — Normal-use plugin with config + overlay
 - `GuardKillerTestScript.java` — Automated verification: attacks one guard, checks combat, checks loot, writes `result.json`, calls `System.exit(code)`
@@ -377,7 +377,7 @@ Additions:
 ## File Layout
 
 ```
-microbot/
+cupidbot/
 ├── testing/
 │   ├── TestRunnerPlugin.java      # alwaysOn, hidden — auto-enables target plugin in test mode
 │   ├── TestResult.java            # Result data model (checks, errors, exit codes)

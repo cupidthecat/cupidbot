@@ -1,37 +1,63 @@
 # Installation
 
-## Download A Release
+CupidBot is installed from local builds in this workspace. The launcher does not download client jars, and CupidBot does not download hub plugin jars at runtime. Locally installed hub plugins may still use networking for their own features.
 
-Download the latest shaded release jar from https://github.com/chsami/microbot/releases.
+## Requirements
 
-Nightly builds are development builds. Use a release build unless you are intentionally testing new changes.
+- Java 17 for the CupidBot client
+- Java 11 for `CupidBot-hub`
+- Node.js/npm for `cupidbot-launcher`
+- A working Jagex account token flow for launcher-based accounts
 
-## Java
-
-Install Java 17+ and run the shaded jar:
+## Build The Client
 
 ```bash
-java -jar client-<version>-SNAPSHOT-shaded.jar
+cd /home/frank/micro-client-custom/cupidbot
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew :client:assemble
 ```
 
-## Jagex Account Flow
+Install the jar for the launcher:
 
-1. Log in with the Jagex Launcher once. This creates the account token used by RuneLite-compatible clients.
-2. Close the launcher/client after a successful login.
-3. Open the Microbot shaded jar. It should prompt with the Jagex account login flow.
+```bash
+scripts/install-cupidbot-launcher-jar.sh
+```
 
-Video walkthroughs:
-- Jagex account setup: https://www.youtube.com/watch?v=ga-lg1oAnhM
-- Java/client launch: https://www.youtube.com/watch?v=EbtdZnxq5iw
+## Build And Install Local Hub Plugins
 
-## Jagex Launcher Replacement
+```bash
+cd /home/frank/micro-client-custom/CupidBot-hub
+JAVA_HOME=/usr/lib/jvm/java-11-openjdk ./gradlew clean build generatePluginsJson copyPluginDocs \
+  -PcupidbotClientPath=/home/frank/micro-client-custom/cupidbot/runelite-client/build/libs/cupidbot-2.6.10.jar
+scripts/install-cupidbot-local-plugins.sh
+```
 
-Replace the official `RuneLite.jar` with the Microbot jar and keep the filename expected by the launcher. Then start the Jagex Launcher and select RuneLite.
+This installs:
 
-## Linux
+- `~/.runelite/cupidbot-plugins/plugins.json`
+- `~/.runelite/cupidbot-plugins/<InternalName>.jar`
+- copied plugin docs under `~/.runelite/cupidbot-plugins/plugins/` when docs are present
 
-- Install Java 17+ from your package manager, then run the shaded jar with `java -jar`.
-- For Jagex accounts, Bolt can launch a custom RuneLite jar: https://github.com/Adamcake/Bolt
-- You can also extract the RuneLite AppImage and replace `RuneLite.jar` with the Microbot jar.
+## Run With The Launcher
 
-**Are you stuck? Join our [Discord](https://discord.gg/zaGrfqFEWE) server.**
+```bash
+cd /home/frank/micro-client-custom/cupidbot-launcher
+npm install
+npm run dev
+```
+
+The launcher reads `~/.cupidbot/cupidbot-<version>.jar`, stores launcher state in `~/.cupidbot`, and uses only the Jagex OAuth/session endpoints for account launch.
+
+## Run The Jar Directly
+
+```bash
+java -jar /home/frank/micro-client-custom/cupidbot/runelite-client/build/libs/cupidbot-2.6.10.jar
+```
+
+Direct jar launch uses the same local plugin directory at `~/.runelite/cupidbot-plugins`.
+
+## Offline Tips
+
+- Rebuild and rerun `scripts/install-cupidbot-local-plugins.sh` after changing hub plugin source.
+- If a plugin shows a hash warning, reinstall the hub plugins so the jar and manifest match.
+- If the launcher cannot find a client, rerun `scripts/install-cupidbot-launcher-jar.sh`.
+- If Java is not found, install JDK 17 locally and make `java` available on `PATH`.

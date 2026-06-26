@@ -169,8 +169,8 @@ class PluginListPanel extends PluginPanel {
         List<String> pinnedPlugins = getPinnedPluginNames();
         //List<String> pinnedPlugins = new ArrayList<>();
 
-        Predicate<Plugin> isMicrobotPlugin = plugin ->
-                plugin.getClass().getPackage().getName().toLowerCase().contains("microbot");
+        Predicate<Plugin> isCupidBotPlugin = plugin ->
+                plugin.getClass().getPackage().getName().toLowerCase().contains("cupidbot");
 
         // Might add a different check later if needed, but for now, we consider external plugins as those
         Predicate<Plugin> isExternalPlugin = plugin ->
@@ -181,7 +181,7 @@ class PluginListPanel extends PluginPanel {
                         fakePlugins.stream(),
                         pluginManager.getPlugins().stream()
                                 .filter(plugin -> !plugin.getClass().getAnnotation(PluginDescriptor.class).hidden())
-                                .filter(isMicrobotPlugin.or(isExternalPlugin).negate())
+                                .filter(isCupidBotPlugin.or(isExternalPlugin).negate())
                                 .map(plugin ->
                                 {
                                     PluginDescriptor descriptor = plugin.getClass().getAnnotation(PluginDescriptor.class);

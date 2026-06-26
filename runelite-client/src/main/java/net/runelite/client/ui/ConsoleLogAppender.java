@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Microbot Contributors
+ * Copyright (c) 2024 CupidBot Contributors
  * All rights reserved.
  */
 package net.runelite.client.ui;

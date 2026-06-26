@@ -183,9 +183,9 @@ public class DevToolsPlugin extends Plugin
 		}
 	};
 	@Inject
-	private MicrobotClickOverlay microbotClickOverlay;
+	private CupidBotClickOverlay cupidbotClickOverlay;
 	@Inject
-	private MicrobotMouseOverlay microbotMouseOverlay;
+	private CupidBotMouseOverlay cupidbotMouseOverlay;
 	private DevToolsButton players;
 	private DevToolsButton npcs;
 	private DevToolsButton groundItems;
@@ -223,7 +223,7 @@ public class DevToolsPlugin extends Plugin
 	private DevToolsButton worldEntities;
 	private NavigationButton navButton;
 
-	//custom devtools from microbot
+	//custom devtools from cupidbot
 	private DevToolsButton inventory;
 	private DevToolsButton memoryInspector;
 
@@ -290,8 +290,8 @@ public class DevToolsPlugin extends Plugin
 		overlayManager.add(worldMapLocationOverlay);
 		overlayManager.add(mapRegionOverlay);
 		overlayManager.add(soundEffectOverlay);
-		overlayManager.add(microbotClickOverlay);
-		overlayManager.add(microbotMouseOverlay);
+		overlayManager.add(cupidbotClickOverlay);
+		overlayManager.add(cupidbotMouseOverlay);
 
 		final DevToolsPanel panel = injector.getInstance(DevToolsPanel.class);
 
@@ -322,8 +322,8 @@ public class DevToolsPlugin extends Plugin
 		overlayManager.remove(worldMapLocationOverlay);
 		overlayManager.remove(mapRegionOverlay);
 		overlayManager.remove(soundEffectOverlay);
-		overlayManager.remove(microbotClickOverlay);
-		overlayManager.remove(microbotMouseOverlay);
+		overlayManager.remove(cupidbotClickOverlay);
+		overlayManager.remove(cupidbotMouseOverlay);
 		clientToolbar.removeNavigation(navButton);
 		Toolkit.getDefaultToolkit().removeAWTEventListener(swingInspectorKeyListener);
 	}

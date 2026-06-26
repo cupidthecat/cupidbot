@@ -1,6 +1,6 @@
 # Agent Server
 
-The Agent Server is an embedded HTTP server that exposes Microbot's widget system, game state, and game interactions to external AI agents at runtime. An agent can inspect the UI, query NPCs/objects/items, manage inventory, bank, walk, handle dialogues, and more - all through HTTP calls or the `microbot-cli` wrapper.
+The Agent Server is an embedded HTTP server that exposes CupidBot's widget system, game state, and game interactions to external AI agents at runtime. An agent can inspect the UI, query NPCs/objects/items, manage inventory, bank, walk, handle dialogues, and more - all through HTTP calls or the `cupidbot-cli` wrapper.
 
 ## Architecture
 
@@ -8,7 +8,7 @@ The Agent Server is an embedded HTTP server that exposes Microbot's widget syste
 ┌──────────────────────────────────────────────────┐
 │  AI Agent (Claude Code, script, etc.)            │
 │                                                  │
-│  ./microbot-cli npcs --name Banker               │
+│  ./cupidbot-cli npcs --name Banker               │
 │         │                                        │
 │         ▼                                        │
 │  curl http://127.0.0.1:8081/npcs?name=Banker     │
@@ -43,15 +43,15 @@ TCP mode binds to `127.0.0.1` only. UDS mode binds to `~/.runelite/.agent.sock` 
 - A **JVM shutdown hook** stops the server cleanly on client exit (window close, kill signal, `System.exit`).
 - On TCP startup, if the port is already in use, this client skips Agent Server startup for that instance.
 - Toggling the plugin off and back on works cleanly — the old server is stopped before the new one starts.
-- Optional stealth-bind mode opens the socket only while a Microbot script is active, then tears it down after an idle grace period.
+- Optional stealth-bind mode opens the socket only while a CupidBot script is active, then tears it down after an idle grace period.
 
 ## Setup
 
 1. Build: `./gradlew :client:compileJava`
 2. Launch the client
-3. Enable **"Agent Server"** in the Microbot plugin list
+3. Enable **"Agent Server"** in the CupidBot plugin list
 4. Server starts on port `8081` (configurable)
-5. The auth token is auto-generated and written to `~/.runelite/.agent-token`; `./microbot-cli` reads it automatically.
+5. The auth token is auto-generated and written to `~/.runelite/.agent-token`; `./cupidbot-cli` reads it automatically.
 
 ## Configuration
 
@@ -67,11 +67,11 @@ CLI environment variables:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MICROBOT_HOST` | `127.0.0.1` | Server host |
-| `MICROBOT_PORT` | `8081` | Server port |
-| `MICROBOT_TIMEOUT` | `30` | Request timeout in seconds |
-| `MICROBOT_TOKEN` | unset | Override the `X-Agent-Token` value |
-| `MICROBOT_TOKEN_FILE` | `~/.runelite/.agent-token` | Token file path |
+| `CUPIDBOT_HOST` | `127.0.0.1` | Server host |
+| `CUPIDBOT_PORT` | `8081` | Server port |
+| `CUPIDBOT_TIMEOUT` | `30` | Request timeout in seconds |
+| `CUPIDBOT_TOKEN` | unset | Override the `X-Agent-Token` value |
+| `CUPIDBOT_TOKEN_FILE` | `~/.runelite/.agent-token` | Token file path |
 
 ## API Reference
 
@@ -87,8 +87,8 @@ Returns all visible root-level widget interfaces.
 | `offset` | `0` | Skip first N results |
 
 ```bash
-./microbot-cli widgets list
-./microbot-cli widgets list --limit 50
+./cupidbot-cli widgets list
+./cupidbot-cli widgets list --limit 50
 ```
 
 #### GET /widgets/search
@@ -101,7 +101,7 @@ Searches visible widgets by keywords, ranked by relevance.
 | `limit` | No | Max results |
 
 ```bash
-./microbot-cli widgets search "notification,level-up"
+./cupidbot-cli widgets search "notification,level-up"
 ```
 
 #### GET /widgets/describe
@@ -115,7 +115,7 @@ Returns the widget tree under a specific widget.
 | `depth` | No | `5` | Max depth (capped at 15) |
 
 ```bash
-./microbot-cli widgets describe 134 0 --depth 3
+./cupidbot-cli widgets describe 134 0 --depth 3
 ```
 
 #### POST /widgets/click
@@ -126,8 +126,8 @@ Clicks a widget. Returns diagnostic info on failure.
 **By text:** `{"text": "Toggle"}`
 
 ```bash
-./microbot-cli widgets click 134 42
-./microbot-cli widgets click --text "Toggle"
+./cupidbot-cli widgets click 134 42
+./cupidbot-cli widgets click --text "Toggle"
 ```
 
 Response includes `reason` field when `clicked` is `false`.
@@ -137,7 +137,7 @@ Response includes `reason` field when `clicked` is `false`.
 #### GET /state
 
 ```bash
-./microbot-cli state
+./cupidbot-cli state
 ```
 
 ```json
@@ -166,8 +166,8 @@ Response includes `reason` field when `clicked` is `false`.
 | `name` | No | Filter by skill name (e.g., "Attack") |
 
 ```bash
-./microbot-cli skills
-./microbot-cli skills --name Attack
+./cupidbot-cli skills
+./cupidbot-cli skills --name Attack
 ```
 
 ```json
@@ -185,7 +185,7 @@ Response includes `reason` field when `clicked` is `false`.
 #### GET /inventory
 
 ```bash
-./microbot-cli inventory
+./cupidbot-cli inventory
 ```
 
 ```json
@@ -205,7 +205,7 @@ Response includes `reason` field when `clicked` is `false`.
 Body: `{"name": "Lobster", "action": "Eat"}` or `{"id": 379, "action": "Eat"}`
 
 ```bash
-./microbot-cli inventory interact "Lobster" "Eat"
+./cupidbot-cli inventory interact "Lobster" "Eat"
 ```
 
 #### POST /inventory/drop
@@ -213,8 +213,8 @@ Body: `{"name": "Lobster", "action": "Eat"}` or `{"id": 379, "action": "Eat"}`
 Body: `{"name": "Logs"}` or `{"name": "Logs", "all": true}`
 
 ```bash
-./microbot-cli inventory drop "Logs"
-./microbot-cli inventory drop "Logs" --all
+./cupidbot-cli inventory drop "Logs"
+./cupidbot-cli inventory drop "Logs" --all
 ```
 
 ### NPCs
@@ -228,7 +228,7 @@ Body: `{"name": "Logs"}` or `{"name": "Logs", "all": true}`
 | `limit` | config max | Max results |
 
 ```bash
-./microbot-cli npcs --name Guard --distance 15
+./cupidbot-cli npcs --name Guard --distance 15
 ```
 
 ```json
@@ -246,7 +246,7 @@ Body: `{"name": "Logs"}` or `{"name": "Logs", "all": true}`
 Body: `{"name": "Banker", "action": "Bank"}` or `{"id": 3010, "action": "Attack"}`
 
 ```bash
-./microbot-cli npcs interact "Banker" "Bank"
+./cupidbot-cli npcs interact "Banker" "Bank"
 ```
 
 ### Objects
@@ -260,7 +260,7 @@ Body: `{"name": "Banker", "action": "Bank"}` or `{"id": 3010, "action": "Attack"
 | `limit` | config max | Max results |
 
 ```bash
-./microbot-cli objects --name "Oak tree" --distance 10
+./cupidbot-cli objects --name "Oak tree" --distance 10
 ```
 
 ```json
@@ -278,7 +278,7 @@ Body: `{"name": "Banker", "action": "Bank"}` or `{"id": 3010, "action": "Attack"
 Body: `{"name": "Oak tree", "action": "Chop down"}`
 
 ```bash
-./microbot-cli objects interact "Oak tree" "Chop down"
+./cupidbot-cli objects interact "Oak tree" "Chop down"
 ```
 
 ### Ground Items
@@ -292,7 +292,7 @@ Body: `{"name": "Oak tree", "action": "Chop down"}`
 | `limit` | config max | Max results |
 
 ```bash
-./microbot-cli ground-items --name "Dragon bones"
+./cupidbot-cli ground-items --name "Dragon bones"
 ```
 
 ```json
@@ -310,7 +310,7 @@ Body: `{"name": "Oak tree", "action": "Chop down"}`
 Body: `{"name": "Dragon bones"}` or `{"id": 536}`
 
 ```bash
-./microbot-cli ground-items pickup "Dragon bones"
+./cupidbot-cli ground-items pickup "Dragon bones"
 ```
 
 ### Movement
@@ -329,9 +329,9 @@ Body: `{"x": 3100, "y": 3500, "plane": 0, "wait": false, "timeout": 30}`
 Walking is non-blocking by default — long routes used to exceed the CLI's curl timeout and produce broken-pipe errors. Poll `/state` to check the player's position, or pass `--wait` to block.
 
 ```bash
-./microbot-cli walk 3100 3500
-./microbot-cli walk 3100 3500 1
-./microbot-cli walk 3100 3500 --wait --timeout 120
+./cupidbot-cli walk 3100 3500
+./cupidbot-cli walk 3100 3500 1
+./cupidbot-cli walk 3100 3500 --wait --timeout 120
 ```
 
 Non-blocking response:
@@ -378,7 +378,7 @@ Blocking timeout response:
 Returns bank status. If open, includes items.
 
 ```bash
-./microbot-cli bank
+./cupidbot-cli bank
 ```
 
 #### POST /bank/open
@@ -386,13 +386,13 @@ Returns bank status. If open, includes items.
 Opens nearest bank and waits up to 5 seconds.
 
 ```bash
-./microbot-cli bank open
+./cupidbot-cli bank open
 ```
 
 #### POST /bank/close
 
 ```bash
-./microbot-cli bank close
+./cupidbot-cli bank close
 ```
 
 #### POST /bank/deposit
@@ -400,8 +400,8 @@ Opens nearest bank and waits up to 5 seconds.
 Body: `{"all": true}` or `{"name": "Logs"}`
 
 ```bash
-./microbot-cli bank deposit-all
-./microbot-cli bank deposit "Logs"
+./cupidbot-cli bank deposit-all
+./cupidbot-cli bank deposit "Logs"
 ```
 
 #### POST /bank/withdraw
@@ -409,7 +409,7 @@ Body: `{"all": true}` or `{"name": "Logs"}`
 Body: `{"name": "Pure essence", "quantity": 28}`
 
 ```bash
-./microbot-cli bank withdraw "Pure essence" 28
+./cupidbot-cli bank withdraw "Pure essence" 28
 ```
 
 ### Dialogue
@@ -417,7 +417,7 @@ Body: `{"name": "Pure essence", "quantity": 28}`
 #### GET /dialogue
 
 ```bash
-./microbot-cli dialogue
+./cupidbot-cli dialogue
 ```
 
 ```json
@@ -433,7 +433,7 @@ Body: `{"name": "Pure essence", "quantity": 28}`
 #### POST /dialogue/continue
 
 ```bash
-./microbot-cli dialogue continue
+./cupidbot-cli dialogue continue
 ```
 
 #### POST /dialogue/select
@@ -441,7 +441,7 @@ Body: `{"name": "Pure essence", "quantity": 28}`
 Body: `{"option": "Buy sword"}` or `{"index": 1}`
 
 ```bash
-./microbot-cli dialogue select "Buy sword"
+./cupidbot-cli dialogue select "Buy sword"
 ```
 
 ### Login
@@ -453,7 +453,7 @@ Returns current login state, active profile, world, and login error detection.
 When the client is on the login screen, the response includes `loginIndex` and `loginError` (if an error is detected). This lets callers detect issues like non-member accounts on members worlds, bans, and auth failures without polling the game state manually.
 
 ```bash
-./microbot-cli login
+./cupidbot-cli login
 ```
 
 **Normal login screen (no error):**
@@ -543,8 +543,8 @@ curl -X POST -H 'Content-Type: application/json' \
 ```
 
 ```bash
-./microbot-cli login now --world 360
-./microbot-cli login wait --timeout 60 --world 360
+./cupidbot-cli login now --world 360
+./cupidbot-cli login wait --timeout 60 --world 360
 ```
 
 **Success response:**
@@ -669,7 +669,7 @@ curl -X POST -H "Content-Type: application/json" \
 
 #### GET /scripts
 
-Lists all microbot plugins with their active/enabled status.
+Lists all cupidbot plugins with their active/enabled status.
 
 ```bash
 curl http://127.0.0.1:8081/scripts
@@ -679,8 +679,8 @@ curl http://127.0.0.1:8081/scripts
 {
   "count": 12,
   "scripts": [
-    {"name": "Micro Guard Killer", "className": "net.runelite.client.plugins.microbot.guardkiller.GuardKillerPlugin", "active": false, "enabled": false},
-    {"name": "Micro Example", "className": "net.runelite.client.plugins.microbot.example.ExamplePlugin", "active": true, "enabled": true}
+    {"name": "Micro Guard Killer", "className": "net.runelite.client.plugins.cupidbot.guardkiller.GuardKillerPlugin", "active": false, "enabled": false},
+    {"name": "Micro Example", "className": "net.runelite.client.plugins.cupidbot.example.ExamplePlugin", "active": true, "enabled": true}
   ]
 }
 ```
@@ -689,11 +689,11 @@ curl http://127.0.0.1:8081/scripts
 
 Starts a plugin by fully qualified class name or display name.
 
-Body: `{"className": "net.runelite.client.plugins.microbot.example.ExamplePlugin"}` or `{"name": "Example"}`
+Body: `{"className": "net.runelite.client.plugins.cupidbot.example.ExamplePlugin"}` or `{"name": "Example"}`
 
 ```bash
 curl -X POST -H 'Content-Type: application/json' \
-  -d '{"className":"net.runelite.client.plugins.microbot.example.ExamplePlugin"}' \
+  -d '{"className":"net.runelite.client.plugins.cupidbot.example.ExamplePlugin"}' \
   http://127.0.0.1:8081/scripts/start
 ```
 
@@ -701,7 +701,7 @@ curl -X POST -H 'Content-Type: application/json' \
 {
   "success": true,
   "name": "Micro Example",
-  "className": "net.runelite.client.plugins.microbot.example.ExamplePlugin",
+  "className": "net.runelite.client.plugins.cupidbot.example.ExamplePlugin",
   "status": "RUNNING",
   "startedAt": "2026-04-06T12:00:00Z"
 }
@@ -715,12 +715,12 @@ Body: `{"className": "..."}` or `{"name": "..."}`
 
 ```bash
 curl -X POST -H 'Content-Type: application/json' \
-  -d '{"className":"net.runelite.client.plugins.microbot.example.ExamplePlugin"}' \
+  -d '{"className":"net.runelite.client.plugins.cupidbot.example.ExamplePlugin"}' \
   http://127.0.0.1:8081/scripts/stop
 ```
 
 ```json
-{"success": true, "className": "net.runelite.client.plugins.microbot.example.ExamplePlugin", "status": "STOPPED"}
+{"success": true, "className": "net.runelite.client.plugins.cupidbot.example.ExamplePlugin", "status": "STOPPED"}
 ```
 
 #### GET /scripts/status
@@ -733,13 +733,13 @@ Gets detailed status of a specific plugin, including runtime.
 | `name` | Display name (partial, case-insensitive) |
 
 ```bash
-curl 'http://127.0.0.1:8081/scripts/status?className=net.runelite.client.plugins.microbot.example.ExamplePlugin'
+curl 'http://127.0.0.1:8081/scripts/status?className=net.runelite.client.plugins.cupidbot.example.ExamplePlugin'
 ```
 
 ```json
 {
   "name": "Micro Example",
-  "className": "net.runelite.client.plugins.microbot.example.ExamplePlugin",
+  "className": "net.runelite.client.plugins.cupidbot.example.ExamplePlugin",
   "active": true,
   "status": "RUNNING",
   "startedAt": "2026-04-06T12:00:00Z",
@@ -762,7 +762,7 @@ curl -X POST -H 'Content-Type: application/json' \
 Scripts running inside the JVM can also submit results directly via Java:
 
 ```java
-import net.runelite.client.plugins.microbot.agentserver.handler.ScriptResultStore;
+import net.runelite.client.plugins.cupidbot.agentserver.handler.ScriptResultStore;
 
 ScriptResultStore.submit("com.hub.MyPlugin", Map.of("passed", true, "kills", 10));
 ```
@@ -843,7 +843,7 @@ The `AgentHandler` base class provides: `sendJson()`, `parseQuery()`, `readJsonB
 | `agentserver/handler/ScriptSession.java` | Script execution session tracking |
 | `agentserver/handler/ScriptResultStore.java` | Static result store (Java API + HTTP) |
 | `util/widget/Rs2WidgetInspector.java` | Widget tree inspection logic |
-| `microbot-cli` (repo root) | Bash CLI wrapper |
+| `cupidbot-cli` (repo root) | Bash CLI wrapper |
 
 ## Error Handling
 

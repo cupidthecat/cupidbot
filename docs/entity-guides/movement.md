@@ -19,7 +19,7 @@ if (!clicked)
 
 **Where this applies:** `Rs2Walker`, `Rs2MiniMap`, and shortest-path walking loops.
 
-**Defensive check:** When debugging stalls, compare pathfinder logs with `./microbot-cli state`. A repeating valid path with an unchanged player position usually means the click layer failed after pathing succeeded.
+**Defensive check:** When debugging stalls, compare pathfinder logs with `./cupidbot-cli state`. A repeating valid path with an unchanged player position usually means the click layer failed after pathing succeeded.
 
 ## 2. Probe raw path obstacles before declaring the walker stuck
 

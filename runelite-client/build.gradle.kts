@@ -36,8 +36,8 @@ fun loadRootProperty(name: String): String? {
     return props.getProperty(name)
 }
 
-val microbotVersionProvider = providers.gradleProperty("microbot.version")
-    .orElse(loadRootProperty("microbot.version") ?: "0.0.0")
+val cupidbotVersionProvider = providers.gradleProperty("cupidbot.version")
+    .orElse(loadRootProperty("cupidbot.version") ?: "0.0.0")
 val injectedClientVersionProvider = providers.gradleProperty("runelite.injected-client.version")
     .orElse(loadRootProperty("runelite.injected-client.version") ?: project.version.toString())
 
@@ -84,9 +84,9 @@ tasks.register<JavaExec>("seedMenuActionInfo") {
     dependsOn(":client:compileJava")
 
     classpath = sourceSets.main.get().runtimeClasspath
-    mainClass.set("net.runelite.client.plugins.microbot.util.reflection.MenuActionResourceSeeder")
+    mainClass.set("net.runelite.client.plugins.cupidbot.util.reflection.MenuActionResourceSeeder")
 
-    val outputFile = file("src/main/resources/net/runelite/client/plugins/microbot/util/reflection/menu-action-info.properties")
+    val outputFile = file("src/main/resources/net/runelite/client/plugins/cupidbot/util/reflection/menu-action-info.properties")
     args(outputFile.absolutePath)
 
     doFirst {
@@ -125,7 +125,7 @@ tasks.register<JavaExec>("runTest") {
     jvmArgs(macEawtJvmArgs)
 
     System.getProperties()
-        .filter { it.key.toString().startsWith("microbot.test.") }
+        .filter { it.key.toString().startsWith("cupidbot.test.") }
         .forEach { (k, v) -> jvmArgs("-D$k=$v") }
 }
 
@@ -188,12 +188,12 @@ tasks.register<Test>("runUnitTests") {
     )
 
     // Forward the baseline-regenerate flags to the test JVM so contributors can run
-    // `./gradlew :client:runUnitTests -Dmicrobot.guardrail.regenerate-baseline=true` ad-hoc.
-    System.getProperty("microbot.guardrail.regenerate-baseline")?.let {
-        systemProperty("microbot.guardrail.regenerate-baseline", it)
+    // `./gradlew :client:runUnitTests -Dcupidbot.guardrail.regenerate-baseline=true` ad-hoc.
+    System.getProperty("cupidbot.guardrail.regenerate-baseline")?.let {
+        systemProperty("cupidbot.guardrail.regenerate-baseline", it)
     }
-    System.getProperty("microbot.queryable-guardrail.regenerate-baseline")?.let {
-        systemProperty("microbot.queryable-guardrail.regenerate-baseline", it)
+    System.getProperty("cupidbot.queryable-guardrail.regenerate-baseline")?.let {
+        systemProperty("cupidbot.queryable-guardrail.regenerate-baseline", it)
     }
 
     exclude("**/Rs2ActorModelIntegrationTest.class")
@@ -223,7 +223,7 @@ tasks.register<Test>("regenerateClientThreadGuardrailBaseline") {
     jvmArgs(
         "-Dfile.encoding=UTF-8",
         "-Duser.timezone=Europe/Brussels",
-        "-Dmicrobot.guardrail.regenerate-baseline=true"
+        "-Dcupidbot.guardrail.regenerate-baseline=true"
     )
 
     include("**/threadsafety/ClientThreadGuardrailTest.class")
@@ -250,7 +250,7 @@ tasks.register<Test>("regenerateQueryableTerminalBaseline") {
     jvmArgs(
         "-Dfile.encoding=UTF-8",
         "-Duser.timezone=Europe/Brussels",
-        "-Dmicrobot.queryable-guardrail.regenerate-baseline=true"
+        "-Dcupidbot.queryable-guardrail.regenerate-baseline=true"
     )
 
     include("**/threadsafety/QueryableTerminalGuardrailTest.class")
@@ -278,7 +278,7 @@ tasks.register<Test>("runClientThreadScanner") {
     jvmArgs(
         "-Dfile.encoding=UTF-8",
         "-Duser.timezone=Europe/Brussels",
-        "-Dmicrobot.scanner.enabled=true"
+        "-Dcupidbot.scanner.enabled=true"
     )
 
     include("**/threadsafety/ClientThreadScannerTest.class")
@@ -426,13 +426,13 @@ publishing {
         }
     }
     repositories {
-        val microbotRepoUrl = providers.gradleProperty("microbot.repo.url").orNull
-        if (!microbotRepoUrl.isNullOrBlank()) {
-            maven(uri(microbotRepoUrl)) {
-                name = "microbot"
+        val cupidbotRepoUrl = providers.gradleProperty("cupidbot.repo.url").orNull
+        if (!cupidbotRepoUrl.isNullOrBlank()) {
+            maven(uri(cupidbotRepoUrl)) {
+                name = "cupidbot"
                 credentials(PasswordCredentials::class) {
-                    username = providers.gradleProperty("microbot.repo.username").getOrElse("")
-                    password = providers.gradleProperty("microbot.repo.password").getOrElse("")
+                    username = providers.gradleProperty("cupidbot.repo.username").getOrElse("")
+                    password = providers.gradleProperty("cupidbot.repo.password").getOrElse("")
                 }
             }
         }
@@ -466,19 +466,19 @@ tasks.processResources {
         standardOutput = dirty
     }
 
-    val microbotVersion = microbotVersionProvider.get()
-    val microbotCommit = providers.gradleProperty("microbot.commit.sha").getOrElse(commit.toString().trim())
+    val cupidbotVersion = cupidbotVersionProvider.get()
+    val cupidbotCommit = providers.gradleProperty("cupidbot.commit.sha").getOrElse(commit.toString().trim())
 
     // Ensure task reruns when injected values change
-    inputs.property("microbotVersion", microbotVersion)
-    inputs.property("microbotCommit", microbotCommit)
+    inputs.property("cupidbotVersion", cupidbotVersion)
+    inputs.property("cupidbotCommit", cupidbotCommit)
 
     filesMatching("net/runelite/client/runelite.properties") {
         filter { it.replace("\${project.version}", project.version.toString()) }
         filter { it.replace("\${git.commit.id.abbrev}", commit.toString().trim()) }
         filter { it.replace("\${git.dirty}", dirty.toString().isNotBlank().toString()) }
-        filter { it.replace("\${microbot.version}", microbotVersion) }
-        filter { it.replace("\${microbot.commit.sha}", microbotCommit) }
+        filter { it.replace("\${cupidbot.version}", cupidbotVersion) }
+        filter { it.replace("\${cupidbot.commit.sha}", cupidbotCommit) }
     }
 }
 
@@ -490,14 +490,14 @@ tasks.jar {
     exclude("**/.clang-format")
 }
 
-val microbotReleaseJar = tasks.register<Copy>("microbotReleaseJar") {
+val cupidbotReleaseJar = tasks.register<Copy>("cupidbotReleaseJar") {
     dependsOn(shadowJar)
     from(shadowJar.flatMap { it.archiveFile })
     into(layout.buildDirectory.dir("libs"))
-    rename { "microbot-${microbotVersionProvider.get()}.jar" }
+    rename { "cupidbot-${cupidbotVersionProvider.get()}.jar" }
 }
 
-tasks.assemble { dependsOn(microbotReleaseJar) }
+tasks.assemble { dependsOn(cupidbotReleaseJar) }
 
 pmd {
     toolVersion = "7.2.0"

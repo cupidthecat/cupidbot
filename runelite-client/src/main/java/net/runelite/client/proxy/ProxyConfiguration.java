@@ -2,7 +2,7 @@ package net.runelite.client.proxy;
 
 import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionSet;
-import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.cupidbot.CupidBot;
 
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
@@ -28,7 +28,7 @@ public class ProxyConfiguration {
         URI uri = URI.create(options.valueOf(proxyInfo));
 
         if (options.has("proxy-type")) {
-            Microbot.showMessage("Proxy type is no longer supported, please use the format -proxy=socks://user:pass@host:port or http://user:pass@host:port");
+            CupidBot.showMessage("Proxy type is no longer supported, please use the format -proxy=socks://user:pass@host:port or http://user:pass@host:port");
             System.exit(1);
         }
 
@@ -57,13 +57,13 @@ public class ProxyConfiguration {
     private static void validateProxyScheme(String scheme) {
         boolean isHttpProxy = scheme.equals("http") || scheme.equals("https");
         if (isHttpProxy) {
-            Microbot.showMessage("HTTP(S) proxies are not supported, please use a SOCKS5 proxy. \n\n This is to make sure that osrs traffic is also routed through the proxy.");
+            CupidBot.showMessage("HTTP(S) proxies are not supported, please use a SOCKS5 proxy. \n\n This is to make sure that osrs traffic is also routed through the proxy.");
             System.exit(1);
         }
 
         boolean isSocksProxy = scheme.equals("socks") || scheme.equals("socks5");
         if (!isSocksProxy) {
-            Microbot.showMessage("Proxy scheme must be socks(5).");
+            CupidBot.showMessage("Proxy scheme must be socks(5).");
             System.exit(1);
         }
     }
@@ -75,7 +75,7 @@ public class ProxyConfiguration {
      */
     private static int validatePort(int port) {
         if (port <= 0) {
-            Microbot.showMessage("Invalid proxy port");
+            CupidBot.showMessage("Invalid proxy port");
             System.exit(1);
         }
         return port;

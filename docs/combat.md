@@ -20,7 +20,7 @@ public class ExampleScript extends Script {
 public static double version = 1.0;
 
 public boolean run(ExampleConfig config) {
-Microbot.enableAutoRunOn = false;
+CupidBot.enableAutoRunOn = false;
 mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
 if (!super.run()) return;
 try {

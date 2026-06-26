@@ -1,9 +1,9 @@
 # Rs2GroundItem Class Documentation
 ## [Back](development.md)
 
-> **Deprecated:** `Rs2GroundItem` is deprecated and marked for removal. Use the **Queryable API** via `Microbot.getRs2TileItemCache().query()` instead. It provides a fluent, type-safe interface with better performance through tick-based caching.
+> **Deprecated:** `Rs2GroundItem` is deprecated and marked for removal. Use the **Queryable API** via `CupidBot.getRs2TileItemCache().query()` instead. It provides a fluent, type-safe interface with better performance through tick-based caching.
 >
-> See the [Queryable API Documentation & Migration Guide](../../runelite-client/src/main/java/net/runelite/client/plugins/microbot/api/QUERYABLE_API.md#migration-guide) for migration steps and side-by-side examples.
+> See the [Queryable API Documentation & Migration Guide](../../runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/api/QUERYABLE_API.md#migration-guide) for migration steps and side-by-side examples.
 >
 > **Quick comparison:**
 > ```java
@@ -11,7 +11,7 @@
 > Rs2GroundItem.loot("Dragon bones", 1, 10);
 >
 > // Queryable API (recommended)
-> Rs2TileItemModel bones = Microbot.getRs2TileItemCache().query()
+> Rs2TileItemModel bones = CupidBot.getRs2TileItemCache().query()
 >     .withName("Dragon bones")
 >     .nearest();
 > bones.click("Take");

@@ -44,7 +44,7 @@ import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.PluginChanged;
 import net.runelite.client.events.ProfileChanged;
-import net.runelite.client.plugins.microbot.Microbot;
+import net.runelite.client.plugins.cupidbot.CupidBot;
 import net.runelite.client.task.Schedule;
 import net.runelite.client.task.ScheduledMethod;
 import net.runelite.client.task.Scheduler;
@@ -150,7 +150,7 @@ public class PluginManager {
     public List<Config> getPluginConfigProxies(Collection<Plugin> plugins) {
         List<Injector> injectors = new ArrayList<>();
         if (plugins == null) {
-            injectors.add(Microbot.getInjector());
+            injectors.add(CupidBot.getInjector());
             plugins = getPlugins();
         }
         plugins.forEach(pl -> injectors.add(pl.getInjector()));
@@ -231,8 +231,8 @@ public class PluginManager {
 	}
 
     /**
-     * Loads core RuneLite plugins, excluding any Microbot-related plugins.
-     * This method filters out plugins from the microbot package hierarchy.
+     * Loads core RuneLite plugins, excluding any CupidBot-related plugins.
+     * This method filters out plugins from the cupidbot package hierarchy.
      */
     public void loadCoreRunelitePlugins() throws IOException, PluginInstantiationException {
         SplashScreen.stage(.59, null, "Loading core RuneLite plugins");
@@ -240,7 +240,7 @@ public class PluginManager {
 
         List<Class<?>> plugins = classPath.getTopLevelClassesRecursive(PLUGIN_PACKAGE).stream()
                 .map(ClassInfo::load)
-                .filter(clazz -> !isMicrobotRelatedClass(clazz))
+                .filter(clazz -> !isCupidBotRelatedClass(clazz))
                 .collect(Collectors.toList());
 
         loadPlugins(plugins, (loaded, total) ->
@@ -248,19 +248,19 @@ public class PluginManager {
     }
 
     /**
-     * Determines if a class is related to Microbot and should be excluded from core RuneLite plugin loading.
+     * Determines if a class is related to CupidBot and should be excluded from core RuneLite plugin loading.
      *
      * @param clazz the class to check
-     * @return true if the class is Microbot-related and should be filtered out
+     * @return true if the class is CupidBot-related and should be filtered out
      */
-    private static boolean isMicrobotRelatedClass(Class<?> clazz) {
+    private static boolean isCupidBotRelatedClass(Class<?> clazz) {
         if (clazz == null || clazz.getPackage() == null) {
             return false;
         }
 
         String packageName = clazz.getPackage().getName();
 
-        return packageName.startsWith(PLUGIN_PACKAGE + ".microbot");
+        return packageName.startsWith(PLUGIN_PACKAGE + ".cupidbot");
     }
 
     public void loadCorePlugins() throws IOException, PluginInstantiationException {
@@ -516,7 +516,7 @@ public class PluginManager {
         }
 
         try {
-            Injector parent = Microbot.getInjector();
+            Injector parent = CupidBot.getInjector();
 
             if (deps.size() > 1) {
                 List<Module> modules = new ArrayList<>(deps.size());
