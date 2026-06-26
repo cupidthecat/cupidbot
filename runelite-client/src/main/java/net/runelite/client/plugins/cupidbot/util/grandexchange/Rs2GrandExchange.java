@@ -24,9 +24,6 @@ import net.runelite.client.plugins.cupidbot.util.misc.Rs2UiHelper;
 import net.runelite.client.plugins.cupidbot.util.npc.Rs2Npc;
 import net.runelite.client.plugins.cupidbot.util.npc.Rs2NpcModel;
 import net.runelite.client.plugins.cupidbot.util.player.Rs2Player;
-import net.runelite.client.plugins.cupidbot.util.security.Encryption;
-import net.runelite.client.plugins.cupidbot.util.security.LoginManager;
-import net.runelite.client.config.ConfigProfile;
 import net.runelite.client.plugins.cupidbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.cupidbot.util.widget.Rs2Widget;
 import org.apache.commons.lang3.tuple.Pair;
@@ -128,21 +125,12 @@ public class Rs2GrandExchange {
                 return false;
             }
             Rs2Npc.interact(npc, "exchange");
-            if (Rs2Bank.isBankPinWidgetVisible()) {
-                ConfigProfile activeProfile = LoginManager.getActiveProfile();
-                if (activeProfile == null) {
-                    log.warn("No active profile configured for bank pin entry");
+            return sleepUntil(() -> {
+                if (Rs2Bank.isBankPinWidgetVisible() && !Rs2Bank.handleBankPin()) {
                     return false;
                 }
-
-                String encryptedPin = activeProfile.getBankPin();
-                if ((encryptedPin == null || encryptedPin.isEmpty()) || encryptedPin.equalsIgnoreCase("**bankpin**")) {
-                    return false;
-                }
-
-                Rs2Bank.handleBankPin(Encryption.decrypt(encryptedPin));
-            }
-            return sleepUntil(Rs2GrandExchange::isOpen, 5000);
+                return Rs2GrandExchange.isOpen();
+            }, 5000);
         } catch (Exception ex) {
             CupidBot.logStackTrace("Rs2GrandExchange", ex);
         }

@@ -12,6 +12,9 @@ import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.config.ConfigManager;
+import net.runelite.client.config.ConfigProfile;
+import net.runelite.client.config.ProfileManager;
 import net.runelite.client.config.RuneScapeProfileType;
 import net.runelite.client.plugins.bank.BankPlugin;
 import net.runelite.client.plugins.loottracker.LootTrackerItem;
@@ -37,9 +40,7 @@ import net.runelite.client.plugins.cupidbot.util.misc.Predicates;
 import net.runelite.client.plugins.cupidbot.util.npc.Rs2Npc;
 import net.runelite.client.plugins.cupidbot.util.npc.Rs2NpcModel;
 import net.runelite.client.plugins.cupidbot.util.player.Rs2Player;
-import net.runelite.client.plugins.cupidbot.util.security.Encryption;
 import net.runelite.client.plugins.cupidbot.util.security.LoginManager;
-import net.runelite.client.config.ConfigProfile;
 import net.runelite.client.plugins.cupidbot.util.settings.Rs2Settings;
 import net.runelite.client.plugins.cupidbot.util.tile.Rs2Tile;
 import net.runelite.client.plugins.cupidbot.util.walker.Rs2Walker;
@@ -2532,7 +2533,7 @@ public class Rs2Bank {
 
         final String[] DIGIT_INSTRUCTIONS = {"FIRST digit", "SECOND digit", "THIRD digit", "FOURTH digit"};
         if (pin == null || pin.length() != DIGIT_INSTRUCTIONS.length || !pin.matches("\\d+")) {
-            CupidBot.log("Unable to enter bankpin with value " + pin);
+            CupidBot.log("Unable to enter bank PIN: configured PIN is missing or invalid.");
             return false;
         }
 
@@ -2559,20 +2560,39 @@ public class Rs2Bank {
     }
 
     public static boolean handleBankPin() {
-        ConfigProfile activeProfile = LoginManager.getActiveProfile();
-        if (activeProfile == null) {
-            log.warn("No active profile configured for bank pin handling");
-            return !isBankPinWidgetVisible();
+        if (!isBankPinWidgetVisible()) {
+            return true;
         }
-        final String encryptedBankPin = activeProfile.getBankPin();
-        if (encryptedBankPin == null || encryptedBankPin.isBlank() || encryptedBankPin.equalsIgnoreCase("**bankpin**"))
-            return !isBankPinWidgetVisible();
-        try {
-            return handleBankPin(Encryption.decrypt(encryptedBankPin));
-        } catch (Exception ex) {
-            log.error("Error handling Bank Pin", ex);
+
+        Optional<String> bankPin = BankPinProfileResolver.resolveBankPin(
+                LoginManager.getActiveProfile(),
+                getProfilesForBankPinLookup(),
+                getCurrentRsProfileKey());
+        if (bankPin.isEmpty()) {
+            log.warn("No usable bank PIN configured for active profile or RuneScape-profile default");
             return false;
         }
+
+        return handleBankPin(bankPin.get());
+    }
+
+    private static List<ConfigProfile> getProfilesForBankPinLookup() {
+        ProfileManager profileManager = CupidBot.getProfileManager();
+        if (profileManager == null) {
+            return Collections.emptyList();
+        }
+
+        try (ProfileManager.Lock lock = profileManager.lock()) {
+            return new ArrayList<>(lock.getProfiles());
+        } catch (Exception ex) {
+            log.debug("Unable to inspect profiles for bank PIN lookup", ex);
+            return Collections.emptyList();
+        }
+    }
+
+    private static String getCurrentRsProfileKey() {
+        ConfigManager configManager = CupidBot.getConfigManager();
+        return configManager != null ? configManager.getRSProfileKey() : null;
     }
 
     public static boolean isBankPinWidgetVisible() {
@@ -3299,7 +3319,8 @@ public class Rs2Bank {
     }
 
     private static boolean hasKeyboardBankPinEnabled() {
-        return CupidBot.getConfigManager().getConfiguration("bank","bankPinKeyboard").equalsIgnoreCase("true");
+        ConfigManager configManager = CupidBot.getConfigManager();
+        return configManager != null && "true".equalsIgnoreCase(configManager.getConfiguration("bank", "bankPinKeyboard"));
 
     }
 
