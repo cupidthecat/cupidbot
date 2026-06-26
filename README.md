@@ -40,7 +40,7 @@ That copies the built jar to `~/.cupidbot/cupidbot-<version>.jar`, which is the 
 Build and install the sibling hub:
 
 ```bash
-cd ../CupidBot-hub
+cd ../cupidbot-plugins
 JAVA_HOME=/usr/lib/jvm/java-11-openjdk ./gradlew clean build generatePluginsJson copyPluginDocs \
   -PcupidbotClientPath=/home/frank/micro-client-custom/cupidbot/runelite-client/build/libs/cupidbot-2.6.10.jar
 scripts/install-cupidbot-local-plugins.sh
@@ -66,5 +66,6 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew :client:assemble
 - Installation: [docs/installation.md](docs/installation.md)
 - Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Development: [docs/development.md](docs/development.md)
+- OSRS update playbook: [docs/osrs-update-playbook.md](docs/osrs-update-playbook.md)
 - Runtime CLI: [docs/CUPIDBOT_CLI.md](docs/CUPIDBOT_CLI.md)
 - Queryable API: [runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/api/QUERYABLE_API.md](runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/api/QUERYABLE_API.md)

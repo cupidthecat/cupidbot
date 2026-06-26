@@ -1,6 +1,7 @@
 - [Architecture](ARCHITECTURE.md)
 - [Decision Records](decisions/)
 - [Development Setup](development.md)
+- [OSRS Update Playbook](osrs-update-playbook.md)
 - [Installation](installation.md)
 - [API Overview](../runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/api/README.md)
 - [Queryable API Guide](../runelite-client/src/main/java/net/runelite/client/plugins/cupidbot/api/QUERYABLE_API.md)

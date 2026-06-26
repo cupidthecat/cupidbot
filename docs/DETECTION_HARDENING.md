@@ -22,7 +22,7 @@ Use focused scans after edits:
 
 ```bash
 rg -n "https?://|openConnection|new URL|HttpClient|OkHttpClient|Socket\\b|WebSocket|telemetry|analytics" \
-  cupidbot CupidBot-hub cupidbot-launcher
+  cupidbot cupidbot-plugins cupidbot-launcher
 ```
 
 Review matches manually. `localhost`, official RuneLite, Jagex, OSRS, and local plugin-owned endpoints are expected; core cloud, release download, and telemetry endpoints are not.

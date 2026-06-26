@@ -5,7 +5,7 @@ CupidBot is installed from local builds in this workspace. The launcher does not
 ## Requirements
 
 - Java 17 for the CupidBot client
-- Java 11 for `CupidBot-hub`
+- Java 11 for `cupidbot-plugins`
 - Node.js/npm for `cupidbot-launcher`
 - A working Jagex account token flow for launcher-based accounts
 
@@ -25,7 +25,7 @@ scripts/install-cupidbot-launcher-jar.sh
 ## Build And Install Local Hub Plugins
 
 ```bash
-cd /home/frank/micro-client-custom/CupidBot-hub
+cd /home/frank/micro-client-custom/cupidbot-plugins
 JAVA_HOME=/usr/lib/jvm/java-11-openjdk ./gradlew clean build generatePluginsJson copyPluginDocs \
   -PcupidbotClientPath=/home/frank/micro-client-custom/cupidbot/runelite-client/build/libs/cupidbot-2.6.10.jar
 scripts/install-cupidbot-local-plugins.sh
