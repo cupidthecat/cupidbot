@@ -7,6 +7,7 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.StatChanged;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.plugins.Plugin;
@@ -119,6 +120,9 @@ public class AntibanPlugin extends Plugin {
     @Inject
     private ClientToolbar clientToolbar;
 
+    @Inject
+    private ConfigManager configManager;
+
     public static boolean isCooking() {
         return Rs2Player.getAnimation() == AnimationID.COOKING_FIRE
                 || Rs2Player.getAnimation() == AnimationID.COOKING_RANGE
@@ -164,6 +168,7 @@ public class AntibanPlugin extends Plugin {
     @Override
     protected void startUp() throws AWTException {
         Rs2Antiban.setActivityIntensity(ActivityIntensity.EXTREME);
+        loadProfileSettings();
         final MasterPanel panel = injector.getInstance(MasterPanel.class);
         final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "antiban.png");
         navButton = NavigationButton.builder()
@@ -172,9 +177,6 @@ public class AntibanPlugin extends Plugin {
                 .priority(1)
                 .panel(panel)
                 .build();
-        Rs2AntibanSettings.reset();
-        Rs2AntibanSettings.loadFromProfile();
-        validateAndSetBreakDurations();
 
         panelRefreshTimer = new Timer();
         panelRefreshTimer.scheduleAtFixedRate(new TimerTask() {
@@ -208,8 +210,13 @@ public class AntibanPlugin extends Plugin {
 
     @Subscribe
     public void onProfileChanged(ProfileChanged event) {
-        Rs2Antiban.resetAntibanSettings();
-        Rs2AntibanSettings.loadFromProfile();
+        loadProfileSettings();
+    }
+
+    void loadProfileSettings() {
+        Rs2AntibanSettings.setProfileConfigManager(configManager);
+        Rs2Antiban.resetAntibanSettings(true);
+        Rs2AntibanSettings.loadFromProfile(configManager);
         validateAndSetBreakDurations();
     }
 

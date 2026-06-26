@@ -86,6 +86,7 @@ public class Rs2AntibanSettings {
     private static final String CONFIG_GROUP = "CupidBotAntiban";
     private static final String CONFIG_KEY = "settings";
     private static final Gson GSON = new Gson();
+    private static volatile ConfigManager profileConfigManager;
 
     private Rs2AntibanSettings() {
         throw new IllegalStateException("Utility class");
@@ -122,8 +123,20 @@ public class Rs2AntibanSettings {
         private String mouseSpeed;
     }
 
+    static void setProfileConfigManager(ConfigManager configManager) {
+        profileConfigManager = configManager;
+    }
+
+    private static ConfigManager getProfileConfigManager() {
+        ConfigManager configManager = profileConfigManager;
+        return configManager != null ? configManager : CupidBot.getConfigManager();
+    }
+
     public static void saveToProfile() {
-        ConfigManager configManager = CupidBot.getConfigManager();
+        saveToProfile(getProfileConfigManager());
+    }
+
+    static void saveToProfile(ConfigManager configManager) {
         if (configManager == null) {
             log.debug("ConfigManager not available, skipping antiban settings save");
             return;
@@ -138,24 +151,37 @@ public class Rs2AntibanSettings {
     }
 
     public static void loadFromProfile() {
-        ConfigManager configManager = CupidBot.getConfigManager();
+        loadFromProfile(getProfileConfigManager());
+    }
+
+    static void loadFromProfile(ConfigManager configManager) {
         if (configManager == null) {
             log.debug("ConfigManager not available, skipping antiban settings load");
             return;
         }
 
-        String json = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY);
+        String json;
+        try {
+            json = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY);
+        } catch (Exception ex) {
+            log.warn("Unable to load antiban settings from profile", ex);
+            return;
+        }
+
         if (json == null || json.isEmpty()) {
+            reset();
             return;
         }
 
         try {
             PersistentSettings settings = GSON.fromJson(json, PersistentSettings.class);
+            reset();
             if (settings != null) {
                 apply(settings);
             }
         } catch (JsonSyntaxException ex) {
             log.warn("Unable to parse antiban settings from profile", ex);
+            reset();
         }
     }
 
@@ -343,11 +369,12 @@ public class Rs2AntibanSettings {
         dynamicIntensity = false;
         dynamicActivity = false;
         devDebug = false;
+        overwriteScriptSettings = false;
         takeMicroBreaks = false;
         playSchedule = false;
         universalAntiban = false;
-        microBreakDurationLow = 3;
-        microBreakDurationHigh = 15;
+        microBreakDurationLow = AntibanPlugin.MICRO_BREAK_DURATION_LOW_DEFAULT;
+        microBreakDurationHigh = AntibanPlugin.MICRO_BREAK_DURATION_HIGH_DEFAULT;
         actionCooldownChance = 0.1;
         microBreakChance = 0.1;
         moveMouseRandomlyChance = 0.1;
