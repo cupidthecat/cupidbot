@@ -134,7 +134,6 @@ public class Rs2Antiban {
     @Setter
     private static Category category;
     @Getter
-    @Setter
     private static PlayStyle playStyle;
 
 
@@ -179,11 +178,15 @@ public class Rs2Antiban {
         if (activityIntensity == null) {
             return;
         }
-        Rs2Antiban.playStyle = Rs2AntibanSettings.randomIntervals
+        PlayStyle targetPlayStyle = Rs2AntibanSettings.randomIntervals
                 ? PlayStyle.RANDOM
                 : activityIntensity.getPlayStyle();
+        boolean playStyleChanged = Rs2Antiban.playStyle != targetPlayStyle;
+        Rs2Antiban.playStyle = targetPlayStyle;
         applyPlayStyleIntensity(activityIntensity);
-        Rs2Antiban.playStyle.resetPlayStyle();
+        if (playStyleChanged) {
+            Rs2Antiban.playStyle.resetPlayStyle();
+        }
     }
 
     private static void applyPlayStyleIntensity(ActivityIntensity activityIntensity) {
@@ -192,6 +195,40 @@ public class Rs2Antiban {
         }
         playStyle.frequency = activityIntensity.getFrequency();
         playStyle.amplitude = activityIntensity.getAmplitude();
+    }
+
+    public static void setPlayStyle(PlayStyle playStyle) {
+        Rs2Antiban.playStyle = playStyle;
+        if (playStyle == null || !Rs2AntibanSettings.dynamicIntensity) {
+            return;
+        }
+
+        ActivityIntensity playStyleIntensity = activityIntensityForPlayStyle(playStyle);
+        if (playStyleIntensity == null) {
+            return;
+        }
+
+        Rs2Antiban.activityIntensity = playStyleIntensity;
+        applyPlayStyleIntensity(playStyleIntensity);
+    }
+
+    private static ActivityIntensity activityIntensityForPlayStyle(PlayStyle playStyle) {
+        switch (playStyle) {
+            case EXTREME_AGGRESSIVE:
+                return ActivityIntensity.EXTREME;
+            case AGGRESSIVE:
+            case MODERATE:
+            case BALANCED:
+                return ActivityIntensity.MODERATE;
+            case CAREFUL:
+            case CAUTIOUS:
+                return ActivityIntensity.LOW;
+            case PASSIVE:
+                return ActivityIntensity.VERY_LOW;
+            case RANDOM:
+            default:
+                return null;
+        }
     }
 
 
