@@ -14,11 +14,12 @@ public class AntibanPluginPanelRefreshTest
 	@Test
 	public void playStyleSwitchRequestsImmediatePanelRefresh() throws IOException
 	{
-		String source = readSource("src/main/java/net/runelite/client/plugins/cupidbot/util/antiban/AntibanPlugin.java");
+		String source = readSource("src/main/java/net/runelite/client/plugins/cupidbot/util/antiban/AntibanPlugin.java")
+			.replace("\r\n", "\n");
 
 		assertTrue(source.contains("private MasterPanel masterPanel;"));
 		assertTrue(source.contains("private void refreshPanel()"));
-		assertTrue(source.contains("Rs2Antiban.setPlayStyle(Rs2Antiban.getPlayStyle().switchProfile());\n                refreshPanel();"));
+		assertTrue(source.contains("if (Rs2Antiban.switchPlayStyleIfAttentionExpired()) {\n                refreshPanel();\n            }"));
 	}
 
 	private static String readSource(String path) throws IOException

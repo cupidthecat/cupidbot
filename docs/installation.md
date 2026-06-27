@@ -33,7 +33,7 @@ the overwritten file.
 ```bash
 cd /home/frank/micro-client-custom/cupidbot-plugins
 JAVA_HOME=/usr/lib/jvm/java-11-openjdk ./gradlew clean build generatePluginsJson copyPluginDocs \
-  -PcupidbotClientPath=/home/frank/micro-client-custom/cupidbot/runelite-client/build/libs/cupidbot-2.6.10.jar
+  -PcupidbotClientPath=/home/frank/micro-client-custom/cupidbot/runelite-client/build/libs/cupidbot-2.6.11.jar
 scripts/install-cupidbot-local-plugins.sh
 ```
 
@@ -56,7 +56,7 @@ The launcher reads `~/.cupidbot/cupidbot-<version>.jar`, stores launcher state i
 ## Run The Jar Directly
 
 ```bash
-java -jar /home/frank/micro-client-custom/cupidbot/runelite-client/build/libs/cupidbot-2.6.10.jar
+java -jar /home/frank/micro-client-custom/cupidbot/runelite-client/build/libs/cupidbot-2.6.11.jar
 ```
 
 Direct jar launch uses the same local plugin directory at `~/.runelite/cupidbot-plugins`.
