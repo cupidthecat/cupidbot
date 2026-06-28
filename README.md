@@ -24,7 +24,7 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew :client:assemble
 The launcher jar is written to:
 
 ```text
-runelite-client/build/libs/cupidbot-2.6.11.jar
+runelite-client/build/libs/cupidbot-2.6.12.jar
 ```
 
 ## Install For CupidBot Launcher
@@ -48,7 +48,7 @@ Build and install the sibling hub:
 ```bash
 cd ../cupidbot-plugins
 JAVA_HOME=/usr/lib/jvm/java-11-openjdk ./gradlew clean build generatePluginsJson copyPluginDocs \
-  -PcupidbotClientPath=/home/frank/micro-client-custom/cupidbot/runelite-client/build/libs/cupidbot-2.6.11.jar
+  -PcupidbotClientPath=/home/frank/micro-client-custom/cupidbot/runelite-client/build/libs/cupidbot-2.6.12.jar
 scripts/install-cupidbot-local-plugins.sh
 ```
 

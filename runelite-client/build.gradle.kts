@@ -467,14 +467,17 @@ tasks.processResources {
     }
 
     val cupidbotVersion = cupidbotVersionProvider.get()
+    val pluginHubVersion = providers.gradleProperty("runelite.pluginhub.version").get()
     val cupidbotCommit = providers.gradleProperty("cupidbot.commit.sha").getOrElse(commit.toString().trim())
 
     // Ensure task reruns when injected values change
     inputs.property("cupidbotVersion", cupidbotVersion)
+    inputs.property("pluginHubVersion", pluginHubVersion)
     inputs.property("cupidbotCommit", cupidbotCommit)
 
     filesMatching("net/runelite/client/runelite.properties") {
         filter { it.replace("\${project.version}", project.version.toString()) }
+        filter { it.replace("\${runelite.pluginhub.version}", pluginHubVersion) }
         filter { it.replace("\${git.commit.id.abbrev}", commit.toString().trim()) }
         filter { it.replace("\${git.dirty}", dirty.toString().isNotBlank().toString()) }
         filter { it.replace("\${cupidbot.version}", cupidbotVersion) }
