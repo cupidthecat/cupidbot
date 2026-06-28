@@ -20,6 +20,15 @@ import static org.junit.Assert.assertTrue;
 public class VirtualMouseUngatedMotionTest {
 
 	@Test
+	public void clickCadenceDelayStaysInsideHumanBounds() {
+		for (int i = 0; i < 10_000; i++) {
+			int delay = VirtualMouse.nextClickStageDelayMs();
+			assertTrue("click delay " + delay + " below floor", delay >= 25);
+			assertTrue("click delay " + delay + " above ceiling", delay <= 90);
+		}
+	}
+
+	@Test
 	public void virtualMouseDoesNotBranchOnNaturalMouseFlag() throws IOException {
 		List<String> hits = scanFieldReads(
 				VirtualMouse.class,

@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.time.Instant;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -27,6 +28,32 @@ public class Rs2AntibanActivityPlayStyleTest
 	public void tearDown()
 	{
 		Rs2Antiban.resetAntibanSettings(true);
+	}
+
+	@Test
+	public void actionCooldownChanceAboveOneAlwaysTriggers()
+	{
+		Rs2AntibanSettings.usePlayStyle = true;
+		Rs2AntibanSettings.actionCooldownChance = 1.5;
+		Rs2Antiban.setActivity(Activity.GENERAL_COMBAT);
+
+		Rs2Antiban.actionCooldown();
+
+		assertTrue(Rs2AntibanSettings.actionCooldownActive);
+		assertTrue(Rs2Antiban.getTIMEOUT() > 0);
+	}
+
+	@Test
+	public void actionCooldownChanceAtOrBelowZeroNeverTriggers()
+	{
+		Rs2AntibanSettings.usePlayStyle = true;
+		Rs2AntibanSettings.actionCooldownChance = -0.1;
+		Rs2Antiban.setActivity(Activity.GENERAL_COMBAT);
+
+		Rs2Antiban.actionCooldown();
+
+		assertFalse(Rs2AntibanSettings.actionCooldownActive);
+		assertEquals(0, Rs2Antiban.getTIMEOUT());
 	}
 
 	@Test

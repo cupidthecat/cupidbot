@@ -64,6 +64,12 @@ public class MouseSpeedTest
 	}
 
 	@Test
+	public void defaultMouseSpeedIsMiddlePreset()
+	{
+		assertSame(MouseSpeed.NORMAL, MouseSpeed.DEFAULT);
+	}
+
+	@Test
 	public void resetRestoresDefaultMouseSpeed()
 	{
 		Rs2AntibanSettings.mouseSpeed = MouseSpeed.VERY_SLOW;

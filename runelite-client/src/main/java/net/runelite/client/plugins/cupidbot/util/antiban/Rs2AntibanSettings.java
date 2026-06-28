@@ -225,10 +225,10 @@ public class Rs2AntibanSettings {
         settings.universalAntiban = universalAntiban;
         settings.microBreakDurationLow = microBreakDurationLow;
         settings.microBreakDurationHigh = microBreakDurationHigh;
-        settings.actionCooldownChance = actionCooldownChance;
-        settings.microBreakChance = microBreakChance;
-        settings.moveMouseRandomlyChance = moveMouseRandomlyChance;
-        settings.moveMouseOffScreenChance = moveMouseOffScreenChance;
+        settings.actionCooldownChance = normalizeProbability(actionCooldownChance);
+        settings.microBreakChance = normalizeProbability(microBreakChance);
+        settings.moveMouseRandomlyChance = normalizeProbability(moveMouseRandomlyChance);
+        settings.moveMouseOffScreenChance = normalizeProbability(moveMouseOffScreenChance);
         settings.mouseSpeed = mouseSpeed != null ? mouseSpeed.name() : MouseSpeed.DEFAULT.name();
         return settings;
     }
@@ -304,20 +304,36 @@ public class Rs2AntibanSettings {
             microBreakDurationHigh = settings.microBreakDurationHigh;
         }
         if (settings.actionCooldownChance != null) {
-            actionCooldownChance = settings.actionCooldownChance;
+            actionCooldownChance = normalizeProbability(settings.actionCooldownChance);
         }
         if (settings.microBreakChance != null) {
-            microBreakChance = settings.microBreakChance;
+            microBreakChance = normalizeProbability(settings.microBreakChance);
         }
         if (settings.moveMouseRandomlyChance != null) {
-            moveMouseRandomlyChance = settings.moveMouseRandomlyChance;
+            moveMouseRandomlyChance = normalizeProbability(settings.moveMouseRandomlyChance);
         }
         if (settings.moveMouseOffScreenChance != null) {
-            moveMouseOffScreenChance = settings.moveMouseOffScreenChance;
+            moveMouseOffScreenChance = normalizeProbability(settings.moveMouseOffScreenChance);
         }
         if (settings.mouseSpeed != null) {
             mouseSpeed = MouseSpeed.fromConfigValue(settings.mouseSpeed);
         }
+    }
+
+    public static double normalizeProbability(double value) {
+        if (Double.isNaN(value)) {
+            return 0.0;
+        }
+        if (value == Double.POSITIVE_INFINITY) {
+            return 1.0;
+        }
+        if (value <= 0.0 || value == Double.NEGATIVE_INFINITY) {
+            return 0.0;
+        }
+        if (value >= 1.0) {
+            return 1.0;
+        }
+        return value;
     }
 
     public static boolean actionCooldownActive = false;

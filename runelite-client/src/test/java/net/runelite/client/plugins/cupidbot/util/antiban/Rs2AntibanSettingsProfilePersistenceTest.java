@@ -116,4 +116,32 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		assertFalse(Rs2AntibanSettings.overwriteScriptSettings);
 		assertSame(MouseSpeed.DEFAULT, Rs2AntibanSettings.mouseSpeed);
 	}
+
+	@Test
+	public void loadProfileSettingsClampsChanceValues()
+	{
+		when(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY)).thenReturn(
+			"{\"actionCooldownChance\":1.5,"
+				+ "\"microBreakChance\":-0.25,"
+				+ "\"moveMouseRandomlyChance\":2.0,"
+				+ "\"moveMouseOffScreenChance\":0.35}");
+
+		Rs2AntibanSettings.loadFromProfile();
+
+		assertEquals(1.0, Rs2AntibanSettings.actionCooldownChance, 1e-9);
+		assertEquals(0.0, Rs2AntibanSettings.microBreakChance, 1e-9);
+		assertEquals(1.0, Rs2AntibanSettings.moveMouseRandomlyChance, 1e-9);
+		assertEquals(0.35, Rs2AntibanSettings.moveMouseOffScreenChance, 1e-9);
+	}
+
+	@Test
+	public void normalizeProbabilityHandlesInvalidValues()
+	{
+		assertEquals(0.0, Rs2AntibanSettings.normalizeProbability(Double.NaN), 1e-9);
+		assertEquals(0.0, Rs2AntibanSettings.normalizeProbability(Double.NEGATIVE_INFINITY), 1e-9);
+		assertEquals(1.0, Rs2AntibanSettings.normalizeProbability(Double.POSITIVE_INFINITY), 1e-9);
+		assertEquals(0.0, Rs2AntibanSettings.normalizeProbability(-0.01), 1e-9);
+		assertEquals(0.42, Rs2AntibanSettings.normalizeProbability(0.42), 1e-9);
+		assertEquals(1.0, Rs2AntibanSettings.normalizeProbability(1.01), 1e-9);
+	}
 }

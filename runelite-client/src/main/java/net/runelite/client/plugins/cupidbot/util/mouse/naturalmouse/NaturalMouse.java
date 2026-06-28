@@ -55,6 +55,8 @@ public class NaturalMouse {
     private volatile ActivityIntensity cachedIntensity;
     private volatile MouseSpeed cachedMouseSpeed;
     private volatile boolean cachedDynamicIntensity;
+    private volatile boolean cachedSimulateFatigue;
+    private volatile int cachedEffectiveBaseTimeMs;
 
     @Inject
     public NaturalMouse() {
@@ -97,19 +99,27 @@ public class NaturalMouse {
     public MouseMotionFactory getFactory() {
         ActivityIntensity intensity = Rs2Antiban.getActivityIntensity();
         boolean dynamicIntensity = Rs2AntibanSettings.dynamicIntensity;
+        boolean simulateFatigue = Rs2AntibanSettings.simulateFatigue;
         MouseSpeed mouseSpeed = Rs2AntibanSettings.getEffectiveMouseSpeed(intensity);
+        int effectiveBaseTimeMs = simulateFatigue
+                ? FactoryTemplates.effectiveMouseBaseTimeMs(mouseSpeed)
+                : mouseSpeed.getBaseTimeMs();
 
         if (cachedFactory != null
                 && intensity == cachedIntensity
                 && mouseSpeed == cachedMouseSpeed
-                && dynamicIntensity == cachedDynamicIntensity) {
+                && dynamicIntensity == cachedDynamicIntensity
+                && simulateFatigue == cachedSimulateFatigue
+                && effectiveBaseTimeMs == cachedEffectiveBaseTimeMs) {
             return cachedFactory;
         }
         log.debug("Creating {} mouse motion factory", mouseSpeed.getName());
-        MouseMotionFactory factory = FactoryTemplates.createMouseSpeedMotionFactory(nature, mouseSpeed);
+        MouseMotionFactory factory = FactoryTemplates.createMouseSpeedMotionFactory(nature, mouseSpeed, effectiveBaseTimeMs);
         cachedIntensity = intensity;
         cachedMouseSpeed = mouseSpeed;
         cachedDynamicIntensity = dynamicIntensity;
+        cachedSimulateFatigue = simulateFatigue;
+        cachedEffectiveBaseTimeMs = effectiveBaseTimeMs;
         cachedFactory = factory;
         return factory;
 

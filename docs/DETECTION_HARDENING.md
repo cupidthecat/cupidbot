@@ -26,3 +26,24 @@ rg -n "https?://|openConnection|new URL|HttpClient|OkHttpClient|Socket\\b|WebSoc
 ```
 
 Review matches manually. `localhost`, official RuneLite, Jagex, OSRS, and local plugin-owned endpoints are expected; core cloud, release download, and telemetry endpoints are not.
+
+## Input and Timing Checklist
+
+Shared automation input should avoid fastest-possible defaults and rectangular timing patterns.
+
+- Keep new-profile mouse speed at a middle preset unless a profile explicitly overrides it.
+- Clamp probability settings to `0.0..1.0` when loading profiles and before runtime use.
+- Treat action cooldown chances `>= 1.0` as always-on and `<= 0.0` as disabled.
+- Keep natural mouse movement fatigue tied to `SessionFatigue` and cap it at the selected mouse preset maximum.
+- Preserve small bounded delays between synthetic mouse press/release/click events.
+
+Focused verification:
+
+```bash
+./gradlew :client:runUnitTests \
+  --tests "*MouseSpeedTest" \
+  --tests "*Rs2AntibanSettingsProfilePersistenceTest" \
+  --tests "*Rs2AntibanActivityPlayStyleTest" \
+  --tests "*FactoryTemplatesMouseSpeedTest" \
+  --tests "*VirtualMouseUngatedMotionTest"
+```

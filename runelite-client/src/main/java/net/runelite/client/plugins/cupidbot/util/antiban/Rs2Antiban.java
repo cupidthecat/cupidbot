@@ -356,17 +356,18 @@ public class Rs2Antiban {
             logDebug("PlayStyle not enabled, cannot perform action cooldown");
             return;
         }
-        if (Rs2AntibanSettings.actionCooldownChance == 1.0) {
+        double chance = Rs2AntibanSettings.normalizeProbability(Rs2AntibanSettings.actionCooldownChance);
+        Rs2AntibanSettings.actionCooldownChance = chance;
+        if (chance >= 1.0) {
             performActionCooldown();
             return;
         }
-        if (Rs2AntibanSettings.actionCooldownChance <= 0.0) {
+        if (chance <= 0.0) {
             logDebug("Action cooldown chance is 0%, cannot perform action cooldown");
             return;
         }
-        if (Rs2AntibanSettings.actionCooldownChance <= 0.99 && Rs2Random.diceFractional(Rs2AntibanSettings.actionCooldownChance)) {
+        if (Rs2Random.diceFractional(chance)) {
             performActionCooldown();
-
         }
 
     }
@@ -394,13 +395,17 @@ public class Rs2Antiban {
 
         Rs2AntibanSettings.actionCooldownActive = true;
 
-        if (Rs2AntibanSettings.moveMouseRandomly && Rs2Random.diceFractional(Rs2AntibanSettings.moveMouseRandomlyChance)) {
+        double moveRandomChance = Rs2AntibanSettings.normalizeProbability(Rs2AntibanSettings.moveMouseRandomlyChance);
+        Rs2AntibanSettings.moveMouseRandomlyChance = moveRandomChance;
+        if (Rs2AntibanSettings.moveMouseRandomly && Rs2Random.diceFractional(moveRandomChance)) {
             Rs2Random.wait(100, 200);
             moveMouseRandomly();
         }
 
+        double offScreenChance = Rs2AntibanSettings.normalizeProbability(Rs2AntibanSettings.moveMouseOffScreenChance);
+        Rs2AntibanSettings.moveMouseOffScreenChance = offScreenChance;
         if (Rs2AntibanSettings.moveMouseOffScreen)
-            moveMouseOffScreen((Rs2AntibanSettings.moveMouseOffScreenChance*100));
+            moveMouseOffScreen(offScreenChance * 100);
     }
 
 
@@ -436,11 +441,13 @@ public class Rs2Antiban {
      */
 
     public static boolean takeMicroBreakByChance() {
-        if (!Rs2AntibanSettings.takeMicroBreaks && Rs2AntibanSettings.microBreakChance > 0.0) {
+        double chance = Rs2AntibanSettings.normalizeProbability(Rs2AntibanSettings.microBreakChance);
+        Rs2AntibanSettings.microBreakChance = chance;
+        if (!Rs2AntibanSettings.takeMicroBreaks && chance > 0.0) {
             logDebug("MICRO BREAKS ARE DISABLED, cannot take micro break");
             return false;
         }
-        if (Rs2Random.diceFractional(Rs2AntibanSettings.microBreakChance)) {
+        if (Rs2Random.diceFractional(chance)) {
             Rs2AntibanSettings.microBreakActive = true;
             logDebug("Micro break triggered by antiban system");
             if (Rs2AntibanSettings.moveMouseOffScreen)
@@ -648,6 +655,7 @@ public class Rs2Antiban {
     public static void resetAntibanSettings(boolean forceReset) {
         if (!forceReset && Rs2AntibanSettings.overwriteScriptSettings) return;
         Rs2AntibanSettings.reset();
+        Rs2Antiban.TIMEOUT = 0;
         Rs2Antiban.playStyle = null;
         Rs2Antiban.activity = null;
         Rs2Antiban.activityIntensity = ActivityIntensity.EXTREME;

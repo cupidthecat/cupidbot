@@ -14,7 +14,7 @@ public enum MouseSpeed
 	VERY_FAST("8", 105, 150, 90, 3, 115),
 	EXTREME("9", 90, 120, 90, 2, 100);
 
-	public static final MouseSpeed DEFAULT = EXTREME;
+	public static final MouseSpeed DEFAULT = NORMAL;
 
 	@Getter
 	private final String name;

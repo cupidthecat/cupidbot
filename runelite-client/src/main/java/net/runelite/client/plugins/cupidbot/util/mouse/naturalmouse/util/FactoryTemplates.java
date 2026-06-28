@@ -3,6 +3,7 @@ package net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.util;
 
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
+import net.runelite.client.plugins.cupidbot.util.antiban.SessionFatigue;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.MouseMotionFactory;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.SpeedManager;
@@ -99,9 +100,15 @@ public class FactoryTemplates {
 
     public static MouseMotionFactory createMouseSpeedMotionFactory(MouseMotionNature nature, MouseSpeed mouseSpeed) {
         MouseSpeed speed = mouseSpeed != null ? mouseSpeed : MouseSpeed.DEFAULT;
-        int currentBaseTime = speed.getBaseTimeMs();
-        if (Rs2AntibanSettings.simulateFatigue)
-            currentBaseTime = Rs2Antiban.mouseFatigue.calculateBaseTimeWithNoise(currentBaseTime, speed.getFatigueMaxBaseTimeMs());
+        int currentBaseTime = Rs2AntibanSettings.simulateFatigue
+                ? effectiveMouseBaseTimeMs(speed)
+                : speed.getBaseTimeMs();
+
+        return createMouseSpeedMotionFactory(nature, speed, currentBaseTime);
+    }
+
+    public static MouseMotionFactory createMouseSpeedMotionFactory(MouseMotionNature nature, MouseSpeed mouseSpeed, int currentBaseTime) {
+        MouseSpeed speed = mouseSpeed != null ? mouseSpeed : MouseSpeed.DEFAULT;
 
         MouseMotionFactory factory = new MouseMotionFactory(nature);
         DefaultSpeedManager manager = new DefaultSpeedManager(createHumanMouseFlows(speed));
@@ -117,6 +124,22 @@ public class FactoryTemplates {
 
         factory.setSpeedManager(manager);
         return factory;
+    }
+
+    public static int effectiveMouseBaseTimeMs(MouseSpeed mouseSpeed) {
+        return effectiveMouseBaseTimeMs(mouseSpeed, SessionFatigue.multiplier());
+    }
+
+    static int effectiveMouseBaseTimeMs(MouseSpeed mouseSpeed, double fatigueMultiplier) {
+        MouseSpeed speed = mouseSpeed != null ? mouseSpeed : MouseSpeed.DEFAULT;
+        if (Double.isNaN(fatigueMultiplier) || fatigueMultiplier <= 0.0) {
+            fatigueMultiplier = 1.0;
+        }
+        if (fatigueMultiplier == Double.POSITIVE_INFINITY) {
+            return speed.getFatigueMaxBaseTimeMs();
+        }
+        int fatiguedBaseTime = (int) Math.round(speed.getBaseTimeMs() * fatigueMultiplier);
+        return Math.min(fatiguedBaseTime, speed.getFatigueMaxBaseTimeMs());
     }
 
     private static List<Flow> createHumanMouseFlows(MouseSpeed mouseSpeed) {

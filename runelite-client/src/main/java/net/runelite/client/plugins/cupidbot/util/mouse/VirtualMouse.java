@@ -114,10 +114,17 @@ public class VirtualMouse extends Mouse {
         entered(point);
         exited(point);
         moved(point);
+        sleep(nextClickStageDelayMs());
         pressed(point, rightClick ? MouseEvent.BUTTON3 : MouseEvent.BUTTON1);
+        sleep(nextClickStageDelayMs());
         released(point, rightClick ? MouseEvent.BUTTON3 : MouseEvent.BUTTON1);
+        sleep(nextClickStageDelayMs());
         clicked(point, rightClick ? MouseEvent.BUTTON3 : MouseEvent.BUTTON1);
         setLastClick(point);
+    }
+
+    static int nextClickStageDelayMs() {
+        return Rs2Random.logNormalBounded(25, 90);
     }
 
     private boolean shouldMoveNaturally(Point point) {
