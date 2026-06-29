@@ -24,6 +24,7 @@
  */
 package net.runelite.client.plugins.cupidbot.ui;
 
+import com.google.common.html.HtmlEscapers;
 import lombok.Getter;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.config.SearchablePlugin;
@@ -46,6 +47,14 @@ class CupidBotPluginListItem extends JPanel implements SearchablePlugin
 {
 	private static final ImageIcon ON_STAR;
 	private static final ImageIcon OFF_STAR;
+	static final int MIN_LIST_ITEM_HEIGHT = 20;
+	static final int LIST_ITEM_VERTICAL_PADDING = 4;
+	private static final String HTML_PREFIX = "<html>";
+	private static final String HTML_SUFFIX = "</html>";
+	private static final int PIN_BUTTON_WIDTH = 21;
+	private static final int CONFIG_BUTTON_WIDTH = 25;
+	private static final int TOGGLE_BUTTON_WIDTH = 34;
+	private static final int TEXT_MARGIN_WIDTH = 12;
 
 	private final CupidBotPluginListPanel pluginListPanel;
 
@@ -90,15 +99,15 @@ class CupidBotPluginListItem extends JPanel implements SearchablePlugin
 		}
 
 		setLayout(new BorderLayout(3, 0));
-		setPreferredSize(new Dimension(CupidBotPluginListPanel.LIST_ITEM_WIDTH, 20));
 
 		JLabel nameLabel = createNameLabel(pluginConfig);
+		setPreferredSize(new Dimension(CupidBotPluginListPanel.LIST_ITEM_WIDTH, preferredItemHeight(nameLabel)));
 
 		pinButton = new JToggleButton(OFF_STAR);
 		pinButton.setSelectedIcon(ON_STAR);
 		SwingUtil.removeButtonDecorations(pinButton);
 		SwingUtil.addModalTooltip(pinButton, "Unpin plugin", "Pin plugin");
-		pinButton.setPreferredSize(new Dimension(21, 0));
+		pinButton.setPreferredSize(new Dimension(PIN_BUTTON_WIDTH, 0));
 		add(pinButton, BorderLayout.LINE_START);
 
 		pinButton.addActionListener(e ->
@@ -116,7 +125,7 @@ class CupidBotPluginListItem extends JPanel implements SearchablePlugin
 		{
 			JButton configButton = new JButton(CupidBotConfigPanel.CONFIG_ICON);
 			SwingUtil.removeButtonDecorations(configButton);
-			configButton.setPreferredSize(new Dimension(25, 0));
+			configButton.setPreferredSize(new Dimension(CONFIG_BUTTON_WIDTH, 0));
 			configButton.setVisible(false);
 			buttonPanel.add(configButton);
 
@@ -184,18 +193,48 @@ class CupidBotPluginListItem extends JPanel implements SearchablePlugin
 	}
 
 	@NotNull
-	private static JLabel createNameLabel(CupidBotPluginConfigurationDescriptor pluginConfig) {
-		JLabel nameLabel = new JLabel(pluginConfig.getName());
-		int buttons = 21 /*pin*/ + 25 /*config, if present*/ + 34 /*toggle approx*/ + 12 /*margins*/;
-		int textWidth = CupidBotPluginListPanel.LIST_ITEM_WIDTH - buttons;
-		nameLabel.setText("<html><div style='width:" + textWidth + "px'>" + pluginConfig.getName() + "</div></html>");
-		nameLabel.setForeground(Color.WHITE);
+	private static JLabel createNameLabel(CupidBotPluginConfigurationDescriptor pluginConfig)
+	{
+		return createNameLabel(pluginConfig.getName(), pluginConfig.getDescription());
+	}
 
-		if (!pluginConfig.getDescription().isEmpty())
+	@NotNull
+	static JLabel createNameLabel(String name, String description)
+	{
+		JLabel nameLabel = new JLabel(name);
+		int buttons = PIN_BUTTON_WIDTH + CONFIG_BUTTON_WIDTH + TOGGLE_BUTTON_WIDTH + TEXT_MARGIN_WIDTH;
+		int textWidth = CupidBotPluginListPanel.LIST_ITEM_WIDTH - buttons;
+		String htmlName = toHtmlFragment(name);
+		nameLabel.setText("<html><div style='width:" + textWidth + "px'>" + htmlName + "</div></html>");
+		nameLabel.setForeground(Color.WHITE);
+		nameLabel.setVerticalAlignment(SwingConstants.CENTER);
+
+		if (!description.isEmpty())
 		{
-			nameLabel.setToolTipText("<html>" + pluginConfig.getName() + ":<br>" + pluginConfig.getDescription() + "</html>");
+			nameLabel.setToolTipText("<html>" + htmlName + ":<br>" + toHtmlFragment(description) + "</html>");
 		}
 		return nameLabel;
+	}
+
+	static String toHtmlFragment(String text)
+	{
+		String trimmed = text.trim();
+		if (trimmed.regionMatches(true, 0, HTML_PREFIX, 0, HTML_PREFIX.length()))
+		{
+			String fragment = trimmed.substring(HTML_PREFIX.length());
+			if (fragment.regionMatches(true, fragment.length() - HTML_SUFFIX.length(), HTML_SUFFIX, 0, HTML_SUFFIX.length()))
+			{
+				fragment = fragment.substring(0, fragment.length() - HTML_SUFFIX.length());
+			}
+			return fragment;
+		}
+
+		return HtmlEscapers.htmlEscaper().escape(text);
+	}
+
+	static int preferredItemHeight(JLabel nameLabel)
+	{
+		return Math.max(MIN_LIST_ITEM_HEIGHT, nameLabel.getPreferredSize().height + LIST_ITEM_VERTICAL_PADDING);
 	}
 
 	@Override
