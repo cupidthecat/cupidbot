@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import net.runelite.api.Client;
 import net.runelite.api.Point;
 import net.runelite.client.plugins.cupidbot.CupidBot;
+import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementReport;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -192,11 +194,37 @@ public class CupidBotMouseOverlay extends Overlay {
 				}
 			}
 
+            renderMovementMetrics(g, x, y);
+
         } else {
             CupidBot.getMouse().getPoints().clear();
             CupidBot.getMouse().getTimer().stop();
         }
 
         return null;
+    }
+
+    private void renderMovementMetrics(Graphics2D g, int x, int y) {
+        if (!Rs2AntibanSettings.devDebug) {
+            return;
+        }
+
+        MouseMovementReport report = CupidBot.getMouse().getLastMovementReport();
+        if (report == null || report.getPlan() == null || report.getStepCount() == 0) {
+            return;
+        }
+
+        g.setFont(new Font("Tahoma", Font.PLAIN, 11));
+        g.setColor(new Color(255, 255, 255, 220));
+        int textX = Math.max(6, x + 18);
+        int textY = Math.max(14, y - 18);
+        g.drawString(String.format(
+                "mouse %s %.2fx err %.1f seed %d",
+                report.getPlan().getContext(),
+                report.getPathEfficiency(),
+                report.getFinalError(),
+                report.getPlan().getSeed()),
+                textX,
+                textY);
     }
 }

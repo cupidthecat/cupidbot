@@ -13,6 +13,7 @@ import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.support.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class FactoryTemplates {
     /**
@@ -121,11 +122,23 @@ public class FactoryTemplates {
             MouseSpeed mouseSpeed,
             int currentBaseTime,
             MouseSmoothness mouseSmoothness) {
+        return createMouseSpeedMotionFactory(nature, mouseSpeed, currentBaseTime, mouseSmoothness, null, null);
+    }
+
+    public static MouseMotionFactory createMouseSpeedMotionFactory(
+            MouseMotionNature nature,
+            MouseSpeed mouseSpeed,
+            int currentBaseTime,
+            MouseSmoothness mouseSmoothness,
+            Random random,
+            Integer overshootsOverride) {
         MouseSpeed speed = mouseSpeed != null ? mouseSpeed : MouseSpeed.DEFAULT;
         MouseSmoothness smoothness = mouseSmoothness != null ? mouseSmoothness : MouseSmoothness.DEFAULT;
+        Random rng = random == null ? new Random() : random;
 
         MouseMotionFactory factory = new MouseMotionFactory(nature);
-        DefaultSpeedManager manager = new DefaultSpeedManager(createHumanMouseFlows(speed));
+        factory.setRandom(rng);
+        DefaultSpeedManager manager = new DefaultSpeedManager(createHumanMouseFlows(speed), rng);
         factory.setDeviationProvider(new SinusoidalDeviationProvider(smoothness.getDeviationSlopeDivider()));
         factory.setNoiseProvider(new DefaultNoiseProvider(smoothness.getNoiseDivider()));
         factory.getNature().setReactionTimeVariationMs(speed.getReactionTimeVariationMs());
@@ -134,8 +147,10 @@ public class FactoryTemplates {
         factory.getNature().setEffectFadeSteps(smoothness.getEffectFadeSteps());
         manager.setMouseMovementBaseTimeMs(currentBaseTime);
 
-        DefaultOvershootManager overshootManager = (DefaultOvershootManager) factory.getOvershootManager();
-        overshootManager.setOvershoots(Rs2AntibanSettings.simulateMistakes ? speed.getOvershoots() : 0);
+        DefaultOvershootManager overshootManager = new DefaultOvershootManager(rng);
+        factory.setOvershootManager(overshootManager);
+        int overshoots = overshootsOverride == null ? speed.getOvershoots() : overshootsOverride;
+        overshootManager.setOvershoots(Rs2AntibanSettings.simulateMistakes ? overshoots : 0);
         overshootManager.setMinDistanceForOvershoots(3);
         overshootManager.setMinOvershootMovementMs(speed.getMinOvershootMovementMs());
 

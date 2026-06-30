@@ -9,14 +9,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 public class DefaultSpeedManager implements SpeedManager {
     private static final double SMALL_DELTA = 10e-6;
     private final List<Flow> flows = new ArrayList<>();
+    private final Random random;
     private long mouseMovementTimeMs = 500;
 
     public DefaultSpeedManager(Collection<Flow> flows) {
+        this(flows, new Random());
+    }
+
+    public DefaultSpeedManager(Collection<Flow> flows, Random random) {
         this.flows.addAll(flows);
+        this.random = random == null ? new Random() : random;
     }
 
     public DefaultSpeedManager() {
@@ -35,8 +42,8 @@ public class DefaultSpeedManager implements SpeedManager {
 
     @Override
     public Pair<Flow, Long> getFlowWithTime(double distance) {
-        double time = mouseMovementTimeMs + (long) (Math.random() * mouseMovementTimeMs);
-        Flow flow = flows.get((int) (Math.random() * flows.size()));
+        double time = mouseMovementTimeMs + (long) (random.nextDouble() * mouseMovementTimeMs);
+        Flow flow = flows.get(random.nextInt(flows.size()));
 
         // Let's ignore waiting time, e.g 0's in flow, by increasing the total time
         // by the amount of 0's there are in the flow multiplied by the time each bucket represents.

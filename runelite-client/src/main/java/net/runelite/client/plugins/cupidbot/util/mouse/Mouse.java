@@ -8,6 +8,9 @@ import net.runelite.api.Point;
 import net.runelite.client.plugins.cupidbot.CupidBot;
 import net.runelite.client.plugins.cupidbot.util.math.Rs2Random;
 import net.runelite.client.plugins.cupidbot.util.menu.NewMenuEntry;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseActionContext;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementReport;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseTarget;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,10 +21,11 @@ public abstract class Mouse {
     private static final int POINT_LIFETIME = 14;// Maximum number of points to store
     final int MAX_POINTS = 500;
 	Deque<Point> points = new ConcurrentLinkedDeque<>();
-	Point lastClick = new Point(-1, -1); // getter for last click
+    Point lastClick = new Point(-1, -1); // getter for last click
     // getter for click before last click
     Point lastClick2 = new Point(-1, -1);
     Point lastMove = new Point(-1, -1); // getter for last move
+    MouseMovementReport lastMovementReport = MouseMovementReport.empty();
     float hue = 0.0f; // Initial hue value
 	Timer timer = new Timer(POINT_LIFETIME, e -> points.pollFirst());
 
@@ -66,7 +70,22 @@ public abstract class Mouse {
 
     public abstract Mouse click();
 
+    public Mouse click(MouseTarget target, MouseActionContext context) {
+        if (target == null) return this;
+        return click(target.getCenter());
+    }
+
+    public Mouse click(MouseTarget target, MouseActionContext context, NewMenuEntry entry) {
+        if (target == null) return this;
+        return click(target.getCenter(), entry);
+    }
+
     public abstract Mouse move(Point point);
+
+    public Mouse move(MouseTarget target, MouseActionContext context) {
+        if (target == null) return this;
+        return move(target.getCenter());
+    }
 
     public abstract Mouse moveInstant(Point point);
 
@@ -86,6 +105,15 @@ public abstract class Mouse {
 
     public abstract Mouse drag(Point startPoint, Point endPoint);
 
+    public Mouse drag(MouseTarget startTarget, MouseTarget endTarget, MouseActionContext context) {
+        if (startTarget == null || endTarget == null) return this;
+        return drag(startTarget.getCenter(), endTarget.getCenter());
+    }
+
     public abstract java.awt.Point getMousePosition();
+
+    protected void setLastMovementReport(MouseMovementReport report) {
+        lastMovementReport = report == null ? MouseMovementReport.empty() : report;
+    }
 
 }

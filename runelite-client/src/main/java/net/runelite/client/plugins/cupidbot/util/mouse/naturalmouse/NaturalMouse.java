@@ -12,6 +12,11 @@ import net.runelite.client.plugins.cupidbot.util.antiban.enums.ActivityIntensity
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import net.runelite.client.plugins.cupidbot.util.math.Rs2Random;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseActionContext;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementPlan;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementPlanner;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementReport;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseTarget;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.MouseInfoAccessor;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.MouseMotionFactory;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.SystemCalls;
@@ -25,8 +30,10 @@ import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.util.Pair;
 
 import javax.inject.Inject;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
@@ -36,6 +43,7 @@ public class NaturalMouse {
     public final MouseMotionNature nature;
     private final ThreadLocalRandom random = ThreadLocalRandom.current();
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final MouseMovementPlanner planner = new MouseMovementPlanner();
     @Inject
     private Client client;
     @Getter
@@ -73,29 +81,50 @@ public class NaturalMouse {
 //			dx = Rs2UiHelper.stretchX(dx);
 //			dy = Rs2UiHelper.stretchY(dy);
 //		}
-        int finalDx = dx;
-        int finalDy = dy;
+        Point mousePos = CupidBot.getMouse().getMousePosition();
+        MouseMovementPlan plan = planner.plan(
+                new net.runelite.api.Point(mousePos.x, mousePos.y),
+                MouseTarget.point(new net.runelite.api.Point(dx, dy)),
+                MouseActionContext.GENERAL,
+                Rs2AntibanSettings.getConfiguredMouseEngineMode(),
+                Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()),
+                Rs2AntibanSettings.getConfiguredMouseSmoothness(),
+                null);
+        moveTo(plan);
+    }
+
+    public synchronized MouseMovementReport moveTo(MouseMovementPlan plan) {
+        if (plan == null) {
+            return MouseMovementReport.empty();
+        }
+        int finalDx = plan.getTargetPoint().getX();
+        int finalDy = plan.getTargetPoint().getY();
         Point mousePos = CupidBot.getMouse().getMousePosition();
         // check if current mouse position is already at the destination
         if (mousePos.x == finalDx && mousePos.y == finalDy) {
-            return;
+            return MouseMovementReport.fromPath(plan, List.of(
+                    new net.runelite.api.Point(mousePos.x, mousePos.y)));
         }
 
         if (!CupidBot.getClient().isClientThread()) {
-            move(finalDx, finalDy);
+            return move(plan);
         } else {
 
-            executorService.submit(() -> move(finalDx, finalDy));
+            executorService.submit(() -> move(plan));
+            return MouseMovementReport.empty();
         }
     }
 
-    private synchronized void move(int dx, int dy) {
-        var motion = getFactory().build(dx, dy);
+    private synchronized MouseMovementReport move(MouseMovementPlan plan) {
+        var motion = getFactory(plan).build(plan.getTargetPoint().getX(), plan.getTargetPoint().getY());
+        List<net.runelite.api.Point> path = new ArrayList<>();
+        path.add(plan.getStartPoint());
         try {
-            motion.move();
+            motion.move((x, y) -> path.add(new net.runelite.api.Point(x, y)));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
+        return MouseMovementReport.fromPath(plan, path);
     }
 
     public MouseMotionFactory getFactory() {
@@ -147,6 +176,19 @@ public class NaturalMouse {
 //		factory.setSpeedManager(manager);
 //
 //		return factory;
+    }
+
+    private MouseMotionFactory getFactory(MouseMovementPlan plan) {
+        ActivityIntensity intensity = Rs2Antiban.getActivityIntensity();
+        MouseSpeed mouseSpeed = Rs2AntibanSettings.getEffectiveMouseSpeed(intensity);
+        MouseSmoothness mouseSmoothness = Rs2AntibanSettings.getConfiguredMouseSmoothness();
+        return FactoryTemplates.createMouseSpeedMotionFactory(
+                nature,
+                mouseSpeed,
+                plan.getFactoryBaseTimeMs(),
+                mouseSmoothness,
+                new Random(plan.getSeed()),
+                plan.getOvershootCount());
     }
 
     /**

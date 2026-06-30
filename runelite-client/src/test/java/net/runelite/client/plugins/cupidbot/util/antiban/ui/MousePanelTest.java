@@ -5,9 +5,11 @@ import net.runelite.client.plugins.cupidbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.ActivityIntensity;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseEngineMode;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.PlayStyle;
+import net.runelite.client.ui.PluginPanel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +17,7 @@ import org.junit.Test;
 import java.awt.Dimension;
 import java.lang.reflect.Field;
 
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 
@@ -32,6 +35,7 @@ import static org.mockito.Mockito.verify;
 public class MousePanelTest
 {
 	private static final int COMMON_ANTIBAN_CARD_HEIGHT = 410;
+	private static final int COMMON_ANTIBAN_CARD_WIDTH = PluginPanel.PANEL_WIDTH - (PluginPanel.BORDER_OFFSET * 2);
 
 	@Before
 	public void setUp()
@@ -123,6 +127,20 @@ public class MousePanelTest
 	}
 
 	@Test
+	public void manualMouseEngineModeSelectionSavesProfile() throws Exception
+	{
+		ConfigManager configManager = mock(ConfigManager.class);
+		setProfileConfigManager(configManager);
+		MousePanel panel = new MousePanel();
+		clearInvocations(configManager);
+
+		getComboBox(panel, "mouseEngineModeComboBox").setSelectedItem(MouseEngineMode.PRECISE);
+
+		assertSame(MouseEngineMode.PRECISE, Rs2AntibanSettings.mouseEngineMode);
+		verify(configManager, atLeastOnce()).setConfiguration(anyString(), anyString(), anyString());
+	}
+
+	@Test
 	public void updateValuesRefreshesMouseSmoothnessWithoutSavingProfile() throws Exception
 	{
 		ConfigManager configManager = mock(ConfigManager.class);
@@ -140,6 +158,22 @@ public class MousePanelTest
 	}
 
 	@Test
+	public void updateValuesRefreshesMouseEngineModeWithoutSavingProfile() throws Exception
+	{
+		ConfigManager configManager = mock(ConfigManager.class);
+		setProfileConfigManager(configManager);
+		MousePanel panel = new MousePanel();
+		clearInvocations(configManager);
+
+		Rs2AntibanSettings.mouseEngineMode = MouseEngineMode.QA_REPLAY;
+		panel.updateValues();
+
+		assertSame(MouseEngineMode.QA_REPLAY,
+			getComboBox(panel, "mouseEngineModeComboBox").getSelectedItem());
+		verify(configManager, never()).setConfiguration(anyString(), anyString(), anyString());
+	}
+
+	@Test
 	public void mousePanelKeepsSmoothnessControlsInsideCommonCardHeight()
 	{
 		MousePanel panel = new MousePanel();
@@ -149,6 +183,21 @@ public class MousePanelTest
 		assertTrue("Mouse panel preferred height must fit the visible Antiban mouse card. Preferred height was "
 				+ preferredSize.height,
 			preferredSize.height <= COMMON_ANTIBAN_CARD_HEIGHT);
+	}
+
+	@Test
+	public void mousePanelKeepsSliderControlsInsideCommonCardWidth() throws Exception
+	{
+		MousePanel panel = new MousePanel();
+		Dimension preferredSize = panel.getPreferredSize();
+
+		assertTrue("Mouse panel preferred width must fit the visible Antiban mouse card. Preferred width was "
+				+ preferredSize.width,
+			preferredSize.width <= COMMON_ANTIBAN_CARD_WIDTH);
+		assertSliderFitsCommonCard(panel, "moveMouseOffScreenChance");
+		assertSliderFitsCommonCard(panel, "moveMouseRandomlyChance");
+		assertSliderFitsCommonCard(panel, "mouseSpeedSlider");
+		assertSliderFitsCommonCard(panel, "mouseSmoothnessSlider");
 	}
 
 	@Test
@@ -193,5 +242,22 @@ public class MousePanelTest
 		Field field = MousePanel.class.getDeclaredField(name);
 		field.setAccessible(true);
 		return (JSlider) field.get(panel);
+	}
+
+	private static void assertSliderFitsCommonCard(MousePanel panel, String name) throws Exception
+	{
+		JSlider slider = getSlider(panel, name);
+		int availableRowWidth = COMMON_ANTIBAN_CARD_WIDTH - 10;
+
+		assertTrue(name + " preferred width must fit inside a mouse-card row. Preferred width was "
+				+ slider.getPreferredSize().width,
+			slider.getPreferredSize().width <= availableRowWidth);
+	}
+
+	private static JComboBox<?> getComboBox(MousePanel panel, String name) throws Exception
+	{
+		Field field = MousePanel.class.getDeclaredField(name);
+		field.setAccessible(true);
+		return (JComboBox<?>) field.get(panel);
 	}
 }

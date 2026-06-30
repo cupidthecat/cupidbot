@@ -47,6 +47,8 @@ import net.runelite.client.plugins.cupidbot.util.menu.NewMenuEntry;
 import net.runelite.client.plugins.cupidbot.util.misc.Rs2UiHelper;
 import net.runelite.client.plugins.cupidbot.util.mouse.Mouse;
 import net.runelite.client.plugins.cupidbot.util.mouse.VirtualMouse;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseActionContext;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseTarget;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.NaturalMouse;
 import net.runelite.client.plugins.cupidbot.api.boat.Rs2BoatCache;
 import net.runelite.client.plugins.cupidbot.util.GameTickBroadcaster;
@@ -606,9 +608,7 @@ public class CupidBot {
         if (!Rs2UiHelper.isRectangleWithinCanvas(start) || !Rs2UiHelper.isRectangleWithinCanvas(end)) {
             return;
         }
-        Point startPoint = Rs2UiHelper.getClickingPoint(start, true);
-        Point endPoint = Rs2UiHelper.getClickingPoint(end, true);
-        mouse.drag(startPoint, endPoint);
+        mouse.drag(MouseTarget.rectangle(start), MouseTarget.rectangle(end), MouseActionContext.DRAG);
         if (!CupidBot.getClient().isClientThread()) {
             sleep(Rs2Random.logNormalBounded(50, 80));
         }
@@ -618,8 +618,7 @@ public class CupidBot {
         if (entry.getType() == MenuAction.WALK) {
             mouse.click(new Point(entry.getParam0(), entry.getParam1()), entry);
         } else {
-            Point point = Rs2UiHelper.getClickingPoint(rectangle, true);
-            mouse.click(point, entry);
+            mouse.click(MouseTarget.rectangle(rectangle), MouseActionContext.MENU, entry);
         }
 
         if (!CupidBot.getClient().isClientThread()) {
@@ -629,8 +628,7 @@ public class CupidBot {
 
     public static void click(Rectangle rectangle) {
 
-        Point point = Rs2UiHelper.getClickingPoint(rectangle, true);
-        mouse.click(point);
+        mouse.click(MouseTarget.rectangle(rectangle), MouseActionContext.MENU);
 
 
         if (!CupidBot.getClient().isClientThread()) {

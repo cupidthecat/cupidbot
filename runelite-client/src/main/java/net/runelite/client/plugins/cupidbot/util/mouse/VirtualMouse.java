@@ -4,14 +4,23 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Point;
 import net.runelite.client.plugins.cupidbot.CupidBot;
+import net.runelite.client.plugins.cupidbot.util.antiban.Rs2Antiban;
+import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseEngineMode;
 import net.runelite.client.plugins.cupidbot.util.math.Rs2Random;
 import net.runelite.client.plugins.cupidbot.util.menu.NewMenuEntry;
 import net.runelite.client.plugins.cupidbot.util.misc.Rs2UiHelper;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseActionContext;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementPlan;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementPlanner;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementReport;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseTarget;
 
 import javax.inject.Inject;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +31,7 @@ import static net.runelite.client.plugins.cupidbot.util.Global.sleep;
 public class VirtualMouse extends Mouse {
 
     private final ScheduledExecutorService scheduledExecutorService;
+    private final MouseMovementPlanner movementPlanner = new MouseMovementPlanner();
 
     @Inject
     public VirtualMouse() {
@@ -133,23 +143,75 @@ public class VirtualMouse extends Mouse {
                 && CupidBot.naturalMouse != null;
     }
 
-    private void moveNaturallyOrInstant(Point point) {
-        if (shouldMoveNaturally(point)) {
-            CupidBot.naturalMouse.moveTo(point.getX(), point.getY());
-        } else {
-            moveInstant(point);
+    private MouseMovementPlan planMovement(MouseTarget target, MouseActionContext context) {
+        java.awt.Point mousePosition = getMousePosition();
+        MouseEngineMode mode = Rs2AntibanSettings.getConfiguredMouseEngineMode();
+        return movementPlanner.plan(
+                new Point(mousePosition.x, mousePosition.y),
+                target,
+                context,
+                mode,
+                Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()),
+                Rs2AntibanSettings.getConfiguredMouseSmoothness(),
+                seedForMode(mode, target, context));
+    }
+
+    private Long seedForMode(MouseEngineMode mode, MouseTarget target, MouseActionContext context) {
+        if (mode != MouseEngineMode.QA_REPLAY) {
+            return null;
         }
+
+        Rectangle bounds = target.getBounds();
+        long seed = 17L;
+        seed = seed * 31L + bounds.x;
+        seed = seed * 31L + bounds.y;
+        seed = seed * 31L + bounds.width;
+        seed = seed * 31L + bounds.height;
+        seed = seed * 31L + context.ordinal();
+        return seed;
+    }
+
+    private MouseMovementReport moveNaturallyOrInstant(MouseMovementPlan plan) {
+        Point targetPoint = plan.getTargetPoint();
+        MouseMovementReport report;
+        if (shouldMoveNaturally(targetPoint)) {
+            report = CupidBot.naturalMouse.moveTo(plan);
+        } else {
+            moveInstant(targetPoint);
+            report = MouseMovementReport.fromPath(plan, List.of(plan.getStartPoint(), targetPoint));
+        }
+        setLastMovementReport(report);
+        return report;
+    }
+
+    private MouseMovementReport moveNaturallyOrInstant(Point point) {
+        return moveNaturallyOrInstant(planMovement(MouseTarget.point(point), MouseActionContext.GENERAL));
+    }
+
+    private MouseTarget targetForEntry(Point fallback, NewMenuEntry entry) {
+        if (entry != null && Rs2UiHelper.hasActor(entry)) {
+            return MouseTarget.rectangle(Rs2UiHelper.getActorClickbox(entry.getActor()));
+        }
+        if (entry != null && Rs2UiHelper.isGameObject(entry)) {
+            return MouseTarget.rectangle(Rs2UiHelper.getObjectClickbox(entry.getGameObject()));
+        }
+        return MouseTarget.point(fallback);
+    }
+
+    private MouseActionContext contextForEntry(NewMenuEntry entry, MouseActionContext fallback) {
+        if (entry != null && Rs2UiHelper.hasActor(entry)) {
+            return MouseActionContext.ACTOR;
+        }
+        if (entry != null && Rs2UiHelper.isGameObject(entry)) {
+            return MouseActionContext.WORLD_OBJECT;
+        }
+        return fallback;
     }
 
     public Mouse click(Point point, boolean rightClick) {
         if (point == null) return this;
 
-        Runnable clickAction = () -> {
-            if (shouldMoveNaturally(point)) {
-                CupidBot.naturalMouse.moveTo(point.getX(), point.getY());
-            }
-            handleClick(point, rightClick);
-        };
+        Runnable clickAction = () -> clickTarget(MouseTarget.point(point), MouseActionContext.GENERAL, rightClick, null);
 
         if (CupidBot.getClient().isClientThread()) {
             scheduledExecutorService.schedule(clickAction, 0, TimeUnit.MILLISECONDS);
@@ -164,32 +226,11 @@ public class VirtualMouse extends Mouse {
     public Mouse click(Point point, boolean rightClick, NewMenuEntry entry) {
         if (point == null) return this;
 
-        Runnable clickAction = () -> {
-            Point newPoint = point;
-            if (shouldMoveNaturally(point)) {
-                CupidBot.naturalMouse.moveTo(point.getX(), point.getY());
-
-                if (Rs2UiHelper.hasActor(entry)) {
-                    Rectangle rectangle = Rs2UiHelper.getActorClickbox(entry.getActor());
-                    if (!Rs2UiHelper.isMouseWithinRectangle(rectangle)) {
-                        newPoint = Rs2UiHelper.getClickingPoint(rectangle, true);
-                        CupidBot.naturalMouse.moveTo(newPoint.getX(), newPoint.getY());
-                    }
-                }
-
-                if (Rs2UiHelper.isGameObject(entry)) {
-                    Rectangle rectangle = Rs2UiHelper.getObjectClickbox(entry.getGameObject());
-                    if (!Rs2UiHelper.isMouseWithinRectangle(rectangle)) {
-                        newPoint = Rs2UiHelper.getClickingPoint(rectangle, true);
-                        CupidBot.naturalMouse.moveTo(newPoint.getX(), newPoint.getY());
-
-                    }
-                }
-            }
-
-            CupidBot.targetMenu = entry;
-            handleClick(newPoint, rightClick);
-        };
+        Runnable clickAction = () -> clickTarget(
+                targetForEntry(point, entry),
+                contextForEntry(entry, MouseActionContext.MENU),
+                rightClick,
+                entry);
 
         if (CupidBot.getClient().isClientThread()) {
             scheduledExecutorService.schedule(clickAction, 0, TimeUnit.MILLISECONDS);
@@ -210,7 +251,7 @@ public class VirtualMouse extends Mouse {
     }
 
     public Mouse click(Rectangle rectangle) {
-        return click(Rs2UiHelper.getClickingPoint(rectangle, true), false);
+        return click(MouseTarget.rectangle(rectangle), MouseActionContext.MENU);
     }
 
     @Override
@@ -233,9 +274,50 @@ public class VirtualMouse extends Mouse {
         return click(CupidBot.getClient().getMouseCanvasPosition());
     }
 
+    @Override
+    public Mouse click(MouseTarget target, MouseActionContext context) {
+        if (target == null) return this;
+        Runnable clickAction = () -> clickTarget(
+                target,
+                context == null ? MouseActionContext.GENERAL : context,
+                false,
+                null);
+        return scheduleClick(clickAction);
+    }
+
+    @Override
+    public Mouse click(MouseTarget target, MouseActionContext context, NewMenuEntry entry) {
+        if (target == null) return this;
+        Runnable clickAction = () -> clickTarget(
+                target,
+                contextForEntry(entry, context == null ? MouseActionContext.MENU : context),
+                false,
+                entry);
+        return scheduleClick(clickAction);
+    }
+
+    private Mouse scheduleClick(Runnable clickAction) {
+        if (CupidBot.getClient().isClientThread()) {
+            scheduledExecutorService.schedule(clickAction, 0, TimeUnit.MILLISECONDS);
+        } else {
+            clickAction.run();
+        }
+        return this;
+    }
+
+    private Mouse clickTarget(MouseTarget target, MouseActionContext context, boolean rightClick, NewMenuEntry entry) {
+        MouseMovementPlan plan = planMovement(target, context);
+        moveNaturallyOrInstant(plan);
+        if (entry != null) {
+            CupidBot.targetMenu = entry;
+        }
+        handleClick(plan.getTargetPoint(), rightClick);
+        return this;
+    }
+
     public Mouse move(Point point) {
         if (point == null) return this;
-        moveNaturallyOrInstant(point);
+        moveNaturallyOrInstant(planMovement(MouseTarget.point(point), MouseActionContext.GENERAL));
         return this;
     }
 
@@ -252,23 +334,36 @@ public class VirtualMouse extends Mouse {
 
     public Mouse move(Rectangle rect) {
         if (rect == null) return this;
-        Point pt = new Point((int) rect.getCenterX(), (int) rect.getCenterY());
-        return move(pt);
+        return move(MouseTarget.rectangle(rect), MouseActionContext.GENERAL);
     }
 
     public Mouse move(Polygon polygon) {
         if (polygon == null) return this;
-        Point point = new Point((int) polygon.getBounds().getCenterX(), (int) polygon.getBounds().getCenterY());
-        return move(point);
+        return move(MouseTarget.polygon(polygon), MouseActionContext.GENERAL);
+    }
+
+    @Override
+    public Mouse move(MouseTarget target, MouseActionContext context) {
+        if (target == null) return this;
+        moveNaturallyOrInstant(planMovement(target, context == null ? MouseActionContext.GENERAL : context));
+        return this;
     }
 
     private Mouse scroll(Point point, int wheelRotation, int unitsToScroll) {
         if (point == null) return this;
 
         Runnable scrollAction = () -> {
-            moveNaturallyOrInstant(point);
+            moveNaturallyOrInstant(planMovement(MouseTarget.point(point), MouseActionContext.SCROLL));
             sleep(Rs2Random.logNormalBounded(40, 100));
-            dispatchWheel(point, wheelRotation, unitsToScroll);
+            int direction = wheelRotation < 0 ? -1 : 1;
+            int ticks = Math.max(1, Math.min(4, Math.abs(wheelRotation)));
+            int unitsPerTick = Math.max(1, Math.abs(unitsToScroll) / ticks) * direction;
+            for (int i = 0; i < ticks; i++) {
+                dispatchWheel(point, direction, unitsPerTick);
+                if (i + 1 < ticks) {
+                    sleep(Rs2Random.logNormalBounded(18, 55));
+                }
+            }
         };
 
         if (CupidBot.getClient().isClientThread()) {
@@ -335,20 +430,23 @@ public class VirtualMouse extends Mouse {
     public Mouse drag(Point startPoint, Point endPoint) {
         if (startPoint == null || endPoint == null) return this;
 
-        if (shouldMoveNaturally(startPoint))
-            CupidBot.naturalMouse.moveTo(startPoint.getX(), startPoint.getY());
-        else
-            moveInstant(startPoint);
+        moveNaturallyOrInstant(planMovement(MouseTarget.point(startPoint), MouseActionContext.DRAG));
         sleep(Rs2Random.logNormalBounded(50, 80));
         pressed(startPoint, MouseEvent.BUTTON1);
         sleep(Rs2Random.logNormalBounded(80, 120));
-        if (shouldMoveNaturally(endPoint))
-            CupidBot.naturalMouse.moveTo(endPoint.getX(), endPoint.getY());
-        else
-            moveInstant(endPoint);
+        moveNaturallyOrInstant(planMovement(MouseTarget.point(endPoint), MouseActionContext.DRAG));
         sleep(Rs2Random.logNormalBounded(80, 120));
         released(endPoint, MouseEvent.BUTTON1);
 
         return this;
+    }
+
+    @Override
+    public Mouse drag(MouseTarget startTarget, MouseTarget endTarget, MouseActionContext context) {
+        if (startTarget == null || endTarget == null) return this;
+
+        Point startPoint = planMovement(startTarget, MouseActionContext.DRAG).getTargetPoint();
+        Point endPoint = planMovement(endTarget, MouseActionContext.DRAG).getTargetPoint();
+        return drag(startPoint, endPoint);
     }
 }
