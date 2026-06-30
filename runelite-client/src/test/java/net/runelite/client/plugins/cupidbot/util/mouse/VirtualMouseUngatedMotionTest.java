@@ -56,10 +56,29 @@ public class VirtualMouseUngatedMotionTest {
 				f.get(null));
 	}
 
+	@Test
+	public void naturalMouseSystemCallsUseRawMoveInstantToAvoidRecursiveSmoothing() throws Exception {
+		Class<?> target = Class.forName(
+				"net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.NaturalMouse$SystemCallsImpl");
+
+		List<String> rawCalls = scanMethodCalls(
+				target,
+				"net/runelite/client/plugins/cupidbot/util/mouse/Mouse",
+				"moveInstant");
+		List<String> highLevelCalls = scanMethodCalls(
+				target,
+				"net/runelite/client/plugins/cupidbot/util/mouse/Mouse",
+				"move");
+
+		assertTrue("NaturalMouse SystemCallsImpl must set each generated step through Mouse.moveInstant",
+				rawCalls.stream().anyMatch(method -> method.startsWith("setMousePosition(")));
+		assertTrue("NaturalMouse SystemCallsImpl must not call high-level Mouse.move from setMousePosition",
+				highLevelCalls.stream().noneMatch(method -> method.startsWith("setMousePosition(")));
+	}
+
 	private static List<String> scanFieldReads(Class<?> target, String ownerInternal, String fieldName) throws IOException {
-		String resource = target.getSimpleName() + ".class";
-		try (InputStream is = target.getResourceAsStream(resource)) {
-			assertNotNull("class resource " + resource + " must be loadable for bytecode scan", is);
+		try (InputStream is = classBytes(target)) {
+			assertNotNull("class resource for " + target.getName() + " must be loadable for bytecode scan", is);
 			ClassReader reader = new ClassReader(is.readAllBytes());
 			List<String> found = new ArrayList<>();
 			reader.accept(new ClassVisitor(Opcodes.ASM9) {
@@ -86,5 +105,35 @@ public class VirtualMouseUngatedMotionTest {
 			}, ClassReader.SKIP_FRAMES);
 			return found;
 		}
+	}
+
+	private static List<String> scanMethodCalls(Class<?> target, String ownerInternal, String methodName) throws IOException {
+		try (InputStream is = classBytes(target)) {
+			assertNotNull("class resource for " + target.getName() + " must be loadable for bytecode scan", is);
+			ClassReader reader = new ClassReader(is.readAllBytes());
+			List<String> found = new ArrayList<>();
+			reader.accept(new ClassVisitor(Opcodes.ASM9) {
+				@Override
+				public MethodVisitor visitMethod(int access, String sourceMethod, String descriptor,
+				                                 String signature, String[] exceptions) {
+					return new MethodVisitor(Opcodes.ASM9) {
+						@Override
+						public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+							if ((opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKEINTERFACE)
+									&& ownerInternal.equals(owner)
+									&& methodName.equals(name)) {
+								found.add(sourceMethod + descriptor);
+							}
+						}
+					};
+				}
+			}, ClassReader.SKIP_FRAMES);
+			return found;
+		}
+	}
+
+	private static InputStream classBytes(Class<?> target) {
+		String resource = "/" + target.getName().replace('.', '/') + ".class";
+		return target.getResourceAsStream(resource);
 	}
 }

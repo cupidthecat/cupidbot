@@ -5,12 +5,14 @@ import net.runelite.client.plugins.cupidbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.Activity;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.ActivityIntensity;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.PlayStyle;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.awt.Dimension;
 import java.lang.reflect.Field;
 
 import javax.swing.JLabel;
@@ -21,6 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -28,6 +31,8 @@ import static org.mockito.Mockito.verify;
 
 public class MousePanelTest
 {
+	private static final int COMMON_ANTIBAN_CARD_HEIGHT = 410;
+
 	@Before
 	public void setUp()
 	{
@@ -99,6 +104,51 @@ public class MousePanelTest
 		panel.updateValues();
 
 		assertEquals("Move Mouse Off Screen (%): 10", label.getText());
+	}
+
+	@Test
+	public void manualMouseSmoothnessSelectionSavesProfile() throws Exception
+	{
+		ConfigManager configManager = mock(ConfigManager.class);
+		setProfileConfigManager(configManager);
+		MousePanel panel = new MousePanel();
+		clearInvocations(configManager);
+
+		getSlider(panel, "mouseSmoothnessSlider").setValue(MouseSmoothness.MAX.getSliderIndex());
+
+		assertSame(MouseSmoothness.MAX, Rs2AntibanSettings.mouseSmoothness);
+		assertEquals("Mouse Smoothness: " + MouseSmoothness.MAX.getName(),
+			getLabel(panel, "mouseSmoothnessLabel").getText());
+		verify(configManager, atLeastOnce()).setConfiguration(anyString(), anyString(), anyString());
+	}
+
+	@Test
+	public void updateValuesRefreshesMouseSmoothnessWithoutSavingProfile() throws Exception
+	{
+		ConfigManager configManager = mock(ConfigManager.class);
+		setProfileConfigManager(configManager);
+		MousePanel panel = new MousePanel();
+		clearInvocations(configManager);
+
+		Rs2AntibanSettings.mouseSmoothness = MouseSmoothness.HIGH;
+		panel.updateValues();
+
+		assertEquals(MouseSmoothness.HIGH.getSliderIndex(), getSlider(panel, "mouseSmoothnessSlider").getValue());
+		assertEquals("Mouse Smoothness: " + MouseSmoothness.HIGH.getName(),
+			getLabel(panel, "mouseSmoothnessLabel").getText());
+		verify(configManager, never()).setConfiguration(anyString(), anyString(), anyString());
+	}
+
+	@Test
+	public void mousePanelKeepsSmoothnessControlsInsideCommonCardHeight()
+	{
+		MousePanel panel = new MousePanel();
+
+		Dimension preferredSize = panel.getPreferredSize();
+
+		assertTrue("Mouse panel preferred height must fit the visible Antiban mouse card. Preferred height was "
+				+ preferredSize.height,
+			preferredSize.height <= COMMON_ANTIBAN_CARD_HEIGHT);
 	}
 
 	@Test

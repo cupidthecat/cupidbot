@@ -4,6 +4,7 @@ package net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.util;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.cupidbot.util.antiban.SessionFatigue;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.MouseMotionFactory;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.SpeedManager;
@@ -108,13 +109,29 @@ public class FactoryTemplates {
     }
 
     public static MouseMotionFactory createMouseSpeedMotionFactory(MouseMotionNature nature, MouseSpeed mouseSpeed, int currentBaseTime) {
+        return createMouseSpeedMotionFactory(
+                nature,
+                mouseSpeed,
+                currentBaseTime,
+                Rs2AntibanSettings.getConfiguredMouseSmoothness());
+    }
+
+    public static MouseMotionFactory createMouseSpeedMotionFactory(
+            MouseMotionNature nature,
+            MouseSpeed mouseSpeed,
+            int currentBaseTime,
+            MouseSmoothness mouseSmoothness) {
         MouseSpeed speed = mouseSpeed != null ? mouseSpeed : MouseSpeed.DEFAULT;
+        MouseSmoothness smoothness = mouseSmoothness != null ? mouseSmoothness : MouseSmoothness.DEFAULT;
 
         MouseMotionFactory factory = new MouseMotionFactory(nature);
         DefaultSpeedManager manager = new DefaultSpeedManager(createHumanMouseFlows(speed));
-        factory.setDeviationProvider(new SinusoidalDeviationProvider(SinusoidalDeviationProvider.DEFAULT_SLOPE_DIVIDER));
-        factory.setNoiseProvider(new DefaultNoiseProvider(DefaultNoiseProvider.DEFAULT_NOISINESS_DIVIDER));
+        factory.setDeviationProvider(new SinusoidalDeviationProvider(smoothness.getDeviationSlopeDivider()));
+        factory.setNoiseProvider(new DefaultNoiseProvider(smoothness.getNoiseDivider()));
         factory.getNature().setReactionTimeVariationMs(speed.getReactionTimeVariationMs());
+        factory.getNature().setTimeToStepsDivider(smoothness.getTimeToStepsDivider());
+        factory.getNature().setMinSteps(smoothness.getMinSteps());
+        factory.getNature().setEffectFadeSteps(smoothness.getEffectFadeSteps());
         manager.setMouseMovementBaseTimeMs(currentBaseTime);
 
         DefaultOvershootManager overshootManager = (DefaultOvershootManager) factory.getOvershootManager();

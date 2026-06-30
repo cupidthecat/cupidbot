@@ -9,6 +9,7 @@ import net.runelite.client.plugins.cupidbot.util.Global;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2Antiban;
 import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.ActivityIntensity;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import net.runelite.client.plugins.cupidbot.util.math.Rs2Random;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.MouseInfoAccessor;
@@ -54,6 +55,7 @@ public class NaturalMouse {
     private volatile MouseMotionFactory cachedFactory;
     private volatile ActivityIntensity cachedIntensity;
     private volatile MouseSpeed cachedMouseSpeed;
+    private volatile MouseSmoothness cachedMouseSmoothness;
     private volatile boolean cachedDynamicIntensity;
     private volatile boolean cachedSimulateFatigue;
     private volatile int cachedEffectiveBaseTimeMs;
@@ -101,6 +103,7 @@ public class NaturalMouse {
         boolean dynamicIntensity = Rs2AntibanSettings.dynamicIntensity;
         boolean simulateFatigue = Rs2AntibanSettings.simulateFatigue;
         MouseSpeed mouseSpeed = Rs2AntibanSettings.getEffectiveMouseSpeed(intensity);
+        MouseSmoothness mouseSmoothness = Rs2AntibanSettings.getConfiguredMouseSmoothness();
         int effectiveBaseTimeMs = simulateFatigue
                 ? FactoryTemplates.effectiveMouseBaseTimeMs(mouseSpeed)
                 : mouseSpeed.getBaseTimeMs();
@@ -108,15 +111,21 @@ public class NaturalMouse {
         if (cachedFactory != null
                 && intensity == cachedIntensity
                 && mouseSpeed == cachedMouseSpeed
+                && mouseSmoothness == cachedMouseSmoothness
                 && dynamicIntensity == cachedDynamicIntensity
                 && simulateFatigue == cachedSimulateFatigue
                 && effectiveBaseTimeMs == cachedEffectiveBaseTimeMs) {
             return cachedFactory;
         }
         log.debug("Creating {} mouse motion factory", mouseSpeed.getName());
-        MouseMotionFactory factory = FactoryTemplates.createMouseSpeedMotionFactory(nature, mouseSpeed, effectiveBaseTimeMs);
+        MouseMotionFactory factory = FactoryTemplates.createMouseSpeedMotionFactory(
+                nature,
+                mouseSpeed,
+                effectiveBaseTimeMs,
+                mouseSmoothness);
         cachedIntensity = intensity;
         cachedMouseSpeed = mouseSpeed;
+        cachedMouseSmoothness = mouseSmoothness;
         cachedDynamicIntensity = dynamicIntensity;
         cachedSimulateFatigue = simulateFatigue;
         cachedEffectiveBaseTimeMs = effectiveBaseTimeMs;
@@ -214,7 +223,7 @@ public class NaturalMouse {
 
         @Override
         public void setMousePosition(int x, int y) {
-            CupidBot.getMouse().move(x, y);
+            CupidBot.getMouse().moveInstant(x, y);
 
         }
     }

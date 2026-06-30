@@ -1,6 +1,7 @@
 package net.runelite.client.plugins.cupidbot.util.antiban;
 
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import org.junit.After;
 import org.junit.Before;
@@ -57,6 +58,7 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		Rs2AntibanSettings.microBreakDurationHigh = 21;
 		Rs2AntibanSettings.actionCooldownChance = 0.35;
 		Rs2AntibanSettings.mouseSpeed = MouseSpeed.VERY_SLOW;
+		Rs2AntibanSettings.mouseSmoothness = MouseSmoothness.MAX;
 
 		Rs2AntibanSettings.saveToProfile();
 
@@ -76,6 +78,7 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		assertEquals(21, Rs2AntibanSettings.microBreakDurationHigh);
 		assertEquals(0.35, Rs2AntibanSettings.actionCooldownChance, 1e-9);
 		assertSame(MouseSpeed.VERY_SLOW, Rs2AntibanSettings.mouseSpeed);
+		assertSame(MouseSmoothness.MAX, Rs2AntibanSettings.mouseSmoothness);
 	}
 
 	@Test
@@ -88,6 +91,7 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		Rs2AntibanSettings.microBreakDurationLow = 9;
 		Rs2AntibanSettings.microBreakDurationHigh = 29;
 		Rs2AntibanSettings.mouseSpeed = MouseSpeed.VERY_SLOW;
+		Rs2AntibanSettings.mouseSmoothness = MouseSmoothness.MAX;
 		when(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY)).thenReturn(null);
 
 		Rs2AntibanSettings.loadFromProfile();
@@ -99,6 +103,7 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		assertEquals(AntibanPlugin.MICRO_BREAK_DURATION_LOW_DEFAULT, Rs2AntibanSettings.microBreakDurationLow);
 		assertEquals(AntibanPlugin.MICRO_BREAK_DURATION_HIGH_DEFAULT, Rs2AntibanSettings.microBreakDurationHigh);
 		assertSame(MouseSpeed.DEFAULT, Rs2AntibanSettings.mouseSpeed);
+		assertSame(MouseSmoothness.DEFAULT, Rs2AntibanSettings.mouseSmoothness);
 	}
 
 	@Test
@@ -107,6 +112,7 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		Rs2AntibanSettings.takeMicroBreaks = true;
 		Rs2AntibanSettings.overwriteScriptSettings = true;
 		Rs2AntibanSettings.mouseSpeed = MouseSpeed.VERY_SLOW;
+		Rs2AntibanSettings.mouseSmoothness = MouseSmoothness.MAX;
 		when(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY)).thenReturn("{\"naturalMouse\":false}");
 
 		Rs2AntibanSettings.loadFromProfile();
@@ -115,6 +121,18 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		assertFalse(Rs2AntibanSettings.takeMicroBreaks);
 		assertFalse(Rs2AntibanSettings.overwriteScriptSettings);
 		assertSame(MouseSpeed.DEFAULT, Rs2AntibanSettings.mouseSpeed);
+		assertSame(MouseSmoothness.DEFAULT, Rs2AntibanSettings.mouseSmoothness);
+	}
+
+	@Test
+	public void loadProfileSettingsUsesDefaultForInvalidMouseSmoothness()
+	{
+		when(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY)).thenReturn(
+			"{\"mouseSmoothness\":\"NOT_REAL\"}");
+
+		Rs2AntibanSettings.loadFromProfile();
+
+		assertSame(MouseSmoothness.DEFAULT, Rs2AntibanSettings.mouseSmoothness);
 	}
 
 	@Test

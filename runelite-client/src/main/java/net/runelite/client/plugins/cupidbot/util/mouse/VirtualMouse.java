@@ -133,6 +133,14 @@ public class VirtualMouse extends Mouse {
                 && CupidBot.naturalMouse != null;
     }
 
+    private void moveNaturallyOrInstant(Point point) {
+        if (shouldMoveNaturally(point)) {
+            CupidBot.naturalMouse.moveTo(point.getX(), point.getY());
+        } else {
+            moveInstant(point);
+        }
+    }
+
     public Mouse click(Point point, boolean rightClick) {
         if (point == null) return this;
 
@@ -226,39 +234,58 @@ public class VirtualMouse extends Mouse {
     }
 
     public Mouse move(Point point) {
+        if (point == null) return this;
+        moveNaturallyOrInstant(point);
+        return this;
+    }
+
+    public Mouse moveInstant(Point point) {
+        if (point == null) return this;
         setLastMove(point);
         dispatchMouseMove(MouseEvent.MOUSE_MOVED, point);
         return this;
+    }
+
+    public Mouse moveInstant(int x, int y) {
+        return moveInstant(new Point(x, y));
     }
 
     public Mouse move(Rectangle rect) {
+        if (rect == null) return this;
         Point pt = new Point((int) rect.getCenterX(), (int) rect.getCenterY());
-        setLastMove(pt);
-        dispatchMouseMove(MouseEvent.MOUSE_MOVED, pt);
-        return this;
+        return move(pt);
     }
 
     public Mouse move(Polygon polygon) {
+        if (polygon == null) return this;
         Point point = new Point((int) polygon.getBounds().getCenterX(), (int) polygon.getBounds().getCenterY());
-        setLastMove(point);
-        dispatchMouseMove(MouseEvent.MOUSE_MOVED, point);
+        return move(point);
+    }
+
+    private Mouse scroll(Point point, int wheelRotation, int unitsToScroll) {
+        if (point == null) return this;
+
+        Runnable scrollAction = () -> {
+            moveNaturallyOrInstant(point);
+            sleep(Rs2Random.logNormalBounded(40, 100));
+            dispatchWheel(point, wheelRotation, unitsToScroll);
+        };
+
+        if (CupidBot.getClient().isClientThread()) {
+            scheduledExecutorService.schedule(scrollAction, 0, TimeUnit.MILLISECONDS);
+        } else {
+            scrollAction.run();
+        }
+
         return this;
     }
 
     public Mouse scrollDown(Point point) {
-        move(point);
-        scheduledExecutorService.schedule(
-                () -> dispatchWheel(point, 2, 10),
-                Rs2Random.logNormalBounded(40, 100), TimeUnit.MILLISECONDS);
-        return this;
+        return scroll(point, 2, 10);
     }
 
     public Mouse scrollUp(Point point) {
-        move(point);
-        scheduledExecutorService.schedule(
-                () -> dispatchWheel(point, -2, -10),
-                Rs2Random.logNormalBounded(40, 100), TimeUnit.MILLISECONDS);
-        return this;
+        return scroll(point, -2, -10);
     }
 
     @Override
@@ -311,14 +338,14 @@ public class VirtualMouse extends Mouse {
         if (shouldMoveNaturally(startPoint))
             CupidBot.naturalMouse.moveTo(startPoint.getX(), startPoint.getY());
         else
-            move(startPoint);
+            moveInstant(startPoint);
         sleep(Rs2Random.logNormalBounded(50, 80));
         pressed(startPoint, MouseEvent.BUTTON1);
         sleep(Rs2Random.logNormalBounded(80, 120));
         if (shouldMoveNaturally(endPoint))
             CupidBot.naturalMouse.moveTo(endPoint.getX(), endPoint.getY());
         else
-            move(endPoint);
+            moveInstant(endPoint);
         sleep(Rs2Random.logNormalBounded(80, 120));
         released(endPoint, MouseEvent.BUTTON1);
 

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.cupidbot.CupidBot;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.ActivityIntensity;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 
 /**
@@ -121,6 +122,7 @@ public class Rs2AntibanSettings {
         private Double moveMouseRandomlyChance;
         private Double moveMouseOffScreenChance;
         private String mouseSpeed;
+        private String mouseSmoothness;
     }
 
     static void setProfileConfigManager(ConfigManager configManager) {
@@ -189,6 +191,10 @@ public class Rs2AntibanSettings {
         return mouseSpeed != null ? mouseSpeed : MouseSpeed.DEFAULT;
     }
 
+    public static MouseSmoothness getConfiguredMouseSmoothness() {
+        return mouseSmoothness != null ? mouseSmoothness : MouseSmoothness.DEFAULT;
+    }
+
     public static MouseSpeed getEffectiveMouseSpeed(ActivityIntensity activityIntensity) {
         if (dynamicIntensity) {
             MouseSpeed dynamicSpeed = MouseSpeed.fromActivityIntensity(activityIntensity);
@@ -230,6 +236,7 @@ public class Rs2AntibanSettings {
         settings.moveMouseRandomlyChance = normalizeProbability(moveMouseRandomlyChance);
         settings.moveMouseOffScreenChance = normalizeProbability(moveMouseOffScreenChance);
         settings.mouseSpeed = mouseSpeed != null ? mouseSpeed.name() : MouseSpeed.DEFAULT.name();
+        settings.mouseSmoothness = mouseSmoothness != null ? mouseSmoothness.name() : MouseSmoothness.DEFAULT.name();
         return settings;
     }
 
@@ -318,6 +325,9 @@ public class Rs2AntibanSettings {
         if (settings.mouseSpeed != null) {
             mouseSpeed = MouseSpeed.fromConfigValue(settings.mouseSpeed);
         }
+        if (settings.mouseSmoothness != null) {
+            mouseSmoothness = MouseSmoothness.fromConfigValue(settings.mouseSmoothness);
+        }
     }
 
     public static double normalizeProbability(double value) {
@@ -367,6 +377,7 @@ public class Rs2AntibanSettings {
     public static double moveMouseRandomlyChance = 0.1; // 10% chance of moving the mouse randomly by default
     public static double moveMouseOffScreenChance = 0.1; // 10% chance of moving the mouse off screen by default
     public static MouseSpeed mouseSpeed = MouseSpeed.DEFAULT;
+    public static MouseSmoothness mouseSmoothness = MouseSmoothness.DEFAULT;
 
     // reset method to reset all settings to default values
     public static void reset() {
@@ -400,5 +411,6 @@ public class Rs2AntibanSettings {
         moveMouseRandomlyChance = 0.1;
         moveMouseOffScreenChance = 0.1;
         mouseSpeed = MouseSpeed.DEFAULT;
+        mouseSmoothness = MouseSmoothness.DEFAULT;
     }
 }

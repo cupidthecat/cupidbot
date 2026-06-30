@@ -32,9 +32,11 @@ Review matches manually. `localhost`, official RuneLite, Jagex, OSRS, and local 
 Shared automation input should avoid fastest-possible defaults and rectangular timing patterns.
 
 - Keep new-profile mouse speed at a middle preset unless a profile explicitly overrides it.
+- Keep new-profile mouse smoothness at the balanced preset unless a profile explicitly overrides it.
 - Clamp probability settings to `0.0..1.0` when loading profiles and before runtime use.
 - Treat action cooldown chances `>= 1.0` as always-on and `<= 0.0` as disabled.
 - Keep natural mouse movement fatigue tied to `SessionFatigue` and cap it at the selected mouse preset maximum.
+- Keep public mouse movement on the natural-motion path, but dispatch individual generated motion steps through the raw `moveInstant` path to avoid recursive smoothing.
 - Preserve small bounded delays between synthetic mouse press/release/click events.
 
 Focused verification:
@@ -42,8 +44,10 @@ Focused verification:
 ```bash
 ./gradlew :client:runUnitTests \
   --tests "*MouseSpeedTest" \
+  --tests "*MouseSmoothnessTest" \
   --tests "*Rs2AntibanSettingsProfilePersistenceTest" \
   --tests "*Rs2AntibanActivityPlayStyleTest" \
+  --tests "*MousePanelTest" \
   --tests "*FactoryTemplatesMouseSpeedTest" \
   --tests "*VirtualMouseUngatedMotionTest"
 ```
