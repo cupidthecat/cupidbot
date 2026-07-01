@@ -106,6 +106,11 @@ public final class MouseTarget
 
 	public Point samplePoint(Random random, int edgeInset, boolean forceCenter)
 	{
+		return samplePoint(random, edgeInset, forceCenter, 0.0);
+	}
+
+	public Point samplePoint(Random random, int edgeInset, boolean forceCenter, double centerBias)
+	{
 		if (forceCenter || shape == Shape.POINT)
 		{
 			return center;
@@ -113,6 +118,25 @@ public final class MouseTarget
 
 		Random rng = random == null ? new Random() : random;
 		Rectangle safe = insetBounds(edgeInset);
+		double bias = Math.max(0.0, Math.min(1.0, centerBias));
+		if (bias > 0.0)
+		{
+			double xDeviation = Math.max(1.0, safe.width * (0.34 - 0.20 * bias));
+			double yDeviation = Math.max(1.0, safe.height * (0.34 - 0.20 * bias));
+			for (int i = 0; i < 16; i++)
+			{
+				int x = clamp((int) Math.round(center.getX() + rng.nextGaussian() * xDeviation),
+					safe.x, safe.x + safe.width - 1);
+				int y = clamp((int) Math.round(center.getY() + rng.nextGaussian() * yDeviation),
+					safe.y, safe.y + safe.height - 1);
+				Point candidate = new Point(x, y);
+				if (contains(candidate))
+				{
+					return candidate;
+				}
+			}
+		}
+
 		for (int i = 0; i < 16; i++)
 		{
 			int x = safe.x + rng.nextInt(Math.max(1, safe.width));
@@ -143,5 +167,10 @@ public final class MouseTarget
 		int width = Math.max(1, rectangle.width);
 		int height = Math.max(1, rectangle.height);
 		return new Rectangle(rectangle.x, rectangle.y, width, height);
+	}
+
+	private static int clamp(int value, int min, int max)
+	{
+		return Math.max(min, Math.min(max, value));
 	}
 }

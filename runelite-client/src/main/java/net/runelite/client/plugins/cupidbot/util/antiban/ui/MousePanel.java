@@ -84,6 +84,12 @@ public class MousePanel extends JPanel
     private final JSlider mouseOvershootScaleSlider = new JSlider(0, 200, Rs2AntibanSettings.mouseOvershootScale);
     private final JLabel mouseCorrectionScaleLabel = new JLabel();
     private final JSlider mouseCorrectionScaleSlider = new JSlider(0, 200, Rs2AntibanSettings.mouseCorrectionScale);
+    private final JLabel mouseEndpointErrorScaleLabel = new JLabel();
+    private final JSlider mouseEndpointErrorScaleSlider = new JSlider(0, 200, Rs2AntibanSettings.mouseEndpointErrorScale);
+    private final JLabel mouseDragStabilityScaleLabel = new JLabel();
+    private final JSlider mouseDragStabilityScaleSlider = new JSlider(0, 200, Rs2AntibanSettings.mouseDragStabilityScale);
+    private final JLabel mouseScrollBurstScaleLabel = new JLabel();
+    private final JSlider mouseScrollBurstScaleSlider = new JSlider(0, 200, Rs2AntibanSettings.mouseScrollBurstScale);
 
     public MousePanel()
     {
@@ -129,6 +135,9 @@ public class MousePanel extends JPanel
         setupAdvancedSlider(mouseMicroJitterScaleSlider, "Small per-step hand jitter percentage");
         setupAdvancedSlider(mouseOvershootScaleSlider, "Overshoot distance and likelihood percentage");
         setupAdvancedSlider(mouseCorrectionScaleSlider, "Corrective sub-movement percentage");
+        setupAdvancedSlider(mouseEndpointErrorScaleSlider, "Endpoint miss radius percentage");
+        setupAdvancedSlider(mouseDragStabilityScaleSlider, "Drag stabilization percentage");
+        setupAdvancedSlider(mouseScrollBurstScaleSlider, "Scroll burst tick percentage");
 
         setLayout(new GridBagLayout());
         setBackground(ColorScheme.DARK_GRAY_HOVER_COLOR);
@@ -293,6 +302,12 @@ public class MousePanel extends JPanel
                 value -> Rs2AntibanSettings.mouseOvershootScale = value);
         bindAdvancedSlider(mouseCorrectionScaleSlider, mouseCorrectionScaleLabel, "Corrections (%)",
                 value -> Rs2AntibanSettings.mouseCorrectionScale = value);
+        bindAdvancedSlider(mouseEndpointErrorScaleSlider, mouseEndpointErrorScaleLabel, "Endpoint Error (%)",
+                value -> Rs2AntibanSettings.mouseEndpointErrorScale = value);
+        bindAdvancedSlider(mouseDragStabilityScaleSlider, mouseDragStabilityScaleLabel, "Drag Stability (%)",
+                value -> Rs2AntibanSettings.mouseDragStabilityScale = value);
+        bindAdvancedSlider(mouseScrollBurstScaleSlider, mouseScrollBurstScaleLabel, "Scroll Burst (%)",
+                value -> Rs2AntibanSettings.mouseScrollBurstScale = value);
     }
 
     public void updateValues()
@@ -336,6 +351,9 @@ public class MousePanel extends JPanel
             setSliderValueIfNotAdjusting(mouseMicroJitterScaleSlider, Rs2AntibanSettings.mouseMicroJitterScale);
             setSliderValueIfNotAdjusting(mouseOvershootScaleSlider, Rs2AntibanSettings.mouseOvershootScale);
             setSliderValueIfNotAdjusting(mouseCorrectionScaleSlider, Rs2AntibanSettings.mouseCorrectionScale);
+            setSliderValueIfNotAdjusting(mouseEndpointErrorScaleSlider, Rs2AntibanSettings.mouseEndpointErrorScale);
+            setSliderValueIfNotAdjusting(mouseDragStabilityScaleSlider, Rs2AntibanSettings.mouseDragStabilityScale);
+            setSliderValueIfNotAdjusting(mouseScrollBurstScaleSlider, Rs2AntibanSettings.mouseScrollBurstScale);
             updateAdvancedLabels();
         } finally {
             updatingValues = false;
@@ -434,6 +452,9 @@ public class MousePanel extends JPanel
         addAdvancedControl(advancedMousePopupPanel, mouseMicroJitterScaleLabel, mouseMicroJitterScaleSlider, popupGbc);
         addAdvancedControl(advancedMousePopupPanel, mouseOvershootScaleLabel, mouseOvershootScaleSlider, popupGbc);
         addAdvancedControl(advancedMousePopupPanel, mouseCorrectionScaleLabel, mouseCorrectionScaleSlider, popupGbc);
+        addAdvancedControl(advancedMousePopupPanel, mouseEndpointErrorScaleLabel, mouseEndpointErrorScaleSlider, popupGbc);
+        addAdvancedControl(advancedMousePopupPanel, mouseDragStabilityScaleLabel, mouseDragStabilityScaleSlider, popupGbc);
+        addAdvancedControl(advancedMousePopupPanel, mouseScrollBurstScaleLabel, mouseScrollBurstScaleSlider, popupGbc);
 
         advancedMousePopup.add(advancedMousePopupScrollPane);
     }
@@ -587,6 +608,9 @@ public class MousePanel extends JPanel
         mouseMicroJitterScaleLabel.setText("Micro Jitter (%): " + mouseMicroJitterScaleSlider.getValue());
         mouseOvershootScaleLabel.setText("Overshoot (%): " + mouseOvershootScaleSlider.getValue());
         mouseCorrectionScaleLabel.setText("Corrections (%): " + mouseCorrectionScaleSlider.getValue());
+        mouseEndpointErrorScaleLabel.setText("Endpoint Error (%): " + mouseEndpointErrorScaleSlider.getValue());
+        mouseDragStabilityScaleLabel.setText("Drag Stability (%): " + mouseDragStabilityScaleSlider.getValue());
+        mouseScrollBurstScaleLabel.setText("Scroll Burst (%): " + mouseScrollBurstScaleSlider.getValue());
         updateTimingControlStates();
     }
 
@@ -688,6 +712,12 @@ public class MousePanel extends JPanel
                 mouseOvershootScaleLabel,
                 mouseOvershootScaleSlider,
                 mouseCorrectionScaleLabel,
-                mouseCorrectionScaleSlider);
+                mouseCorrectionScaleSlider,
+                mouseEndpointErrorScaleLabel,
+                mouseEndpointErrorScaleSlider,
+                mouseDragStabilityScaleLabel,
+                mouseDragStabilityScaleSlider,
+                mouseScrollBurstScaleLabel,
+                mouseScrollBurstScaleSlider);
     }
 }

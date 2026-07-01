@@ -136,6 +136,109 @@ public class MouseMovementPlannerTest
 	}
 
 	@Test
+	public void contextAndDifficultyChooseTrajectoryStyleAndTexture()
+	{
+		MouseMovementPlanner planner = new MouseMovementPlanner();
+		Point start = new Point(5, 5);
+
+		MouseMovementPlan dragPlan = planner.plan(
+			start,
+			MouseTarget.rectangle(new Rectangle(300, 240, 30, 30)),
+			MouseActionContext.DRAG,
+			MouseEngineMode.BALANCED,
+			MouseSpeed.NORMAL,
+			MouseSmoothness.DEFAULT,
+			123L);
+		MouseMovementPlan scrollPlan = planner.plan(
+			start,
+			MouseTarget.rectangle(new Rectangle(300, 240, 30, 30)),
+			MouseActionContext.SCROLL,
+			MouseEngineMode.BALANCED,
+			MouseSpeed.NORMAL,
+			MouseSmoothness.DEFAULT,
+			123L);
+		MouseMovementPlan difficultPlan = planner.plan(
+			start,
+			MouseTarget.rectangle(new Rectangle(600, 420, 4, 4)),
+			MouseActionContext.WORLD_OBJECT,
+			MouseEngineMode.RELAXED,
+			MouseSpeed.NORMAL,
+			MouseSmoothness.DEFAULT,
+			123L);
+
+		assertEquals(MouseTrajectoryStyle.DRAG_STABLE, dragPlan.getTrajectoryStyle());
+		assertEquals(MouseTrajectoryStyle.SCROLL_SMOOTH, scrollPlan.getTrajectoryStyle());
+		assertEquals(MouseTrajectoryStyle.CORRECTIVE, difficultPlan.getTrajectoryStyle());
+		assertEquals(0, dragPlan.getOvershootCount());
+		assertEquals(0, scrollPlan.getOvershootCount());
+		assertTrue("drag movement should reduce low-frequency path drift",
+			dragPlan.getEffectivePathNoiseMultiplier() < difficultPlan.getEffectivePathNoiseMultiplier());
+		assertTrue("drag movement should reduce micro jitter",
+			dragPlan.getEffectiveMicroJitterMultiplier() < difficultPlan.getEffectiveMicroJitterMultiplier());
+		assertTrue("difficult target should expose a useful Fitts-style difficulty",
+			difficultPlan.getDifficultyIndex() > dragPlan.getDifficultyIndex());
+	}
+
+	@Test
+	public void endpointErrorScaleCanTightenTargetAcquisition()
+	{
+		MouseMovementPlanner planner = new MouseMovementPlanner();
+		Point start = new Point(5, 5);
+		MouseTarget target = MouseTarget.rectangle(new Rectangle(300, 240, 80, 60));
+
+		Rs2AntibanSettings.mouseEndpointErrorScale = 100;
+		MouseMovementPlan normalPlan = planner.plan(
+			start,
+			target,
+			MouseActionContext.MENU,
+			MouseEngineMode.BALANCED,
+			MouseSpeed.NORMAL,
+			MouseSmoothness.DEFAULT,
+			123L);
+		Rs2AntibanSettings.mouseEndpointErrorScale = 0;
+		MouseMovementPlan tightPlan = planner.plan(
+			start,
+			target,
+			MouseActionContext.MENU,
+			MouseEngineMode.BALANCED,
+			MouseSpeed.NORMAL,
+			MouseSmoothness.DEFAULT,
+			123L);
+
+		assertTrue(normalPlan.getEndpointErrorRadius() > 0);
+		assertEquals(0, tightPlan.getEndpointErrorRadius());
+	}
+
+	@Test
+	public void targetPointSamplingIsCenterBiasedForLargeTargets()
+	{
+		MouseMovementPlanner planner = new MouseMovementPlanner();
+		Point start = new Point(10, 10);
+		MouseTarget target = MouseTarget.rectangle(new Rectangle(200, 200, 100, 100));
+		double totalDistanceFromCenter = 0.0;
+
+		for (long seed = 1; seed <= 80; seed++)
+		{
+			MouseMovementPlan plan = planner.plan(
+				start,
+				target,
+				MouseActionContext.MENU,
+				MouseEngineMode.BALANCED,
+				MouseSpeed.NORMAL,
+				MouseSmoothness.DEFAULT,
+				seed);
+			Point targetPoint = plan.getTargetPoint();
+			assertTrue(target.contains(targetPoint));
+			totalDistanceFromCenter += Math.hypot(
+				targetPoint.getX() - target.getCenter().getX(),
+				targetPoint.getY() - target.getCenter().getY());
+		}
+
+		assertTrue("target sampling should prefer the middle of large clickboxes",
+			totalDistanceFromCenter / 80.0 < 24.0);
+	}
+
+	@Test
 	public void randomTimingSettingsAreSampledPerPlanWithinConfiguredRanges()
 	{
 		Rs2AntibanSettings.mouseReactionDelayRandom = true;
@@ -255,5 +358,31 @@ public class MouseMovementPlannerTest
 		assertEquals(MouseMovementTuning.DEFAULT_REACTION_DELAY_MS, report.getPlannedReactionDelayMs());
 		assertEquals(MouseMovementTuning.DEFAULT_SETTLE_DELAY_MS, report.getPlannedSettleDelayMs());
 		assertEquals(MouseMovementTuning.DEFAULT_BUTTON_HOLD_MS, report.getPlannedButtonDownTimeMs());
+	}
+
+	@Test
+	public void reportCalculatesStepVarianceAndJerkProxy()
+	{
+		MouseMovementPlan plan = new MouseMovementPlan(
+			new Point(0, 0),
+			MouseTarget.point(new Point(9, 0)),
+			new Point(9, 0),
+			MouseActionContext.GENERAL,
+			MouseEngineMode.BALANCED,
+			42L,
+			9.0,
+			10.0,
+			120,
+			1,
+			0,
+			0,
+			MouseSpeed.NORMAL.getBaseTimeMs());
+
+		MouseMovementReport report = MouseMovementReport.fromPath(
+			plan,
+			Arrays.asList(new Point(0, 0), new Point(5, 0), new Point(5, 0), new Point(9, 0)));
+
+		assertTrue(report.getStepDistanceVariance() > 0.0);
+		assertTrue(report.getJerkProxy() > 0.0);
 	}
 }

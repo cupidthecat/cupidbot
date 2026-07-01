@@ -6,7 +6,9 @@ import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.cupidbot.util.antiban.SessionFatigue;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementPlan;
 import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementTuning;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseTrajectoryStyle;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.MouseMotionFactory;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.SpeedManager;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.support.*;
@@ -151,20 +153,72 @@ public class FactoryTemplates {
             Random random,
             Integer overshootsOverride,
             MouseMovementTuning tuning) {
+        MouseMovementTuning safeTuning = tuning == null ? MouseMovementTuning.defaults() : tuning;
+        return createMouseSpeedMotionFactory(
+                nature,
+                mouseSpeed,
+                currentBaseTime,
+                mouseSmoothness,
+                random,
+                overshootsOverride,
+                safeTuning,
+                MouseTrajectoryStyle.BALANCED,
+                safeTuning.getCurveMultiplier(),
+                safeTuning.getPathNoiseMultiplier(),
+                safeTuning.getMicroJitterMultiplier());
+    }
+
+    public static MouseMotionFactory createMouseSpeedMotionFactory(
+            MouseMotionNature nature,
+            MouseSpeed mouseSpeed,
+            int currentBaseTime,
+            MouseSmoothness mouseSmoothness,
+            Random random,
+            Integer overshootsOverride,
+            MouseMovementPlan plan) {
+        MouseMovementPlan safePlan = plan == null ? null : plan;
+        MouseMovementTuning safeTuning = safePlan == null ? MouseMovementTuning.defaults() : safePlan.getTuning();
+        return createMouseSpeedMotionFactory(
+                nature,
+                mouseSpeed,
+                currentBaseTime,
+                mouseSmoothness,
+                random,
+                overshootsOverride,
+                safeTuning,
+                safePlan == null ? MouseTrajectoryStyle.BALANCED : safePlan.getTrajectoryStyle(),
+                safePlan == null ? safeTuning.getCurveMultiplier() : safePlan.getEffectiveCurveMultiplier(),
+                safePlan == null ? safeTuning.getPathNoiseMultiplier() : safePlan.getEffectivePathNoiseMultiplier(),
+                safePlan == null ? safeTuning.getMicroJitterMultiplier() : safePlan.getEffectiveMicroJitterMultiplier());
+    }
+
+    private static MouseMotionFactory createMouseSpeedMotionFactory(
+            MouseMotionNature nature,
+            MouseSpeed mouseSpeed,
+            int currentBaseTime,
+            MouseSmoothness mouseSmoothness,
+            Random random,
+            Integer overshootsOverride,
+            MouseMovementTuning tuning,
+            MouseTrajectoryStyle trajectoryStyle,
+            double curveMultiplier,
+            double pathNoiseMultiplier,
+            double microJitterMultiplier) {
         MouseSpeed speed = mouseSpeed != null ? mouseSpeed : MouseSpeed.DEFAULT;
         MouseSmoothness smoothness = mouseSmoothness != null ? mouseSmoothness : MouseSmoothness.DEFAULT;
         MouseMovementTuning safeTuning = tuning == null ? MouseMovementTuning.defaults() : tuning;
+        MouseTrajectoryStyle style = trajectoryStyle == null ? MouseTrajectoryStyle.BALANCED : trajectoryStyle;
         Random rng = random == null ? new Random() : random;
 
         MouseMotionFactory factory = new MouseMotionFactory(nature);
         factory.setRandom(rng);
-        DefaultSpeedManager manager = new DefaultSpeedManager(createHumanMouseFlows(speed), rng);
+        DefaultSpeedManager manager = new DefaultSpeedManager(createHumanMouseFlows(speed, style), rng);
         factory.setDeviationProvider(new SinusoidalDeviationProvider(
-                scaledDivider(smoothness.getDeviationSlopeDivider(), safeTuning.getCurveMultiplier())));
+                scaledDivider(smoothness.getDeviationSlopeDivider(), curveMultiplier)));
         factory.setNoiseProvider(new DefaultNoiseProvider(
                 smoothness.getNoiseDivider(),
-                safeTuning.getPathNoiseMultiplier(),
-                safeTuning.getMicroJitterMultiplier()));
+                pathNoiseMultiplier,
+                microJitterMultiplier));
         factory.getNature().setReactionTimeVariationMs(speed.getReactionTimeVariationMs());
         factory.getNature().setTimeToStepsDivider(smoothness.getTimeToStepsDivider());
         factory.getNature().setMinSteps(smoothness.getMinSteps());
@@ -209,6 +263,32 @@ public class FactoryTemplates {
     }
 
     private static List<Flow> createHumanMouseFlows(MouseSpeed mouseSpeed) {
+        return createHumanMouseFlows(mouseSpeed, MouseTrajectoryStyle.BALANCED);
+    }
+
+    private static List<Flow> createHumanMouseFlows(MouseSpeed mouseSpeed, MouseTrajectoryStyle trajectoryStyle) {
+        MouseTrajectoryStyle style = trajectoryStyle == null ? MouseTrajectoryStyle.BALANCED : trajectoryStyle;
+        if (style == MouseTrajectoryStyle.DRAG_STABLE) {
+            return new ArrayList<>(Arrays.asList(
+                    new Flow(FlowTemplates.variatingFlow()),
+                    new Flow(FlowTemplates.slowStartupFlow()),
+                    new Flow(FlowTemplates.adjustingFlow())
+            ));
+        }
+        if (style == MouseTrajectoryStyle.SCROLL_SMOOTH || style == MouseTrajectoryStyle.SMOOTH) {
+            return new ArrayList<>(Arrays.asList(
+                    new Flow(FlowTemplates.variatingFlow()),
+                    new Flow(FlowTemplates.slowStartupFlow()),
+                    new Flow(FlowTemplates.slowStartup2Flow()),
+                    new Flow(FlowTemplates.adjustingFlow())
+            ));
+        }
+        if (style == MouseTrajectoryStyle.DIRECT || style == MouseTrajectoryStyle.QA_REPLAY) {
+            return new ArrayList<>(Arrays.asList(
+                    new Flow(FlowTemplates.constantSpeed()),
+                    new Flow(FlowTemplates.variatingFlow())
+            ));
+        }
         List<Flow> flows = new ArrayList<>(Arrays.asList(
                 new Flow(FlowTemplates.variatingFlow()),
                 new Flow(FlowTemplates.slowStartupFlow()),
@@ -216,6 +296,9 @@ public class FactoryTemplates {
                 new Flow(FlowTemplates.adjustingFlow()),
                 new Flow(FlowTemplates.jaggedFlow())
         ));
+        if (style == MouseTrajectoryStyle.CORRECTIVE) {
+            flows.add(new Flow(FlowTemplates.stoppingFlow()));
+        }
         if (mouseSpeed.getSliderIndex() <= MouseSpeed.RELAXED.getSliderIndex()) {
             flows.add(new Flow(FlowTemplates.interruptedFlow()));
             flows.add(new Flow(FlowTemplates.interruptedFlow2()));

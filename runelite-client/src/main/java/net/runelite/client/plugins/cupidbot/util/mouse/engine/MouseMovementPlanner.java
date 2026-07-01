@@ -44,13 +44,14 @@ public class MouseMovementPlanner
 		long effectiveSeed = seed == null ? ThreadLocalRandom.current().nextLong() : seed;
 		Random random = new Random(effectiveSeed);
 
-		double distance = Math.hypot(
-			safeTarget.getCenter().getX() - start.getX(),
-			safeTarget.getCenter().getY() - start.getY());
 		double targetWidth = safeTarget.getEffectiveWidth();
-		int endpointErrorRadius = endpointErrorRadius(targetWidth, safeMode);
 		boolean replay = safeMode == MouseEngineMode.QA_REPLAY || safeContext == MouseActionContext.QA_REPLAY;
-		Point targetPoint = safeTarget.samplePoint(random, endpointErrorRadius, replay);
+		int endpointErrorRadius = endpointErrorRadius(targetWidth, safeContext, safeMode, safeTuning);
+		Point targetPoint = safeTarget.samplePoint(
+			random,
+			endpointErrorRadius,
+			replay,
+			safeContext.getTargetCenterBias());
 		if (replay)
 		{
 			safeTuning = safeTuning.withoutReplayDelays();
@@ -60,9 +61,13 @@ public class MouseMovementPlanner
 			safeTuning = safeTuning.sampleTimings(random);
 		}
 		double targetPointDistance = Math.hypot(targetPoint.getX() - start.getX(), targetPoint.getY() - start.getY());
+		double difficultyIndex = difficultyIndex(targetPointDistance, targetWidth);
 		int durationMs = durationMs(targetPointDistance, targetWidth, safeContext, safeMode, safeSpeed, safeSmoothness);
 		int overshoots = overshootCount(targetPointDistance, targetWidth, safeContext, safeMode, safeSpeed, safeTuning);
 		int corrections = correctionCount(targetPointDistance, targetWidth, overshoots, safeContext, safeMode, safeTuning);
+		MouseTrajectoryStyle trajectoryStyle = trajectoryStyle(
+			targetPointDistance, difficultyIndex, overshoots, corrections, safeContext, safeMode);
+		double[] textureMultipliers = textureMultipliers(safeContext, trajectoryStyle, safeTuning);
 		int factoryBaseTimeMs = Math.max(30, durationMs / 2);
 
 		return new MouseMovementPlan(
@@ -79,7 +84,12 @@ public class MouseMovementPlanner
 			overshoots,
 			corrections,
 			factoryBaseTimeMs,
-			safeTuning);
+			safeTuning,
+			difficultyIndex,
+			trajectoryStyle,
+			textureMultipliers[0],
+			textureMultipliers[1],
+			textureMultipliers[2]);
 	}
 
 	private int durationMs(
@@ -90,7 +100,7 @@ public class MouseMovementPlanner
 		MouseSpeed speed,
 		MouseSmoothness smoothness)
 	{
-		double difficulty = Math.log(distance / Math.max(1.0, targetWidth) + 1.0) / LOG_2;
+		double difficulty = difficultyIndex(distance, targetWidth);
 		double smoothnessCost = 1.0 + smoothness.getSliderIndex() * 0.025;
 		double duration = speed.getBaseTimeMs()
 			+ difficulty * speed.getBaseTimeMs() * 0.48
@@ -100,13 +110,22 @@ public class MouseMovementPlanner
 		return clamp((int) Math.round(duration), 45, max);
 	}
 
-	private int endpointErrorRadius(double targetWidth, MouseEngineMode mode)
+	private int endpointErrorRadius(
+		double targetWidth,
+		MouseActionContext context,
+		MouseEngineMode mode,
+		MouseMovementTuning tuning)
 	{
 		if (mode == MouseEngineMode.QA_REPLAY)
 		{
 			return 0;
 		}
-		return clamp((int) Math.floor(targetWidth * 0.18 * mode.getEndpointErrorMultiplier()), 0, 14);
+		double radius = targetWidth
+			* 0.18
+			* mode.getEndpointErrorMultiplier()
+			* context.getEndpointErrorMultiplier()
+			* tuning.getEndpointErrorMultiplier();
+		return clamp((int) Math.floor(radius), 0, 14);
 	}
 
 	private int overshootCount(
@@ -124,7 +143,7 @@ public class MouseMovementPlanner
 		{
 			return 0;
 		}
-		double difficulty = Math.log(distance / Math.max(1.0, targetWidth) + 1.0) / LOG_2;
+		double difficulty = difficultyIndex(distance, targetWidth);
 		if (difficulty < 3.0)
 		{
 			return 0;
@@ -162,7 +181,77 @@ public class MouseMovementPlanner
 		return clamp(corrections, 0, 4);
 	}
 
+	private MouseTrajectoryStyle trajectoryStyle(
+		double distance,
+		double difficultyIndex,
+		int overshoots,
+		int corrections,
+		MouseActionContext context,
+		MouseEngineMode mode)
+	{
+		if (mode == MouseEngineMode.QA_REPLAY || context == MouseActionContext.QA_REPLAY)
+		{
+			return MouseTrajectoryStyle.QA_REPLAY;
+		}
+		if (context == MouseActionContext.DRAG)
+		{
+			return MouseTrajectoryStyle.DRAG_STABLE;
+		}
+		if (context == MouseActionContext.SCROLL)
+		{
+			return MouseTrajectoryStyle.SCROLL_SMOOTH;
+		}
+		if (overshoots > 0 || corrections > 0 || difficultyIndex >= 5.0)
+		{
+			return MouseTrajectoryStyle.CORRECTIVE;
+		}
+		if (context == MouseActionContext.MENU || context == MouseActionContext.INVENTORY)
+		{
+			return MouseTrajectoryStyle.SMOOTH;
+		}
+		if (distance < 20.0)
+		{
+			return MouseTrajectoryStyle.DIRECT;
+		}
+		return MouseTrajectoryStyle.BALANCED;
+	}
+
+	private double[] textureMultipliers(
+		MouseActionContext context,
+		MouseTrajectoryStyle style,
+		MouseMovementTuning tuning)
+	{
+		double curve = tuning.getCurveMultiplier() * context.getCurveMultiplier() * style.getCurveMultiplier();
+		double pathNoise = tuning.getPathNoiseMultiplier()
+			* context.getPathNoiseMultiplier()
+			* style.getPathNoiseMultiplier();
+		double microJitter = tuning.getMicroJitterMultiplier()
+			* context.getMicroJitterMultiplier()
+			* style.getMicroJitterMultiplier();
+		if (context == MouseActionContext.DRAG)
+		{
+			double dragDampening = 1.0 / Math.max(0.5, tuning.getDragStabilityMultiplier() + 0.5);
+			pathNoise *= dragDampening;
+			microJitter *= dragDampening;
+		}
+		return new double[]{
+			clamp(curve, 0.0, 4.0),
+			clamp(pathNoise, 0.0, 4.0),
+			clamp(microJitter, 0.0, 4.0)
+		};
+	}
+
+	private double difficultyIndex(double distance, double targetWidth)
+	{
+		return Math.log(distance / Math.max(1.0, targetWidth) + 1.0) / LOG_2;
+	}
+
 	private static int clamp(int value, int min, int max)
+	{
+		return Math.max(min, Math.min(max, value));
+	}
+
+	private static double clamp(double value, double min, double max)
 	{
 		return Math.max(min, Math.min(max, value));
 	}

@@ -69,6 +69,37 @@ public class VirtualMouseUngatedMotionTest {
 	}
 
 	@Test
+	public void dragTimingUsesPlanTuningAndHumanBounds() {
+		MouseMovementPlan plan = movementPlanWithTuning(
+				new MouseMovementTuning(25, 35, 82, 100, 100, 100, 100, 100));
+
+		assertEquals(82, VirtualMouse.nextDragPressDelayMs(plan));
+		assertEquals(35, VirtualMouse.nextDragReleaseDelayMs(plan));
+
+		for (int i = 0; i < 10_000; i++) {
+			int pressDelay = VirtualMouse.nextDragPressDelayMs(null);
+			int releaseDelay = VirtualMouse.nextDragReleaseDelayMs(null);
+			assertTrue("drag press delay " + pressDelay + " below floor", pressDelay >= 35);
+			assertTrue("drag press delay " + pressDelay + " above ceiling", pressDelay <= 140);
+			assertTrue("drag release delay " + releaseDelay + " below floor", releaseDelay >= 40);
+			assertTrue("drag release delay " + releaseDelay + " above ceiling", releaseDelay <= 140);
+		}
+	}
+
+	@Test
+	public void scrollBurstScaleControlsWheelTickCount() {
+		MouseMovementPlan defaultPlan = movementPlanWithTuning(
+				new MouseMovementTuning(25, 35, 82, 100, 100, 100, 100, 100));
+		MouseMovementPlan doubledPlan = movementPlanWithTuning(
+				new MouseMovementTuning(25, 35, 82, 100, 100, 100, 100, 100, 100, 100, 200));
+
+		assertEquals(2, VirtualMouse.scrollBurstTicks(2, defaultPlan));
+		assertEquals(4, VirtualMouse.scrollBurstTicks(2, doubledPlan));
+		assertEquals(1, VirtualMouse.scrollBurstTicks(0, doubledPlan));
+		assertEquals(6, VirtualMouse.scrollBurstTicks(20, doubledPlan));
+	}
+
+	@Test
 	public void virtualMouseDoesNotBranchOnNaturalMouseFlag() throws IOException {
 		List<String> hits = scanFieldReads(
 				VirtualMouse.class,

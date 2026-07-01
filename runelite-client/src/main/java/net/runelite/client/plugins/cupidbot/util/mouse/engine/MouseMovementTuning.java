@@ -18,6 +18,9 @@ public final class MouseMovementTuning
 	public static final int DEFAULT_BUTTON_HOLD_MIN_MS = 35;
 	public static final int DEFAULT_BUTTON_HOLD_MAX_MS = 90;
 	public static final int DEFAULT_PERCENT = 100;
+	public static final int DEFAULT_ENDPOINT_ERROR_PERCENT = 100;
+	public static final int DEFAULT_DRAG_STABILITY_PERCENT = 100;
+	public static final int DEFAULT_SCROLL_BURST_PERCENT = 100;
 
 	private final int reactionDelayMs;
 	private final boolean reactionDelayRandom;
@@ -36,6 +39,9 @@ public final class MouseMovementTuning
 	private final int microJitterPercent;
 	private final int overshootPercent;
 	private final int correctionPercent;
+	private final int endpointErrorPercent;
+	private final int dragStabilityPercent;
+	private final int scrollBurstPercent;
 
 	public MouseMovementTuning(
 		int reactionDelayMs,
@@ -46,6 +52,33 @@ public final class MouseMovementTuning
 		int microJitterPercent,
 		int overshootPercent,
 		int correctionPercent)
+	{
+		this(
+			reactionDelayMs,
+			settleDelayMs,
+			buttonDownTimeMs,
+			curvePercent,
+			pathNoisePercent,
+			microJitterPercent,
+			overshootPercent,
+			correctionPercent,
+			DEFAULT_ENDPOINT_ERROR_PERCENT,
+			DEFAULT_DRAG_STABILITY_PERCENT,
+			DEFAULT_SCROLL_BURST_PERCENT);
+	}
+
+	public MouseMovementTuning(
+		int reactionDelayMs,
+		int settleDelayMs,
+		int buttonDownTimeMs,
+		int curvePercent,
+		int pathNoisePercent,
+		int microJitterPercent,
+		int overshootPercent,
+		int correctionPercent,
+		int endpointErrorPercent,
+		int dragStabilityPercent,
+		int scrollBurstPercent)
 	{
 		this(
 			reactionDelayMs,
@@ -64,7 +97,10 @@ public final class MouseMovementTuning
 			pathNoisePercent,
 			microJitterPercent,
 			overshootPercent,
-			correctionPercent);
+			correctionPercent,
+			endpointErrorPercent,
+			dragStabilityPercent,
+			scrollBurstPercent);
 	}
 
 	public MouseMovementTuning(
@@ -86,6 +122,51 @@ public final class MouseMovementTuning
 		int overshootPercent,
 		int correctionPercent)
 	{
+		this(
+			reactionDelayMs,
+			reactionDelayRandom,
+			reactionDelayMinMs,
+			reactionDelayMaxMs,
+			settleDelayMs,
+			settleDelayRandom,
+			settleDelayMinMs,
+			settleDelayMaxMs,
+			buttonDownTimeMs,
+			buttonDownTimeRandom,
+			buttonDownTimeMinMs,
+			buttonDownTimeMaxMs,
+			curvePercent,
+			pathNoisePercent,
+			microJitterPercent,
+			overshootPercent,
+			correctionPercent,
+			DEFAULT_ENDPOINT_ERROR_PERCENT,
+			DEFAULT_DRAG_STABILITY_PERCENT,
+			DEFAULT_SCROLL_BURST_PERCENT);
+	}
+
+	public MouseMovementTuning(
+		int reactionDelayMs,
+		boolean reactionDelayRandom,
+		int reactionDelayMinMs,
+		int reactionDelayMaxMs,
+		int settleDelayMs,
+		boolean settleDelayRandom,
+		int settleDelayMinMs,
+		int settleDelayMaxMs,
+		int buttonDownTimeMs,
+		boolean buttonDownTimeRandom,
+		int buttonDownTimeMinMs,
+		int buttonDownTimeMaxMs,
+		int curvePercent,
+		int pathNoisePercent,
+		int microJitterPercent,
+		int overshootPercent,
+		int correctionPercent,
+		int endpointErrorPercent,
+		int dragStabilityPercent,
+		int scrollBurstPercent)
+	{
 		this.reactionDelayMs = clampTimingMs(reactionDelayMs);
 		this.reactionDelayRandom = reactionDelayRandom;
 		this.reactionDelayMinMs = normalizeTimingMinMs(reactionDelayMinMs, reactionDelayMaxMs);
@@ -103,6 +184,9 @@ public final class MouseMovementTuning
 		this.microJitterPercent = clampPercent(microJitterPercent);
 		this.overshootPercent = clampPercent(overshootPercent);
 		this.correctionPercent = clampPercent(correctionPercent);
+		this.endpointErrorPercent = clampPercent(endpointErrorPercent);
+		this.dragStabilityPercent = clampPercent(dragStabilityPercent);
+		this.scrollBurstPercent = clampPercent(scrollBurstPercent);
 	}
 
 	public static MouseMovementTuning defaults()
@@ -115,7 +199,10 @@ public final class MouseMovementTuning
 			DEFAULT_PERCENT,
 			DEFAULT_PERCENT,
 			DEFAULT_PERCENT,
-			DEFAULT_PERCENT);
+			DEFAULT_PERCENT,
+			DEFAULT_ENDPOINT_ERROR_PERCENT,
+			DEFAULT_DRAG_STABILITY_PERCENT,
+			DEFAULT_SCROLL_BURST_PERCENT);
 	}
 
 	public static MouseMovementTuning fromSettings()
@@ -137,7 +224,10 @@ public final class MouseMovementTuning
 			Rs2AntibanSettings.mousePathNoiseScale,
 			Rs2AntibanSettings.mouseMicroJitterScale,
 			Rs2AntibanSettings.mouseOvershootScale,
-			Rs2AntibanSettings.mouseCorrectionScale);
+			Rs2AntibanSettings.mouseCorrectionScale,
+			Rs2AntibanSettings.mouseEndpointErrorScale,
+			Rs2AntibanSettings.mouseDragStabilityScale,
+			Rs2AntibanSettings.mouseScrollBurstScale);
 	}
 
 	public MouseMovementTuning withoutReplayDelays()
@@ -150,7 +240,10 @@ public final class MouseMovementTuning
 			pathNoisePercent,
 			microJitterPercent,
 			0,
-			0);
+			0,
+			0,
+			dragStabilityPercent,
+			scrollBurstPercent);
 	}
 
 	public MouseMovementTuning sampleTimings(Random random)
@@ -164,7 +257,10 @@ public final class MouseMovementTuning
 			pathNoisePercent,
 			microJitterPercent,
 			overshootPercent,
-			correctionPercent);
+			correctionPercent,
+			endpointErrorPercent,
+			dragStabilityPercent,
+			scrollBurstPercent);
 	}
 
 	public int getReactionDelayMs()
@@ -252,6 +348,21 @@ public final class MouseMovementTuning
 		return correctionPercent;
 	}
 
+	public int getEndpointErrorPercent()
+	{
+		return endpointErrorPercent;
+	}
+
+	public int getDragStabilityPercent()
+	{
+		return dragStabilityPercent;
+	}
+
+	public int getScrollBurstPercent()
+	{
+		return scrollBurstPercent;
+	}
+
 	public double getCurveMultiplier()
 	{
 		return toMultiplier(curvePercent);
@@ -275,6 +386,21 @@ public final class MouseMovementTuning
 	public double getCorrectionMultiplier()
 	{
 		return toMultiplier(correctionPercent);
+	}
+
+	public double getEndpointErrorMultiplier()
+	{
+		return toMultiplier(endpointErrorPercent);
+	}
+
+	public double getDragStabilityMultiplier()
+	{
+		return toMultiplier(dragStabilityPercent);
+	}
+
+	public double getScrollBurstMultiplier()
+	{
+		return toMultiplier(scrollBurstPercent);
 	}
 
 	public static int clampTimingMs(int value)

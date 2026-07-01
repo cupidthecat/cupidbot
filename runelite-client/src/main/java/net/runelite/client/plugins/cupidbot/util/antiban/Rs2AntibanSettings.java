@@ -144,6 +144,9 @@ public class Rs2AntibanSettings {
         private Integer mouseMicroJitterScale;
         private Integer mouseOvershootScale;
         private Integer mouseCorrectionScale;
+        private Integer mouseEndpointErrorScale;
+        private Integer mouseDragStabilityScale;
+        private Integer mouseScrollBurstScale;
     }
 
     public static final class SettingsSnapshot {
@@ -322,6 +325,9 @@ public class Rs2AntibanSettings {
         settings.mouseMicroJitterScale = MouseMovementTuning.clampPercent(mouseMicroJitterScale);
         settings.mouseOvershootScale = MouseMovementTuning.clampPercent(mouseOvershootScale);
         settings.mouseCorrectionScale = MouseMovementTuning.clampPercent(mouseCorrectionScale);
+        settings.mouseEndpointErrorScale = MouseMovementTuning.clampPercent(mouseEndpointErrorScale);
+        settings.mouseDragStabilityScale = MouseMovementTuning.clampPercent(mouseDragStabilityScale);
+        settings.mouseScrollBurstScale = MouseMovementTuning.clampPercent(mouseScrollBurstScale);
         return settings;
     }
 
@@ -477,6 +483,15 @@ public class Rs2AntibanSettings {
         if (settings.mouseCorrectionScale != null) {
             mouseCorrectionScale = MouseMovementTuning.clampPercent(settings.mouseCorrectionScale);
         }
+        if (settings.mouseEndpointErrorScale != null) {
+            mouseEndpointErrorScale = MouseMovementTuning.clampPercent(settings.mouseEndpointErrorScale);
+        }
+        if (settings.mouseDragStabilityScale != null) {
+            mouseDragStabilityScale = MouseMovementTuning.clampPercent(settings.mouseDragStabilityScale);
+        }
+        if (settings.mouseScrollBurstScale != null) {
+            mouseScrollBurstScale = MouseMovementTuning.clampPercent(settings.mouseScrollBurstScale);
+        }
     }
 
     public static double normalizeProbability(double value) {
@@ -545,6 +560,9 @@ public class Rs2AntibanSettings {
     public static int mouseMicroJitterScale = MouseMovementTuning.DEFAULT_PERCENT;
     public static int mouseOvershootScale = MouseMovementTuning.DEFAULT_PERCENT;
     public static int mouseCorrectionScale = MouseMovementTuning.DEFAULT_PERCENT;
+    public static int mouseEndpointErrorScale = MouseMovementTuning.DEFAULT_ENDPOINT_ERROR_PERCENT;
+    public static int mouseDragStabilityScale = MouseMovementTuning.DEFAULT_DRAG_STABILITY_PERCENT;
+    public static int mouseScrollBurstScale = MouseMovementTuning.DEFAULT_SCROLL_BURST_PERCENT;
 
     // reset method to reset all settings to default values
     public static void reset() {
@@ -597,5 +615,8 @@ public class Rs2AntibanSettings {
         mouseMicroJitterScale = MouseMovementTuning.DEFAULT_PERCENT;
         mouseOvershootScale = MouseMovementTuning.DEFAULT_PERCENT;
         mouseCorrectionScale = MouseMovementTuning.DEFAULT_PERCENT;
+        mouseEndpointErrorScale = MouseMovementTuning.DEFAULT_ENDPOINT_ERROR_PERCENT;
+        mouseDragStabilityScale = MouseMovementTuning.DEFAULT_DRAG_STABILITY_PERCENT;
+        mouseScrollBurstScale = MouseMovementTuning.DEFAULT_SCROLL_BURST_PERCENT;
     }
 }

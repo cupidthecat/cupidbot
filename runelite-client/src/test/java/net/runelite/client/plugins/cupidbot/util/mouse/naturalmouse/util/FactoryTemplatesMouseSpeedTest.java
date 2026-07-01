@@ -1,8 +1,14 @@
 package net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.util;
 
+import net.runelite.api.Point;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseEngineMode;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseActionContext;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementPlan;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementPlanner;
 import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementTuning;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseTarget;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.MouseMotionFactory;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.support.DefaultMouseMotionNature;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.support.DefaultNoiseProvider;
@@ -11,6 +17,7 @@ import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.support.Doub
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.support.SinusoidalDeviationProvider;
 import org.junit.Test;
 
+import java.awt.Rectangle;
 import java.lang.reflect.Field;
 import java.util.Random;
 
@@ -111,6 +118,33 @@ public class FactoryTemplatesMouseSpeedTest
 		assertEquals(0.0, noise.getY(), 1e-9);
 	}
 
+	@Test
+	public void planTrajectoryStyleControlsFactoryTexture() throws Exception
+	{
+		MouseMovementPlanner planner = new MouseMovementPlanner();
+		MouseMovementPlan dragPlan = planner.plan(
+			new Point(10, 10),
+			MouseTarget.rectangle(new Rectangle(300, 300, 36, 36)),
+			MouseActionContext.DRAG,
+			MouseEngineMode.BALANCED,
+			MouseSpeed.NORMAL,
+			MouseSmoothness.BALANCED,
+			123L);
+
+		MouseMotionFactory factory = FactoryTemplates.createMouseSpeedMotionFactory(
+			new DefaultMouseMotionNature(),
+			MouseSpeed.NORMAL,
+			dragPlan.getFactoryBaseTimeMs(),
+			MouseSmoothness.BALANCED,
+			new Random(dragPlan.getSeed()),
+			dragPlan.getOvershootCount(),
+			dragPlan);
+
+		assertEquals(dragPlan.getEffectiveCurveMultiplier(), slopeDividerMultiplier(factory, MouseSmoothness.BALANCED), 1e-9);
+		assertEquals(dragPlan.getEffectivePathNoiseMultiplier(), pathNoiseMultiplier(factory), 1e-9);
+		assertEquals(dragPlan.getEffectiveMicroJitterMultiplier(), microJitterMultiplier(factory), 1e-9);
+	}
+
 	private static double slopeDivider(MouseMotionFactory factory) throws Exception
 	{
 		Field field = SinusoidalDeviationProvider.class.getDeclaredField("slopeDivider");
@@ -137,5 +171,10 @@ public class FactoryTemplatesMouseSpeedTest
 		Field field = DefaultNoiseProvider.class.getDeclaredField("microJitterMultiplier");
 		field.setAccessible(true);
 		return (double) field.get(factory.getNoiseProvider());
+	}
+
+	private static double slopeDividerMultiplier(MouseMotionFactory factory, MouseSmoothness smoothness) throws Exception
+	{
+		return smoothness.getDeviationSlopeDivider() / slopeDivider(factory);
 	}
 }

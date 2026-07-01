@@ -219,9 +219,12 @@ public class CupidBotMouseOverlay extends Overlay {
         int textX = Math.max(6, x + 18);
         int textY = Math.max(14, y - 18);
         g.drawString(String.format(
-                "mouse %s %.2fx err %.1f seed %d",
+                "mouse %s/%s d%.2f %.2fx jerk %.1f err %.1f seed %d",
                 report.getPlan().getContext(),
+                report.getPlan().getTrajectoryStyle(),
+                report.getPlan().getDifficultyIndex(),
                 report.getPathEfficiency(),
+                report.getJerkProxy(),
                 report.getFinalError(),
                 report.getPlan().getSeed()),
                 textX,

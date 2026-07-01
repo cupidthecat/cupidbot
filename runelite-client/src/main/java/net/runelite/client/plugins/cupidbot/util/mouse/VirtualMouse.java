@@ -149,6 +149,31 @@ public class VirtualMouse extends Mouse {
         return plan == null ? nextClickStageDelayMs() : 0;
     }
 
+    static int nextDragPressDelayMs(MouseMovementPlan plan) {
+        return plan == null ? Rs2Random.logNormalBounded(35, 140) : plan.getButtonDownTimeMs();
+    }
+
+    static int nextDragReleaseDelayMs(MouseMovementPlan plan) {
+        return plan == null ? Rs2Random.logNormalBounded(40, 140) : plan.getSettleDelayMs();
+    }
+
+    static int scrollBurstTicks(int wheelRotation, MouseMovementPlan plan) {
+        if (wheelRotation == 0) {
+            return 1;
+        }
+        int baseTicks = Math.max(1, Math.abs(wheelRotation));
+        double multiplier = plan == null ? 1.0 : plan.getTuning().getScrollBurstMultiplier();
+        return clamp((int) Math.ceil(baseTicks * multiplier), 1, 6);
+    }
+
+    private static int nextScrollSettleDelayMs(MouseMovementPlan plan) {
+        return plan == null ? Rs2Random.logNormalBounded(40, 100) : plan.getSettleDelayMs();
+    }
+
+    private static int nextScrollBurstDelayMs() {
+        return Rs2Random.logNormalBounded(18, 55);
+    }
+
     private boolean shouldMoveNaturally(Point point) {
         return point.getX() > 1
                 && point.getY() > 1
@@ -366,15 +391,16 @@ public class VirtualMouse extends Mouse {
         if (point == null) return this;
 
         Runnable scrollAction = () -> {
-            moveNaturallyOrInstant(planMovement(MouseTarget.point(point), MouseActionContext.SCROLL));
-            sleep(Rs2Random.logNormalBounded(40, 100));
+            MouseMovementPlan plan = planMovement(MouseTarget.point(point), MouseActionContext.SCROLL);
+            moveNaturallyOrInstant(plan);
+            sleep(nextScrollSettleDelayMs(plan));
             int direction = wheelRotation < 0 ? -1 : 1;
-            int ticks = Math.max(1, Math.min(4, Math.abs(wheelRotation)));
+            int ticks = scrollBurstTicks(wheelRotation, plan);
             int unitsPerTick = Math.max(1, Math.abs(unitsToScroll) / ticks) * direction;
             for (int i = 0; i < ticks; i++) {
                 dispatchWheel(point, direction, unitsPerTick);
                 if (i + 1 < ticks) {
-                    sleep(Rs2Random.logNormalBounded(18, 55));
+                    sleep(nextScrollBurstDelayMs());
                 }
             }
         };
@@ -443,12 +469,22 @@ public class VirtualMouse extends Mouse {
     public Mouse drag(Point startPoint, Point endPoint) {
         if (startPoint == null || endPoint == null) return this;
 
-        moveNaturallyOrInstant(planMovement(MouseTarget.point(startPoint), MouseActionContext.DRAG));
-        sleep(Rs2Random.logNormalBounded(50, 80));
+        MouseMovementPlan startPlan = planMovement(MouseTarget.point(startPoint), MouseActionContext.DRAG);
+        MouseMovementPlan endPlan = planMovement(MouseTarget.point(endPoint), MouseActionContext.DRAG);
+        return drag(startPlan, endPlan);
+    }
+
+    private Mouse drag(MouseMovementPlan startPlan, MouseMovementPlan endPlan) {
+        if (startPlan == null || endPlan == null) return this;
+
+        Point startPoint = startPlan.getTargetPoint();
+        Point endPoint = endPlan.getTargetPoint();
+        moveNaturallyOrInstant(startPlan);
+        sleep(nextDragReleaseDelayMs(startPlan));
         pressed(startPoint, MouseEvent.BUTTON1);
-        sleep(Rs2Random.logNormalBounded(80, 120));
-        moveNaturallyOrInstant(planMovement(MouseTarget.point(endPoint), MouseActionContext.DRAG));
-        sleep(Rs2Random.logNormalBounded(80, 120));
+        sleep(nextDragPressDelayMs(startPlan));
+        moveNaturallyOrInstant(endPlan);
+        sleep(nextDragReleaseDelayMs(endPlan));
         released(endPoint, MouseEvent.BUTTON1);
 
         return this;
@@ -458,8 +494,12 @@ public class VirtualMouse extends Mouse {
     public Mouse drag(MouseTarget startTarget, MouseTarget endTarget, MouseActionContext context) {
         if (startTarget == null || endTarget == null) return this;
 
-        Point startPoint = planMovement(startTarget, MouseActionContext.DRAG).getTargetPoint();
-        Point endPoint = planMovement(endTarget, MouseActionContext.DRAG).getTargetPoint();
-        return drag(startPoint, endPoint);
+        MouseMovementPlan startPlan = planMovement(startTarget, MouseActionContext.DRAG);
+        MouseMovementPlan endPlan = planMovement(endTarget, MouseActionContext.DRAG);
+        return drag(startPlan, endPlan);
+    }
+
+    private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
     }
 }

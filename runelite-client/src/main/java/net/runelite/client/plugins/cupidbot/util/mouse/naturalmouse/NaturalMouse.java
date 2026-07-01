@@ -193,7 +193,7 @@ public class NaturalMouse {
                 mouseSmoothness,
                 new Random(plan.getSeed()),
                 Math.max(plan.getOvershootCount(), plan.getCorrectionCount()),
-                plan.getTuning());
+                plan);
     }
 
     /**

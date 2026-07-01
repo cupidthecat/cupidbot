@@ -242,6 +242,9 @@ public class MousePanelTest
 		assertFalse(getCheckBox(panel, "advancedMouseControls").isSelected());
 		assertFalse(getSlider(panel, "mouseReactionDelaySlider").isVisible());
 		assertFalse(getSlider(panel, "mouseCorrectionScaleSlider").isVisible());
+		assertFalse(getSlider(panel, "mouseEndpointErrorScaleSlider").isVisible());
+		assertFalse(getSlider(panel, "mouseDragStabilityScaleSlider").isVisible());
+		assertFalse(getSlider(panel, "mouseScrollBurstScaleSlider").isVisible());
 		assertTrue("Collapsed mouse panel should still fit the common card height",
 			panel.getPreferredSize().height <= COMMON_ANTIBAN_CARD_HEIGHT);
 	}
@@ -275,10 +278,16 @@ public class MousePanelTest
 		getSlider(panel, "mouseReactionDelaySlider").setValue(60);
 		getSlider(panel, "mouseCurveScaleSlider").setValue(150);
 		getSlider(panel, "mouseCorrectionScaleSlider").setValue(50);
+		getSlider(panel, "mouseEndpointErrorScaleSlider").setValue(80);
+		getSlider(panel, "mouseDragStabilityScaleSlider").setValue(150);
+		getSlider(panel, "mouseScrollBurstScaleSlider").setValue(120);
 
 		assertEquals(60, Rs2AntibanSettings.mouseReactionDelayMs);
 		assertEquals(150, Rs2AntibanSettings.mouseCurveScale);
 		assertEquals(50, Rs2AntibanSettings.mouseCorrectionScale);
+		assertEquals(80, Rs2AntibanSettings.mouseEndpointErrorScale);
+		assertEquals(150, Rs2AntibanSettings.mouseDragStabilityScale);
+		assertEquals(120, Rs2AntibanSettings.mouseScrollBurstScale);
 		verify(configManager, atLeastOnce()).setConfiguration(anyString(), anyString(), anyString());
 	}
 

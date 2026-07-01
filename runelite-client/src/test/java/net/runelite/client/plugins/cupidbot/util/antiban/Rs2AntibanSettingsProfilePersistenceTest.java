@@ -80,6 +80,9 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		Rs2AntibanSettings.mouseMicroJitterScale = 70;
 		Rs2AntibanSettings.mouseOvershootScale = 200;
 		Rs2AntibanSettings.mouseCorrectionScale = 50;
+		Rs2AntibanSettings.mouseEndpointErrorScale = 80;
+		Rs2AntibanSettings.mouseDragStabilityScale = 150;
+		Rs2AntibanSettings.mouseScrollBurstScale = 120;
 
 		Rs2AntibanSettings.saveToProfile();
 
@@ -118,6 +121,9 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		assertEquals(70, Rs2AntibanSettings.mouseMicroJitterScale);
 		assertEquals(200, Rs2AntibanSettings.mouseOvershootScale);
 		assertEquals(50, Rs2AntibanSettings.mouseCorrectionScale);
+		assertEquals(80, Rs2AntibanSettings.mouseEndpointErrorScale);
+		assertEquals(150, Rs2AntibanSettings.mouseDragStabilityScale);
+		assertEquals(120, Rs2AntibanSettings.mouseScrollBurstScale);
 	}
 
 	@Test
@@ -227,7 +233,10 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 				+ "\"mousePathNoiseScale\":220,"
 				+ "\"mouseMicroJitterScale\":90,"
 				+ "\"mouseOvershootScale\":250,"
-				+ "\"mouseCorrectionScale\":-10}");
+				+ "\"mouseCorrectionScale\":-10,"
+				+ "\"mouseEndpointErrorScale\":250,"
+				+ "\"mouseDragStabilityScale\":-10,"
+				+ "\"mouseScrollBurstScale\":300}");
 
 		Rs2AntibanSettings.loadFromProfile();
 
@@ -248,6 +257,9 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		assertEquals(90, Rs2AntibanSettings.mouseMicroJitterScale);
 		assertEquals(200, Rs2AntibanSettings.mouseOvershootScale);
 		assertEquals(0, Rs2AntibanSettings.mouseCorrectionScale);
+		assertEquals(200, Rs2AntibanSettings.mouseEndpointErrorScale);
+		assertEquals(0, Rs2AntibanSettings.mouseDragStabilityScale);
+		assertEquals(200, Rs2AntibanSettings.mouseScrollBurstScale);
 	}
 
 	@Test
@@ -333,6 +345,9 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		Rs2AntibanSettings.mouseMicroJitterScale = 70;
 		Rs2AntibanSettings.mouseOvershootScale = 160;
 		Rs2AntibanSettings.mouseCorrectionScale = 60;
+		Rs2AntibanSettings.mouseEndpointErrorScale = 80;
+		Rs2AntibanSettings.mouseDragStabilityScale = 150;
+		Rs2AntibanSettings.mouseScrollBurstScale = 120;
 
 		Rs2Antiban.resetAntibanSettings();
 
@@ -356,6 +371,9 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		assertEquals(70, Rs2AntibanSettings.mouseMicroJitterScale);
 		assertEquals(160, Rs2AntibanSettings.mouseOvershootScale);
 		assertEquals(60, Rs2AntibanSettings.mouseCorrectionScale);
+		assertEquals(80, Rs2AntibanSettings.mouseEndpointErrorScale);
+		assertEquals(150, Rs2AntibanSettings.mouseDragStabilityScale);
+		assertEquals(120, Rs2AntibanSettings.mouseScrollBurstScale);
 		assertFalse(Rs2AntibanSettings.actionCooldownActive);
 		assertFalse(Rs2AntibanSettings.microBreakActive);
 	}
