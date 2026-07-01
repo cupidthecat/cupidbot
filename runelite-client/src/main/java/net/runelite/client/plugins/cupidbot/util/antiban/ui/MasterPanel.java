@@ -13,6 +13,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Locale;
+
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * The MasterPanel is a user interface panel for configuring anti-ban settings.
@@ -43,6 +49,8 @@ import java.awt.image.BufferedImage;
  * </p>
  */
 public class MasterPanel extends PluginPanel {
+    private static final String SETTINGS_FILE_EXTENSION = "json";
+    private static final String DEFAULT_SETTINGS_FILE_NAME = "cupidbot-antiban-settings.json";
     private static final int BOUNDARY_RIGHT = 150; // Adjust for how far you want the GIF to move
     private static final int BOUNDARY_LEFT = 0;
     // Additional Info Panel
@@ -62,6 +70,9 @@ public class MasterPanel extends PluginPanel {
     MicroBreakPanel microBreakPanel = new MicroBreakPanel();
     CooldownPanel cooldownPanel = new CooldownPanel();
     JButton resetButton = new JButton("Reset");
+    JButton importButton = new JButton("Import");
+    JButton exportButton = new JButton("Export");
+    private final JFileChooser settingsFileChooser = new JFileChooser();
     private int xPosition = 0;
     private int xVelocity = 1; // Change this value to control the speed of movement
 
@@ -122,11 +133,20 @@ public class MasterPanel extends PluginPanel {
 
         add(headerPanel, BorderLayout.NORTH);
         add(mainDisplayPanel, BorderLayout.CENTER);
-        add(resetButton, BorderLayout.SOUTH);
+        add(createActionPanel(), BorderLayout.SOUTH);
 
         cardPanel.showPanel("General");
+        setupFileButtons();
         setupResetButton();
 
+    }
+
+    private JPanel createActionPanel() {
+        JPanel actionPanel = new JPanel(new GridLayout(1, 3, 4, 0));
+        actionPanel.add(importButton);
+        actionPanel.add(exportButton);
+        actionPanel.add(resetButton);
+        return actionPanel;
     }
 
     private JPanel createHeaderPanel(NavigationPanel navigationPanel) {
@@ -183,6 +203,69 @@ public class MasterPanel extends PluginPanel {
             Rs2AntibanSettings.saveToProfile();
             loadSettings();
         });
+    }
+
+    private void setupFileButtons() {
+        settingsFileChooser.setFileFilter(new FileNameExtensionFilter(
+                "Anti-ban settings (*.json)", SETTINGS_FILE_EXTENSION));
+
+        exportButton.addActionListener(e -> exportSettingsFromChooser());
+        importButton.addActionListener(e -> importSettingsFromChooser());
+    }
+
+    private void exportSettingsFromChooser() {
+        settingsFileChooser.setSelectedFile(new File(DEFAULT_SETTINGS_FILE_NAME));
+        if (settingsFileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        try {
+            Path path = ensureJsonExtension(settingsFileChooser.getSelectedFile().toPath());
+            exportSettingsToFile(path);
+            JOptionPane.showMessageDialog(this, "Anti-ban settings exported.", "Export Complete",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            showSettingsFileError("export", ex);
+        }
+    }
+
+    private void importSettingsFromChooser() {
+        if (settingsFileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        try {
+            importSettingsFromFile(settingsFileChooser.getSelectedFile().toPath());
+            JOptionPane.showMessageDialog(this, "Anti-ban settings imported.", "Import Complete",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            showSettingsFileError("import", ex);
+        }
+    }
+
+    private Path ensureJsonExtension(Path path) {
+        String fileName = path.getFileName().toString();
+        if (fileName.toLowerCase(Locale.ROOT).endsWith("." + SETTINGS_FILE_EXTENSION)) {
+            return path;
+        }
+        return path.resolveSibling(fileName + "." + SETTINGS_FILE_EXTENSION);
+    }
+
+    void exportSettingsToFile(Path path) throws IOException {
+        Rs2AntibanSettings.saveToFile(path);
+    }
+
+    void importSettingsFromFile(Path path) throws IOException {
+        Rs2AntibanSettings.loadFromFile(path);
+        Rs2AntibanSettings.saveToProfile();
+        loadSettings();
+    }
+
+    private void showSettingsFileError(String action, IOException ex) {
+        JOptionPane.showMessageDialog(this,
+                "Unable to " + action + " anti-ban settings:\n" + ex.getMessage(),
+                "Anti-ban Settings " + action.substring(0, 1).toUpperCase(Locale.ROOT) + action.substring(1) + " Failed",
+                JOptionPane.ERROR_MESSAGE);
     }
 
     public void loadSettings() {

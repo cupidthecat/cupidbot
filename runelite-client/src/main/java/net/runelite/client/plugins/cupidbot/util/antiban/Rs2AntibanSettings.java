@@ -12,6 +12,11 @@ import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.PlayStyle;
 import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementTuning;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 /**
  * Provides configuration settings for the anti-ban system used by various plugins within the bot framework.
  *
@@ -170,6 +175,22 @@ public class Rs2AntibanSettings {
         saveToProfile(getProfileConfigManager());
     }
 
+    public static void saveToFile(Path path) throws IOException {
+        Path parent = path.toAbsolutePath().getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+
+        Files.write(path, GSON.toJson(snapshot()).getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static void loadFromFile(Path path) throws IOException {
+        String json = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+        PersistentSettings settings = parseFileSettings(json);
+        reset();
+        apply(settings);
+    }
+
     static void saveToProfile(ConfigManager configManager) {
         if (configManager == null) {
             log.debug("ConfigManager not available, skipping antiban settings save");
@@ -182,6 +203,22 @@ public class Rs2AntibanSettings {
             configManager.sendConfig();
         } catch (Exception ex) {
             log.warn("Unable to save antiban settings to profile", ex);
+        }
+    }
+
+    private static PersistentSettings parseFileSettings(String json) throws IOException {
+        if (json == null || json.trim().isEmpty()) {
+            throw new IOException("Unable to parse antiban settings file: file is empty");
+        }
+
+        try {
+            PersistentSettings settings = GSON.fromJson(json, PersistentSettings.class);
+            if (settings == null) {
+                throw new IOException("Unable to parse antiban settings file: no settings found");
+            }
+            return settings;
+        } catch (JsonSyntaxException ex) {
+            throw new IOException("Unable to parse antiban settings file", ex);
         }
     }
 

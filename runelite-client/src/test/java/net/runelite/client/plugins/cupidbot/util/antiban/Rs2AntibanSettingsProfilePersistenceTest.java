@@ -6,13 +6,20 @@ import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -34,6 +41,9 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 
 	@Captor
 	private ArgumentCaptor<String> savedSettings;
+
+	@Rule
+	public TemporaryFolder tempFolder = new TemporaryFolder();
 
 	@Before
 	public void setUp()
@@ -134,6 +144,71 @@ public class Rs2AntibanSettingsProfilePersistenceTest
 		InOrder orderedConfigSave = inOrder(configManager);
 		orderedConfigSave.verify(configManager).setConfiguration(eq(CONFIG_GROUP), eq(CONFIG_KEY), savedSettings.capture());
 		orderedConfigSave.verify(configManager).sendConfig();
+	}
+
+	@Test
+	public void saveAndLoadRoundTripsThroughJsonFile() throws IOException
+	{
+		File settingsFile = tempFolder.newFile("cupidbot-antiban-settings.json");
+		Rs2AntibanSettings.antibanEnabled = false;
+		Rs2AntibanSettings.usePlayStyle = true;
+		Rs2AntibanSettings.simulateFatigue = true;
+		Rs2AntibanSettings.takeMicroBreaks = true;
+		Rs2AntibanSettings.actionCooldownActive = true;
+		Rs2AntibanSettings.microBreakActive = true;
+		Rs2AntibanSettings.microBreakDurationLow = 6;
+		Rs2AntibanSettings.microBreakDurationHigh = 19;
+		Rs2AntibanSettings.actionCooldownChance = 0.42;
+		Rs2AntibanSettings.mouseSpeed = MouseSpeed.VERY_SLOW;
+		Rs2AntibanSettings.mouseSmoothness = MouseSmoothness.MAX;
+		Rs2AntibanSettings.mouseEngineMode = MouseEngineMode.PRECISE;
+
+		Rs2AntibanSettings.saveToFile(settingsFile.toPath());
+
+		String json = new String(Files.readAllBytes(settingsFile.toPath()), StandardCharsets.UTF_8);
+		assertTrue(json.contains("\"antibanEnabled\":false"));
+		assertTrue(json.contains("\"usePlayStyle\":true"));
+		assertFalse(json.contains("actionCooldownActive"));
+		assertFalse(json.contains("microBreakActive"));
+
+		Rs2AntibanSettings.reset();
+		Rs2AntibanSettings.loadFromFile(settingsFile.toPath());
+
+		assertFalse(Rs2AntibanSettings.antibanEnabled);
+		assertTrue(Rs2AntibanSettings.usePlayStyle);
+		assertTrue(Rs2AntibanSettings.simulateFatigue);
+		assertTrue(Rs2AntibanSettings.takeMicroBreaks);
+		assertEquals(6, Rs2AntibanSettings.microBreakDurationLow);
+		assertEquals(19, Rs2AntibanSettings.microBreakDurationHigh);
+		assertEquals(0.42, Rs2AntibanSettings.actionCooldownChance, 1e-9);
+		assertSame(MouseSpeed.VERY_SLOW, Rs2AntibanSettings.mouseSpeed);
+		assertSame(MouseSmoothness.MAX, Rs2AntibanSettings.mouseSmoothness);
+		assertSame(MouseEngineMode.PRECISE, Rs2AntibanSettings.mouseEngineMode);
+		assertFalse(Rs2AntibanSettings.actionCooldownActive);
+		assertFalse(Rs2AntibanSettings.microBreakActive);
+	}
+
+	@Test
+	public void invalidJsonFileDoesNotChangeCurrentSettings() throws IOException
+	{
+		File settingsFile = tempFolder.newFile("invalid-antiban-settings.json");
+		Files.write(settingsFile.toPath(), "{not json".getBytes(StandardCharsets.UTF_8));
+		Rs2AntibanSettings.usePlayStyle = true;
+		Rs2AntibanSettings.mouseSpeed = MouseSpeed.VERY_SLOW;
+
+		try
+		{
+			Rs2AntibanSettings.loadFromFile(settingsFile.toPath());
+		}
+		catch (IOException ex)
+		{
+			assertTrue(ex.getMessage().contains("Unable to parse antiban settings"));
+			assertTrue(Rs2AntibanSettings.usePlayStyle);
+			assertSame(MouseSpeed.VERY_SLOW, Rs2AntibanSettings.mouseSpeed);
+			return;
+		}
+
+		throw new AssertionError("Expected invalid anti-ban settings file to be rejected");
 	}
 
 	@Test
