@@ -81,6 +81,12 @@ public class CupidBotPluginHubPanel extends CupidBotPluginPanel {
     private static final String NEWLY_ADDED_FILTER_QUERY = "New";
     private static final Color PASTEL_GREEN = new Color(0x7CB987);
     private static final Color PASTEL_ORANGE = new Color(0xD4A574);
+    private static final int TITLE_AUTHOR_RESERVED_WIDTH = 72;
+    private static final int TITLE_TEXT_WIDTH = PluginPanel.PANEL_WIDTH
+            - 14 // main panel horizontal border
+            - 48 // icon column
+            - 5 // icon/title gap
+            - TITLE_AUTHOR_RESERVED_WIDTH;
 
     static {
         BufferedImage missingIcon = ImageUtil.loadImageResource(CupidBotPluginHubPanel.class, "pluginhub_missingicon.png");
@@ -246,10 +252,7 @@ public class CupidBotPluginHubPanel extends CupidBotPluginPanel {
             GroupLayout layout = new GroupLayout(this);
             setLayout(layout);
 
-            JLabel pluginName = new JLabel(manifest.getDisplayName());
-            pluginName.setFont(FontManager.getRunescapeBoldFont());
-            pluginName.setToolTipText(manifest.getDisplayName());
-            pluginName.setHorizontalAlignment(JLabel.LEFT);
+            JLabel pluginName = createPluginNameLabel(manifest.getDisplayName());
 
             String[] authorsArr = manifest.getAuthors();
             String authorRaw = manifest.getAuthor();
@@ -948,6 +951,18 @@ public class CupidBotPluginHubPanel extends CupidBotPluginPanel {
     private boolean isNewlyAddedFilterQuery(String query) {
         return NEWLY_ADDED_FILTER_QUERY.equalsIgnoreCase(query)
                 || "Newly Added".equalsIgnoreCase(query);
+    }
+
+    static JLabel createPluginNameLabel(String displayName) {
+        String name = displayName == null ? "" : displayName;
+        String htmlName = CupidBotPluginListItem.toHtmlFragment(name);
+        JLabel pluginName = new JLabel("<html><div style='width:" + TITLE_TEXT_WIDTH + "px'>" + htmlName + "</div></html>");
+        pluginName.setFont(FontManager.getRunescapeBoldFont());
+        pluginName.setForeground(Color.WHITE);
+        pluginName.setToolTipText("<html>" + htmlName + "</html>");
+        pluginName.setHorizontalAlignment(JLabel.LEFT);
+        pluginName.setVerticalAlignment(SwingConstants.CENTER);
+        return pluginName;
     }
 
     @Override
