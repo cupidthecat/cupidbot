@@ -13,6 +13,7 @@ import java.time.Instant;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -129,6 +130,48 @@ public class Rs2AntibanActivityPlayStyleTest
 	}
 
 	@Test
+	public void dynamicIntensityUsesApprovedPlayStyleMouseSpeedRange()
+	{
+		Rs2AntibanSettings.dynamicIntensity = true;
+		Rs2AntibanSettings.mouseSpeed = MouseSpeed.NORMAL;
+		Rs2Antiban.setActivity(Activity.GENERAL_COMBAT);
+
+		assertEffectivePlayStyleSpeed(PlayStyle.PASSIVE, MouseSpeed.VERY_SLOW);
+		assertEffectivePlayStyleSpeed(PlayStyle.CAUTIOUS, MouseSpeed.SLOW);
+		assertEffectivePlayStyleSpeed(PlayStyle.CAREFUL, MouseSpeed.RELAXED);
+		assertEffectivePlayStyleSpeed(PlayStyle.BALANCED, MouseSpeed.NORMAL);
+		assertEffectivePlayStyleSpeed(PlayStyle.MODERATE, MouseSpeed.BRISK);
+		assertEffectivePlayStyleSpeed(PlayStyle.AGGRESSIVE, MouseSpeed.VERY_FAST);
+		assertEffectivePlayStyleSpeed(PlayStyle.EXTREME_AGGRESSIVE, MouseSpeed.EXTREME);
+	}
+
+	@Test
+	public void randomPlayStyleUsesConfiguredMouseSpeed()
+	{
+		Rs2AntibanSettings.dynamicIntensity = true;
+		Rs2AntibanSettings.mouseSpeed = MouseSpeed.STEADY;
+		Rs2Antiban.setActivity(Activity.GENERAL_COMBAT);
+
+		Rs2Antiban.setPlayStyle(PlayStyle.RANDOM);
+
+		assertSame(MouseSpeed.STEADY, Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()));
+	}
+
+	@Test
+	public void extremeAggressivePlayStyleDrivesExtremeMouseSpeed()
+	{
+		Rs2AntibanSettings.dynamicIntensity = true;
+		Rs2AntibanSettings.mouseSpeed = MouseSpeed.NORMAL;
+		Rs2Antiban.setActivity(Activity.GENERAL_COMBAT);
+
+		Rs2Antiban.setPlayStyle(PlayStyle.EXTREME_AGGRESSIVE);
+
+		assertSame(PlayStyle.EXTREME_AGGRESSIVE, Rs2Antiban.getPlayStyle());
+		assertSame(ActivityIntensity.EXTREME, Rs2Antiban.getActivityIntensity());
+		assertSame(MouseSpeed.EXTREME, Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()));
+	}
+
+	@Test
 	public void dynamicIntensitySwitchesPlayStyleWhenAttentionTimerExpires() throws Exception
 	{
 		Rs2AntibanSettings.usePlayStyle = true;
@@ -145,7 +188,7 @@ public class Rs2AntibanActivityPlayStyleTest
 		assertTrue(Rs2Antiban.switchPlayStyleIfAttentionExpired());
 		assertSame(PlayStyle.AGGRESSIVE, Rs2Antiban.getPlayStyle());
 		assertSame(ActivityIntensity.MODERATE, Rs2Antiban.getActivityIntensity());
-		assertSame(MouseSpeed.NORMAL, Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()));
+		assertSame(MouseSpeed.VERY_FAST, Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()));
 	}
 
 	@Test
@@ -165,11 +208,44 @@ public class Rs2AntibanActivityPlayStyleTest
 		assertSame(MouseSpeed.SLOW, Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()));
 	}
 
+	@Test
+	public void resetRuntimeStateClearsActiveStateWithoutResettingUserSettings()
+	{
+		Rs2AntibanSettings.usePlayStyle = true;
+		Rs2AntibanSettings.randomIntervals = true;
+		Rs2AntibanSettings.mouseSpeed = MouseSpeed.EXTREME;
+		Rs2AntibanSettings.actionCooldownActive = true;
+		Rs2AntibanSettings.microBreakActive = true;
+		Rs2Antiban.setActivity(Activity.GENERAL_COMBAT);
+		Rs2Antiban.setPlayStyle(PlayStyle.AGGRESSIVE);
+		Rs2Antiban.setTIMEOUT(42);
+
+		Rs2Antiban.resetRuntimeState();
+
+		assertTrue(Rs2AntibanSettings.usePlayStyle);
+		assertTrue(Rs2AntibanSettings.randomIntervals);
+		assertSame(MouseSpeed.EXTREME, Rs2AntibanSettings.mouseSpeed);
+		assertFalse(Rs2AntibanSettings.actionCooldownActive);
+		assertFalse(Rs2AntibanSettings.microBreakActive);
+		assertEquals(0, Rs2Antiban.getTIMEOUT());
+		assertNull(Rs2Antiban.getActivity());
+		assertSame(ActivityIntensity.EXTREME, Rs2Antiban.getActivityIntensity());
+		assertNull(Rs2Antiban.getCategory());
+		assertNull(Rs2Antiban.getPlayStyle());
+	}
+
 	private static void setStartTime(PlayStyle playStyle, Instant startTime) throws Exception
 	{
 		Field field = PlayStyle.class.getDeclaredField("startTime");
 		field.setAccessible(true);
 		field.set(playStyle, startTime);
+	}
+
+	private static void assertEffectivePlayStyleSpeed(PlayStyle playStyle, MouseSpeed expectedSpeed)
+	{
+		Rs2Antiban.setPlayStyle(playStyle);
+
+		assertSame(expectedSpeed, Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()));
 	}
 
 	private static Instant getStartTime(PlayStyle playStyle) throws Exception

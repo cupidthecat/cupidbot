@@ -105,6 +105,35 @@ public enum MouseSpeed
 		}
 	}
 
+	public static MouseSpeed fromPlayStyle(PlayStyle playStyle)
+	{
+		if (playStyle == null)
+		{
+			return null;
+		}
+
+		switch (playStyle)
+		{
+			case PASSIVE:
+				return VERY_SLOW;
+			case CAUTIOUS:
+				return SLOW;
+			case CAREFUL:
+				return RELAXED;
+			case BALANCED:
+				return NORMAL;
+			case MODERATE:
+				return BRISK;
+			case AGGRESSIVE:
+				return VERY_FAST;
+			case EXTREME_AGGRESSIVE:
+				return EXTREME;
+			case RANDOM:
+			default:
+				return null;
+		}
+	}
+
 	public ActivityIntensity toActivityIntensity()
 	{
 		switch (this)

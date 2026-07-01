@@ -217,8 +217,10 @@ public class AntibanPlugin extends Plugin {
 
     void loadProfileSettings() {
         Rs2AntibanSettings.setProfileConfigManager(configManager);
-        Rs2Antiban.resetAntibanSettings(true);
-        Rs2AntibanSettings.loadFromProfile(configManager);
+        boolean loaded = Rs2AntibanSettings.loadFromProfile(configManager);
+        if (!loaded) {
+            Rs2AntibanSettings.saveToProfile(configManager);
+        }
         validateAndSetBreakDurations();
     }
 

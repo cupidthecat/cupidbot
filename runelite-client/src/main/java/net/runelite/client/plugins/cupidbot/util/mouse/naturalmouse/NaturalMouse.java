@@ -87,7 +87,8 @@ public class NaturalMouse {
                 MouseTarget.point(new net.runelite.api.Point(dx, dy)),
                 MouseActionContext.GENERAL,
                 Rs2AntibanSettings.getConfiguredMouseEngineMode(),
-                Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()),
+                Rs2AntibanSettings.getEffectiveMouseSpeed(
+                        Rs2Antiban.getActivityIntensity(), Rs2Antiban.getPlayStyle()),
                 Rs2AntibanSettings.getConfiguredMouseSmoothness(),
                 null);
         moveTo(plan);
@@ -116,6 +117,9 @@ public class NaturalMouse {
     }
 
     private synchronized MouseMovementReport move(MouseMovementPlan plan) {
+        if (plan.getReactionDelayMs() > 0) {
+            Global.sleep(plan.getReactionDelayMs());
+        }
         var motion = getFactory(plan).build(plan.getTargetPoint().getX(), plan.getTargetPoint().getY());
         List<net.runelite.api.Point> path = new ArrayList<>();
         path.add(plan.getStartPoint());
@@ -131,7 +135,7 @@ public class NaturalMouse {
         ActivityIntensity intensity = Rs2Antiban.getActivityIntensity();
         boolean dynamicIntensity = Rs2AntibanSettings.dynamicIntensity;
         boolean simulateFatigue = Rs2AntibanSettings.simulateFatigue;
-        MouseSpeed mouseSpeed = Rs2AntibanSettings.getEffectiveMouseSpeed(intensity);
+        MouseSpeed mouseSpeed = Rs2AntibanSettings.getEffectiveMouseSpeed(intensity, Rs2Antiban.getPlayStyle());
         MouseSmoothness mouseSmoothness = Rs2AntibanSettings.getConfiguredMouseSmoothness();
         int effectiveBaseTimeMs = simulateFatigue
                 ? FactoryTemplates.effectiveMouseBaseTimeMs(mouseSpeed)
@@ -180,7 +184,7 @@ public class NaturalMouse {
 
     private MouseMotionFactory getFactory(MouseMovementPlan plan) {
         ActivityIntensity intensity = Rs2Antiban.getActivityIntensity();
-        MouseSpeed mouseSpeed = Rs2AntibanSettings.getEffectiveMouseSpeed(intensity);
+        MouseSpeed mouseSpeed = Rs2AntibanSettings.getEffectiveMouseSpeed(intensity, Rs2Antiban.getPlayStyle());
         MouseSmoothness mouseSmoothness = Rs2AntibanSettings.getConfiguredMouseSmoothness();
         return FactoryTemplates.createMouseSpeedMotionFactory(
                 nature,
@@ -188,7 +192,8 @@ public class NaturalMouse {
                 plan.getFactoryBaseTimeMs(),
                 mouseSmoothness,
                 new Random(plan.getSeed()),
-                plan.getOvershootCount());
+                Math.max(plan.getOvershootCount(), plan.getCorrectionCount()),
+                plan.getTuning());
     }
 
     /**

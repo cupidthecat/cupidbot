@@ -18,7 +18,9 @@ import java.awt.Dimension;
 import java.lang.reflect.Field;
 
 import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSlider;
 
 import static org.junit.Assert.assertEquals;
@@ -79,6 +81,22 @@ public class MousePanelTest
 		assertEquals(MouseSpeed.SLOW.getSliderIndex(), getSlider(panel, "mouseSpeedSlider").getValue());
 		assertEquals("Mouse Speed: Dynamic (" + MouseSpeed.SLOW.getName() + ")", getLabel(panel, "mouseSpeedLabel").getText());
 		assertSame(MouseSpeed.EXTREME, Rs2AntibanSettings.mouseSpeed);
+	}
+
+	@Test
+	public void updateValuesUsesPlayStyleSpeedWhenDynamicIntensityIsOn() throws Exception
+	{
+		Rs2AntibanSettings.dynamicIntensity = true;
+		Rs2AntibanSettings.mouseSpeed = MouseSpeed.NORMAL;
+		Rs2Antiban.setActivity(Activity.GENERAL_COMBAT);
+		Rs2Antiban.setPlayStyle(PlayStyle.CAREFUL);
+
+		MousePanel panel = new MousePanel();
+		panel.updateValues();
+
+		assertEquals(MouseSpeed.RELAXED.getSliderIndex(), getSlider(panel, "mouseSpeedSlider").getValue());
+		assertEquals("Mouse Speed: Dynamic (" + MouseSpeed.RELAXED.getName() + ")", getLabel(panel, "mouseSpeedLabel").getText());
+		assertSame(MouseSpeed.NORMAL, Rs2AntibanSettings.mouseSpeed);
 	}
 
 	@Test
@@ -216,6 +234,137 @@ public class MousePanelTest
 		verify(configManager, never()).setConfiguration(anyString(), anyString(), anyString());
 	}
 
+	@Test
+	public void advancedMouseControlsAreCollapsedByDefault() throws Exception
+	{
+		MousePanel panel = new MousePanel();
+
+		assertFalse(getCheckBox(panel, "advancedMouseControls").isSelected());
+		assertFalse(getSlider(panel, "mouseReactionDelaySlider").isVisible());
+		assertFalse(getSlider(panel, "mouseCorrectionScaleSlider").isVisible());
+		assertTrue("Collapsed mouse panel should still fit the common card height",
+			panel.getPreferredSize().height <= COMMON_ANTIBAN_CARD_HEIGHT);
+	}
+
+	@Test
+	public void expandingAdvancedMouseControlsDoesNotResizeAntibanCardPanel() throws Exception
+	{
+		MousePanel panel = new MousePanel();
+		JPanel peerPanel = new JPanel();
+		peerPanel.setPreferredSize(new Dimension(COMMON_ANTIBAN_CARD_WIDTH, COMMON_ANTIBAN_CARD_HEIGHT));
+		CardPanel cardPanel = new CardPanel();
+		cardPanel.addPanel(panel, "Mouse");
+		cardPanel.addPanel(peerPanel, "Peer");
+		Dimension collapsedSize = cardPanel.getPreferredSize();
+
+		getCheckBox(panel, "advancedMouseControls").doClick();
+
+		assertEquals("Advanced mouse controls must not resize the shared antiban card container",
+			collapsedSize, cardPanel.getPreferredSize());
+	}
+
+	@Test
+	public void manualAdvancedMouseSelectionSavesProfile() throws Exception
+	{
+		ConfigManager configManager = mock(ConfigManager.class);
+		setProfileConfigManager(configManager);
+		MousePanel panel = new MousePanel();
+		clearInvocations(configManager);
+
+		getCheckBox(panel, "advancedMouseControls").doClick();
+		getSlider(panel, "mouseReactionDelaySlider").setValue(60);
+		getSlider(panel, "mouseCurveScaleSlider").setValue(150);
+		getSlider(panel, "mouseCorrectionScaleSlider").setValue(50);
+
+		assertEquals(60, Rs2AntibanSettings.mouseReactionDelayMs);
+		assertEquals(150, Rs2AntibanSettings.mouseCurveScale);
+		assertEquals(50, Rs2AntibanSettings.mouseCorrectionScale);
+		verify(configManager, atLeastOnce()).setConfiguration(anyString(), anyString(), anyString());
+	}
+
+	@Test
+	public void manualAdvancedTimingRandomSelectionSavesRanges() throws Exception
+	{
+		ConfigManager configManager = mock(ConfigManager.class);
+		setProfileConfigManager(configManager);
+		MousePanel panel = new MousePanel();
+		clearInvocations(configManager);
+
+		getCheckBox(panel, "advancedMouseControls").doClick();
+		getCheckBox(panel, "mouseButtonHoldRandom").doClick();
+		getSlider(panel, "mouseButtonHoldMinSlider").setValue(40);
+		getSlider(panel, "mouseButtonHoldMaxSlider").setValue(90);
+
+		assertTrue(Rs2AntibanSettings.mouseButtonHoldRandom);
+		assertEquals(40, Rs2AntibanSettings.mouseButtonHoldMinMs);
+		assertEquals(90, Rs2AntibanSettings.mouseButtonHoldMaxMs);
+		verify(configManager, atLeastOnce()).setConfiguration(anyString(), anyString(), anyString());
+	}
+
+	@Test
+	public void randomTimingShowsRangeControlsInsteadOfStaticSlider() throws Exception
+	{
+		MousePanel panel = new MousePanel();
+
+		getCheckBox(panel, "advancedMouseControls").doClick();
+		getCheckBox(panel, "mouseSettleDelayRandom").doClick();
+
+		assertEquals("Settle (random)", getLabel(panel, "mouseSettleDelayLabel").getText());
+		assertFalse(getSlider(panel, "mouseSettleDelaySlider").isVisible());
+		assertTrue(getLabel(panel, "mouseSettleDelayMinLabel").isVisible());
+		assertTrue(getSlider(panel, "mouseSettleDelayMinSlider").isVisible());
+		assertTrue(getLabel(panel, "mouseSettleDelayMaxLabel").isVisible());
+		assertTrue(getSlider(panel, "mouseSettleDelayMaxSlider").isVisible());
+	}
+
+	@Test
+	public void defaultAdvancedTimingValuesAlignWithSliderTicks() throws Exception
+	{
+		MousePanel panel = new MousePanel();
+
+		assertEquals(Rs2AntibanSettings.mouseReactionDelayMinMs,
+			getSlider(panel, "mouseReactionDelayMinSlider").getValue());
+		assertEquals(Rs2AntibanSettings.mouseReactionDelayMaxMs,
+			getSlider(panel, "mouseReactionDelayMaxSlider").getValue());
+		assertEquals(Rs2AntibanSettings.mouseSettleDelayMinMs,
+			getSlider(panel, "mouseSettleDelayMinSlider").getValue());
+		assertEquals(Rs2AntibanSettings.mouseSettleDelayMaxMs,
+			getSlider(panel, "mouseSettleDelayMaxSlider").getValue());
+		assertEquals(Rs2AntibanSettings.mouseButtonHoldMinMs,
+			getSlider(panel, "mouseButtonHoldMinSlider").getValue());
+		assertEquals(Rs2AntibanSettings.mouseButtonHoldMaxMs,
+			getSlider(panel, "mouseButtonHoldMaxSlider").getValue());
+		assertSliderValueIsTickAligned(panel, "mouseReactionDelayMinSlider");
+		assertSliderValueIsTickAligned(panel, "mouseReactionDelayMaxSlider");
+		assertSliderValueIsTickAligned(panel, "mouseSettleDelayMinSlider");
+		assertSliderValueIsTickAligned(panel, "mouseSettleDelayMaxSlider");
+		assertSliderValueIsTickAligned(panel, "mouseButtonHoldMinSlider");
+		assertSliderValueIsTickAligned(panel, "mouseButtonHoldMaxSlider");
+	}
+
+	@Test
+	public void updateValuesDoesNotFightActiveAdvancedTimingRangeDrag() throws Exception
+	{
+		MousePanel panel = new MousePanel();
+		getCheckBox(panel, "advancedMouseControls").doClick();
+		getCheckBox(panel, "mouseSettleDelayRandom").doClick();
+		JSlider minSlider = getSlider(panel, "mouseSettleDelayMinSlider");
+		JSlider maxSlider = getSlider(panel, "mouseSettleDelayMaxSlider");
+
+		minSlider.getModel().setValueIsAdjusting(true);
+		minSlider.setValue(90);
+		maxSlider.setValue(120);
+		Rs2AntibanSettings.mouseSettleDelayMinMs = 20;
+		Rs2AntibanSettings.mouseSettleDelayMaxMs = 70;
+
+		panel.updateValues();
+
+		assertEquals(90, minSlider.getValue());
+		assertEquals(120, maxSlider.getValue());
+		assertEquals("Settle Min (ms): 90", getLabel(panel, "mouseSettleDelayMinLabel").getText());
+		assertEquals("Settle Max (ms): 120", getLabel(panel, "mouseSettleDelayMaxLabel").getText());
+	}
+
 	private static void setActivityIntensity(ActivityIntensity activityIntensity) throws Exception
 	{
 		Field field = Rs2Antiban.class.getDeclaredField("activityIntensity");
@@ -244,6 +393,13 @@ public class MousePanelTest
 		return (JSlider) field.get(panel);
 	}
 
+	private static JCheckBox getCheckBox(MousePanel panel, String name) throws Exception
+	{
+		Field field = MousePanel.class.getDeclaredField(name);
+		field.setAccessible(true);
+		return (JCheckBox) field.get(panel);
+	}
+
 	private static void assertSliderFitsCommonCard(MousePanel panel, String name) throws Exception
 	{
 		JSlider slider = getSlider(panel, name);
@@ -252,6 +408,14 @@ public class MousePanelTest
 		assertTrue(name + " preferred width must fit inside a mouse-card row. Preferred width was "
 				+ slider.getPreferredSize().width,
 			slider.getPreferredSize().width <= availableRowWidth);
+	}
+
+	private static void assertSliderValueIsTickAligned(MousePanel panel, String name) throws Exception
+	{
+		JSlider slider = getSlider(panel, name);
+		int spacing = slider.getMinorTickSpacing();
+		assertEquals(name + " default value should sit on a tick to prevent snap jitter",
+			0, slider.getValue() % spacing);
 	}
 
 	private static JComboBox<?> getComboBox(MousePanel panel, String name) throws Exception

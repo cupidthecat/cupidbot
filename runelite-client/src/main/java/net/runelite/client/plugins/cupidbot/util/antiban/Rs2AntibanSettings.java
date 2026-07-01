@@ -9,6 +9,8 @@ import net.runelite.client.plugins.cupidbot.util.antiban.enums.ActivityIntensity
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseEngineMode;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.PlayStyle;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementTuning;
 
 /**
  * Provides configuration settings for the anti-ban system used by various plugins within the bot framework.
@@ -125,6 +127,31 @@ public class Rs2AntibanSettings {
         private String mouseSpeed;
         private String mouseSmoothness;
         private String mouseEngineMode;
+        private Integer mouseReactionDelayMs;
+        private Boolean mouseReactionDelayRandom;
+        private Integer mouseReactionDelayMinMs;
+        private Integer mouseReactionDelayMaxMs;
+        private Integer mouseSettleDelayMs;
+        private Boolean mouseSettleDelayRandom;
+        private Integer mouseSettleDelayMinMs;
+        private Integer mouseSettleDelayMaxMs;
+        private Integer mouseButtonHoldMs;
+        private Boolean mouseButtonHoldRandom;
+        private Integer mouseButtonHoldMinMs;
+        private Integer mouseButtonHoldMaxMs;
+        private Integer mouseCurveScale;
+        private Integer mousePathNoiseScale;
+        private Integer mouseMicroJitterScale;
+        private Integer mouseOvershootScale;
+        private Integer mouseCorrectionScale;
+    }
+
+    public static final class SettingsSnapshot {
+        private final PersistentSettings settings;
+
+        private SettingsSnapshot(PersistentSettings settings) {
+            this.settings = settings;
+        }
     }
 
     static void setProfileConfigManager(ConfigManager configManager) {
@@ -149,19 +176,20 @@ public class Rs2AntibanSettings {
         PersistentSettings settings = snapshot();
         try {
             configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY, GSON.toJson(settings));
+            configManager.sendConfig();
         } catch (Exception ex) {
             log.warn("Unable to save antiban settings to profile", ex);
         }
     }
 
-    public static void loadFromProfile() {
-        loadFromProfile(getProfileConfigManager());
+    public static boolean loadFromProfile() {
+        return loadFromProfile(getProfileConfigManager());
     }
 
-    static void loadFromProfile(ConfigManager configManager) {
+    static boolean loadFromProfile(ConfigManager configManager) {
         if (configManager == null) {
             log.debug("ConfigManager not available, skipping antiban settings load");
-            return;
+            return false;
         }
 
         String json;
@@ -169,23 +197,24 @@ public class Rs2AntibanSettings {
             json = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY);
         } catch (Exception ex) {
             log.warn("Unable to load antiban settings from profile", ex);
-            return;
+            return false;
         }
 
         if (json == null || json.isEmpty()) {
-            reset();
-            return;
+            return false;
         }
 
         try {
             PersistentSettings settings = GSON.fromJson(json, PersistentSettings.class);
-            reset();
-            if (settings != null) {
-                apply(settings);
+            if (settings == null) {
+                return false;
             }
+            reset();
+            apply(settings);
+            return true;
         } catch (JsonSyntaxException ex) {
             log.warn("Unable to parse antiban settings from profile", ex);
-            reset();
+            return false;
         }
     }
 
@@ -201,13 +230,39 @@ public class Rs2AntibanSettings {
         return mouseEngineMode != null ? mouseEngineMode : MouseEngineMode.DEFAULT;
     }
 
+    public static SettingsSnapshot captureSettings() {
+        return new SettingsSnapshot(snapshot());
+    }
+
+    public static void restoreSettings(SettingsSnapshot snapshot) {
+        if (snapshot == null) {
+            return;
+        }
+        reset();
+        apply(snapshot.settings);
+    }
+
+    static void restoreMouseSettings(SettingsSnapshot snapshot) {
+        if (snapshot == null) {
+            return;
+        }
+        applyMouseSettings(snapshot.settings);
+    }
+
     public static MouseSpeed getEffectiveMouseSpeed(ActivityIntensity activityIntensity) {
+        return getEffectiveMouseSpeed(activityIntensity, Rs2Antiban.getPlayStyle());
+    }
+
+    public static MouseSpeed getEffectiveMouseSpeed(ActivityIntensity activityIntensity, PlayStyle playStyle) {
         if (dynamicIntensity) {
-            MouseSpeed dynamicSpeed = MouseSpeed.fromActivityIntensity(activityIntensity);
-            MouseSpeed configuredSpeed = getConfiguredMouseSpeed();
-            return configuredSpeed.getSliderIndex() < dynamicSpeed.getSliderIndex()
-                    ? configuredSpeed
-                    : dynamicSpeed;
+            MouseSpeed playStyleSpeed = MouseSpeed.fromPlayStyle(playStyle);
+            if (playStyleSpeed != null) {
+                return playStyleSpeed;
+            }
+            if (playStyle == PlayStyle.RANDOM) {
+                return getConfiguredMouseSpeed();
+            }
+            return MouseSpeed.fromActivityIntensity(activityIntensity);
         }
         return getConfiguredMouseSpeed();
     }
@@ -244,6 +299,29 @@ public class Rs2AntibanSettings {
         settings.mouseSpeed = mouseSpeed != null ? mouseSpeed.name() : MouseSpeed.DEFAULT.name();
         settings.mouseSmoothness = mouseSmoothness != null ? mouseSmoothness.name() : MouseSmoothness.DEFAULT.name();
         settings.mouseEngineMode = mouseEngineMode != null ? mouseEngineMode.name() : MouseEngineMode.DEFAULT.name();
+        settings.mouseReactionDelayMs = MouseMovementTuning.clampTimingMs(mouseReactionDelayMs);
+        settings.mouseReactionDelayRandom = mouseReactionDelayRandom;
+        settings.mouseReactionDelayMinMs = MouseMovementTuning.normalizeTimingMinMs(
+                mouseReactionDelayMinMs, mouseReactionDelayMaxMs);
+        settings.mouseReactionDelayMaxMs = MouseMovementTuning.normalizeTimingMaxMs(
+                mouseReactionDelayMinMs, mouseReactionDelayMaxMs);
+        settings.mouseSettleDelayMs = MouseMovementTuning.clampTimingMs(mouseSettleDelayMs);
+        settings.mouseSettleDelayRandom = mouseSettleDelayRandom;
+        settings.mouseSettleDelayMinMs = MouseMovementTuning.normalizeTimingMinMs(
+                mouseSettleDelayMinMs, mouseSettleDelayMaxMs);
+        settings.mouseSettleDelayMaxMs = MouseMovementTuning.normalizeTimingMaxMs(
+                mouseSettleDelayMinMs, mouseSettleDelayMaxMs);
+        settings.mouseButtonHoldMs = MouseMovementTuning.clampTimingMs(mouseButtonHoldMs);
+        settings.mouseButtonHoldRandom = mouseButtonHoldRandom;
+        settings.mouseButtonHoldMinMs = MouseMovementTuning.normalizeTimingMinMs(
+                mouseButtonHoldMinMs, mouseButtonHoldMaxMs);
+        settings.mouseButtonHoldMaxMs = MouseMovementTuning.normalizeTimingMaxMs(
+                mouseButtonHoldMinMs, mouseButtonHoldMaxMs);
+        settings.mouseCurveScale = MouseMovementTuning.clampPercent(mouseCurveScale);
+        settings.mousePathNoiseScale = MouseMovementTuning.clampPercent(mousePathNoiseScale);
+        settings.mouseMicroJitterScale = MouseMovementTuning.clampPercent(mouseMicroJitterScale);
+        settings.mouseOvershootScale = MouseMovementTuning.clampPercent(mouseOvershootScale);
+        settings.mouseCorrectionScale = MouseMovementTuning.clampPercent(mouseCorrectionScale);
         return settings;
     }
 
@@ -329,6 +407,10 @@ public class Rs2AntibanSettings {
         if (settings.moveMouseOffScreenChance != null) {
             moveMouseOffScreenChance = normalizeProbability(settings.moveMouseOffScreenChance);
         }
+        applyMouseSettings(settings);
+    }
+
+    private static void applyMouseSettings(PersistentSettings settings) {
         if (settings.mouseSpeed != null) {
             mouseSpeed = MouseSpeed.fromConfigValue(settings.mouseSpeed);
         }
@@ -337,6 +419,63 @@ public class Rs2AntibanSettings {
         }
         if (settings.mouseEngineMode != null) {
             mouseEngineMode = MouseEngineMode.fromConfigValue(settings.mouseEngineMode);
+        }
+        if (settings.mouseReactionDelayMs != null) {
+            mouseReactionDelayMs = MouseMovementTuning.clampTimingMs(settings.mouseReactionDelayMs);
+        }
+        if (settings.mouseReactionDelayRandom != null) {
+            mouseReactionDelayRandom = settings.mouseReactionDelayRandom;
+        }
+        int reactionMin = settings.mouseReactionDelayMinMs != null
+                ? settings.mouseReactionDelayMinMs
+                : mouseReactionDelayMinMs;
+        int reactionMax = settings.mouseReactionDelayMaxMs != null
+                ? settings.mouseReactionDelayMaxMs
+                : mouseReactionDelayMaxMs;
+        mouseReactionDelayMinMs = MouseMovementTuning.normalizeTimingMinMs(reactionMin, reactionMax);
+        mouseReactionDelayMaxMs = MouseMovementTuning.normalizeTimingMaxMs(reactionMin, reactionMax);
+        if (settings.mouseSettleDelayMs != null) {
+            mouseSettleDelayMs = MouseMovementTuning.clampTimingMs(settings.mouseSettleDelayMs);
+        }
+        if (settings.mouseSettleDelayRandom != null) {
+            mouseSettleDelayRandom = settings.mouseSettleDelayRandom;
+        }
+        int settleMin = settings.mouseSettleDelayMinMs != null
+                ? settings.mouseSettleDelayMinMs
+                : mouseSettleDelayMinMs;
+        int settleMax = settings.mouseSettleDelayMaxMs != null
+                ? settings.mouseSettleDelayMaxMs
+                : mouseSettleDelayMaxMs;
+        mouseSettleDelayMinMs = MouseMovementTuning.normalizeTimingMinMs(settleMin, settleMax);
+        mouseSettleDelayMaxMs = MouseMovementTuning.normalizeTimingMaxMs(settleMin, settleMax);
+        if (settings.mouseButtonHoldMs != null) {
+            mouseButtonHoldMs = MouseMovementTuning.clampTimingMs(settings.mouseButtonHoldMs);
+        }
+        if (settings.mouseButtonHoldRandom != null) {
+            mouseButtonHoldRandom = settings.mouseButtonHoldRandom;
+        }
+        int buttonHoldMin = settings.mouseButtonHoldMinMs != null
+                ? settings.mouseButtonHoldMinMs
+                : mouseButtonHoldMinMs;
+        int buttonHoldMax = settings.mouseButtonHoldMaxMs != null
+                ? settings.mouseButtonHoldMaxMs
+                : mouseButtonHoldMaxMs;
+        mouseButtonHoldMinMs = MouseMovementTuning.normalizeTimingMinMs(buttonHoldMin, buttonHoldMax);
+        mouseButtonHoldMaxMs = MouseMovementTuning.normalizeTimingMaxMs(buttonHoldMin, buttonHoldMax);
+        if (settings.mouseCurveScale != null) {
+            mouseCurveScale = MouseMovementTuning.clampPercent(settings.mouseCurveScale);
+        }
+        if (settings.mousePathNoiseScale != null) {
+            mousePathNoiseScale = MouseMovementTuning.clampPercent(settings.mousePathNoiseScale);
+        }
+        if (settings.mouseMicroJitterScale != null) {
+            mouseMicroJitterScale = MouseMovementTuning.clampPercent(settings.mouseMicroJitterScale);
+        }
+        if (settings.mouseOvershootScale != null) {
+            mouseOvershootScale = MouseMovementTuning.clampPercent(settings.mouseOvershootScale);
+        }
+        if (settings.mouseCorrectionScale != null) {
+            mouseCorrectionScale = MouseMovementTuning.clampPercent(settings.mouseCorrectionScale);
         }
     }
 
@@ -389,6 +528,23 @@ public class Rs2AntibanSettings {
     public static MouseSpeed mouseSpeed = MouseSpeed.DEFAULT;
     public static MouseSmoothness mouseSmoothness = MouseSmoothness.DEFAULT;
     public static MouseEngineMode mouseEngineMode = MouseEngineMode.DEFAULT;
+    public static int mouseReactionDelayMs = MouseMovementTuning.DEFAULT_REACTION_DELAY_MS;
+    public static boolean mouseReactionDelayRandom = false;
+    public static int mouseReactionDelayMinMs = MouseMovementTuning.DEFAULT_REACTION_DELAY_MIN_MS;
+    public static int mouseReactionDelayMaxMs = MouseMovementTuning.DEFAULT_REACTION_DELAY_MAX_MS;
+    public static int mouseSettleDelayMs = MouseMovementTuning.DEFAULT_SETTLE_DELAY_MS;
+    public static boolean mouseSettleDelayRandom = false;
+    public static int mouseSettleDelayMinMs = MouseMovementTuning.DEFAULT_SETTLE_DELAY_MIN_MS;
+    public static int mouseSettleDelayMaxMs = MouseMovementTuning.DEFAULT_SETTLE_DELAY_MAX_MS;
+    public static int mouseButtonHoldMs = MouseMovementTuning.DEFAULT_BUTTON_HOLD_MS;
+    public static boolean mouseButtonHoldRandom = false;
+    public static int mouseButtonHoldMinMs = MouseMovementTuning.DEFAULT_BUTTON_HOLD_MIN_MS;
+    public static int mouseButtonHoldMaxMs = MouseMovementTuning.DEFAULT_BUTTON_HOLD_MAX_MS;
+    public static int mouseCurveScale = MouseMovementTuning.DEFAULT_PERCENT;
+    public static int mousePathNoiseScale = MouseMovementTuning.DEFAULT_PERCENT;
+    public static int mouseMicroJitterScale = MouseMovementTuning.DEFAULT_PERCENT;
+    public static int mouseOvershootScale = MouseMovementTuning.DEFAULT_PERCENT;
+    public static int mouseCorrectionScale = MouseMovementTuning.DEFAULT_PERCENT;
 
     // reset method to reset all settings to default values
     public static void reset() {
@@ -424,5 +580,22 @@ public class Rs2AntibanSettings {
         mouseSpeed = MouseSpeed.DEFAULT;
         mouseSmoothness = MouseSmoothness.DEFAULT;
         mouseEngineMode = MouseEngineMode.DEFAULT;
+        mouseReactionDelayMs = MouseMovementTuning.DEFAULT_REACTION_DELAY_MS;
+        mouseReactionDelayRandom = false;
+        mouseReactionDelayMinMs = MouseMovementTuning.DEFAULT_REACTION_DELAY_MIN_MS;
+        mouseReactionDelayMaxMs = MouseMovementTuning.DEFAULT_REACTION_DELAY_MAX_MS;
+        mouseSettleDelayMs = MouseMovementTuning.DEFAULT_SETTLE_DELAY_MS;
+        mouseSettleDelayRandom = false;
+        mouseSettleDelayMinMs = MouseMovementTuning.DEFAULT_SETTLE_DELAY_MIN_MS;
+        mouseSettleDelayMaxMs = MouseMovementTuning.DEFAULT_SETTLE_DELAY_MAX_MS;
+        mouseButtonHoldMs = MouseMovementTuning.DEFAULT_BUTTON_HOLD_MS;
+        mouseButtonHoldRandom = false;
+        mouseButtonHoldMinMs = MouseMovementTuning.DEFAULT_BUTTON_HOLD_MIN_MS;
+        mouseButtonHoldMaxMs = MouseMovementTuning.DEFAULT_BUTTON_HOLD_MAX_MS;
+        mouseCurveScale = MouseMovementTuning.DEFAULT_PERCENT;
+        mousePathNoiseScale = MouseMovementTuning.DEFAULT_PERCENT;
+        mouseMicroJitterScale = MouseMovementTuning.DEFAULT_PERCENT;
+        mouseOvershootScale = MouseMovementTuning.DEFAULT_PERCENT;
+        mouseCorrectionScale = MouseMovementTuning.DEFAULT_PERCENT;
     }
 }

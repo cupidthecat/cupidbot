@@ -5,6 +5,8 @@ import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -25,6 +27,9 @@ public class AntibanPluginProfilePersistenceTest
 
 	@Mock
 	private ConfigManager configManager;
+
+	@Captor
+	private ArgumentCaptor<String> savedSettings;
 
 	@After
 	public void tearDown()
@@ -51,18 +56,27 @@ public class AntibanPluginProfilePersistenceTest
 	}
 
 	@Test
-	public void loadProfileSettingsForcesResetAcrossProfiles() throws Exception
+	public void loadProfileSettingsSeedsMissingProfileWithoutResettingCurrentSettings() throws Exception
 	{
 		when(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY)).thenReturn(null);
 		AntibanPlugin plugin = newPluginWithConfigManager();
 		Rs2AntibanSettings.overwriteScriptSettings = true;
 		Rs2AntibanSettings.usePlayStyle = true;
+		Rs2AntibanSettings.simulateFatigue = true;
+		Rs2AntibanSettings.profileSwitching = true;
 
 		plugin.loadProfileSettings();
 
-		assertFalse(Rs2AntibanSettings.overwriteScriptSettings);
-		assertFalse(Rs2AntibanSettings.usePlayStyle);
+		assertTrue(Rs2AntibanSettings.overwriteScriptSettings);
+		assertTrue(Rs2AntibanSettings.usePlayStyle);
+		assertTrue(Rs2AntibanSettings.simulateFatigue);
+		assertTrue(Rs2AntibanSettings.profileSwitching);
 		assertTrue(Rs2Antiban.getActivityIntensity() != null);
+		verify(configManager).setConfiguration(eq(CONFIG_GROUP), eq(CONFIG_KEY), savedSettings.capture());
+		assertTrue(savedSettings.getValue().contains("\"overwriteScriptSettings\":true"));
+		assertTrue(savedSettings.getValue().contains("\"usePlayStyle\":true"));
+		assertTrue(savedSettings.getValue().contains("\"simulateFatigue\":true"));
+		assertTrue(savedSettings.getValue().contains("\"profileSwitching\":true"));
 	}
 
 	private AntibanPlugin newPluginWithConfigManager() throws Exception

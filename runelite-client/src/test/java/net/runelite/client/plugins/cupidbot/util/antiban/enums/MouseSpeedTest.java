@@ -99,12 +99,12 @@ public class MouseSpeedTest
 	}
 
 	@Test
-	public void dynamicIntensityDoesNotExceedConfiguredMouseSpeed()
+	public void dynamicIntensityCanExceedConfiguredMouseSpeed()
 	{
 		Rs2AntibanSettings.dynamicIntensity = true;
 		Rs2AntibanSettings.mouseSpeed = MouseSpeed.SLOW;
 
-		assertSame(MouseSpeed.SLOW, Rs2AntibanSettings.getEffectiveMouseSpeed(ActivityIntensity.HIGH));
-		assertSame(MouseSpeed.SLOW, Rs2AntibanSettings.getEffectiveMouseSpeed(ActivityIntensity.EXTREME));
+		assertSame(MouseSpeed.FAST, Rs2AntibanSettings.getEffectiveMouseSpeed(ActivityIntensity.HIGH));
+		assertSame(MouseSpeed.EXTREME, Rs2AntibanSettings.getEffectiveMouseSpeed(ActivityIntensity.EXTREME));
 	}
 }

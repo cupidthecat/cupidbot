@@ -654,7 +654,17 @@ public class Rs2Antiban {
 
     public static void resetAntibanSettings(boolean forceReset) {
         if (!forceReset && Rs2AntibanSettings.overwriteScriptSettings) return;
+        Rs2AntibanSettings.SettingsSnapshot mouseSettings = forceReset ? null : Rs2AntibanSettings.captureSettings();
         Rs2AntibanSettings.reset();
+        if (!forceReset) {
+            Rs2AntibanSettings.restoreMouseSettings(mouseSettings);
+        }
+        resetRuntimeState();
+    }
+
+    public static void resetRuntimeState() {
+        Rs2AntibanSettings.actionCooldownActive = false;
+        Rs2AntibanSettings.microBreakActive = false;
         Rs2Antiban.TIMEOUT = 0;
         Rs2Antiban.playStyle = null;
         Rs2Antiban.activity = null;

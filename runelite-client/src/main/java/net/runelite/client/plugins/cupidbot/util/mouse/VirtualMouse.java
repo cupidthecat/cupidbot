@@ -120,21 +120,33 @@ public class VirtualMouse extends Mouse {
         }
     }
 
-    private void handleClick(Point point, boolean rightClick) {
+    private void handleClick(Point point, boolean rightClick, MouseMovementPlan plan) {
         entered(point);
         exited(point);
         moved(point);
-        sleep(nextClickStageDelayMs());
+        sleep(nextClickSettleDelayMs(plan));
         pressed(point, rightClick ? MouseEvent.BUTTON3 : MouseEvent.BUTTON1);
-        sleep(nextClickStageDelayMs());
+        sleep(nextClickHoldDelayMs(plan));
         released(point, rightClick ? MouseEvent.BUTTON3 : MouseEvent.BUTTON1);
-        sleep(nextClickStageDelayMs());
+        sleep(nextClickReleaseDelayMs(plan));
         clicked(point, rightClick ? MouseEvent.BUTTON3 : MouseEvent.BUTTON1);
         setLastClick(point);
     }
 
     static int nextClickStageDelayMs() {
         return Rs2Random.logNormalBounded(25, 90);
+    }
+
+    static int nextClickSettleDelayMs(MouseMovementPlan plan) {
+        return plan == null ? nextClickStageDelayMs() : plan.getSettleDelayMs();
+    }
+
+    static int nextClickHoldDelayMs(MouseMovementPlan plan) {
+        return plan == null ? nextClickStageDelayMs() : plan.getButtonDownTimeMs();
+    }
+
+    static int nextClickReleaseDelayMs(MouseMovementPlan plan) {
+        return plan == null ? nextClickStageDelayMs() : 0;
     }
 
     private boolean shouldMoveNaturally(Point point) {
@@ -151,7 +163,8 @@ public class VirtualMouse extends Mouse {
                 target,
                 context,
                 mode,
-                Rs2AntibanSettings.getEffectiveMouseSpeed(Rs2Antiban.getActivityIntensity()),
+                Rs2AntibanSettings.getEffectiveMouseSpeed(
+                        Rs2Antiban.getActivityIntensity(), Rs2Antiban.getPlayStyle()),
                 Rs2AntibanSettings.getConfiguredMouseSmoothness(),
                 seedForMode(mode, target, context));
     }
@@ -311,7 +324,7 @@ public class VirtualMouse extends Mouse {
         if (entry != null) {
             CupidBot.targetMenu = entry;
         }
-        handleClick(plan.getTargetPoint(), rightClick);
+        handleClick(plan.getTargetPoint(), rightClick, plan);
         return this;
     }
 

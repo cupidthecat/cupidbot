@@ -1,5 +1,11 @@
 package net.runelite.client.plugins.cupidbot.util.mouse;
 
+import net.runelite.api.Point;
+import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseEngineMode;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseActionContext;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementPlan;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementTuning;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseTarget;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -25,6 +31,40 @@ public class VirtualMouseUngatedMotionTest {
 			int delay = VirtualMouse.nextClickStageDelayMs();
 			assertTrue("click delay " + delay + " below floor", delay >= 25);
 			assertTrue("click delay " + delay + " above ceiling", delay <= 90);
+		}
+	}
+
+	@Test
+	public void clickHoldDelayComesFromMovementPlan() {
+		MouseMovementPlan plan = movementPlanWithTuning(
+				new MouseMovementTuning(25, 35, 82, 100, 100, 100, 100, 100));
+
+		assertEquals(82, VirtualMouse.nextClickHoldDelayMs(plan));
+	}
+
+	@Test
+	public void clickReleaseDelayDoesNotAddLegacyRandomStageWhenPlanExists() {
+		MouseMovementPlan plan = movementPlanWithTuning(
+				new MouseMovementTuning(25, 135, 82, 100, 100, 100, 100, 100));
+
+		assertEquals(0, VirtualMouse.nextClickReleaseDelayMs(plan));
+	}
+
+	@Test
+	public void clickHoldDelayFallsBackToHumanBoundsWithoutPlan() {
+		for (int i = 0; i < 10_000; i++) {
+			int delay = VirtualMouse.nextClickHoldDelayMs(null);
+			assertTrue("click hold delay " + delay + " below floor", delay >= 25);
+			assertTrue("click hold delay " + delay + " above ceiling", delay <= 90);
+		}
+	}
+
+	@Test
+	public void clickReleaseDelayFallsBackToHumanBoundsWithoutPlan() {
+		for (int i = 0; i < 10_000; i++) {
+			int delay = VirtualMouse.nextClickReleaseDelayMs(null);
+			assertTrue("click release delay " + delay + " below floor", delay >= 25);
+			assertTrue("click release delay " + delay + " above ceiling", delay <= 90);
 		}
 	}
 
@@ -135,5 +175,23 @@ public class VirtualMouseUngatedMotionTest {
 	private static InputStream classBytes(Class<?> target) {
 		String resource = "/" + target.getName().replace('.', '/') + ".class";
 		return target.getResourceAsStream(resource);
+	}
+
+	private static MouseMovementPlan movementPlanWithTuning(MouseMovementTuning tuning) {
+		return new MouseMovementPlan(
+				new Point(0, 0),
+				MouseTarget.point(new Point(10, 10)),
+				new Point(10, 10),
+				MouseActionContext.GENERAL,
+				MouseEngineMode.BALANCED,
+				42L,
+				14.0,
+				1.0,
+				120,
+				0,
+				0,
+				0,
+				60,
+				tuning);
 	}
 }

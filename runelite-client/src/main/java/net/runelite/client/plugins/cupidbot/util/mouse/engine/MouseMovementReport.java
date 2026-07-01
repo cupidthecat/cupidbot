@@ -7,7 +7,8 @@ import java.util.List;
 
 public final class MouseMovementReport
 {
-	private static final MouseMovementReport EMPTY = new MouseMovementReport(null, 0.0, 0.0, 1.0, 0.0, 0.0, 0);
+	private static final MouseMovementReport EMPTY = new MouseMovementReport(
+		null, 0.0, 0.0, 1.0, 0.0, 0.0, 0, 0, 0, 0, 0);
 
 	private final MouseMovementPlan plan;
 	private final double pathLength;
@@ -16,6 +17,10 @@ public final class MouseMovementReport
 	private final double peakStepDistance;
 	private final double finalError;
 	private final int stepCount;
+	private final int plannedDurationMs;
+	private final int plannedReactionDelayMs;
+	private final int plannedSettleDelayMs;
+	private final int plannedButtonDownTimeMs;
 
 	private MouseMovementReport(
 		MouseMovementPlan plan,
@@ -24,7 +29,11 @@ public final class MouseMovementReport
 		double pathEfficiency,
 		double peakStepDistance,
 		double finalError,
-		int stepCount)
+		int stepCount,
+		int plannedDurationMs,
+		int plannedReactionDelayMs,
+		int plannedSettleDelayMs,
+		int plannedButtonDownTimeMs)
 	{
 		this.plan = plan;
 		this.pathLength = pathLength;
@@ -33,6 +42,10 @@ public final class MouseMovementReport
 		this.peakStepDistance = peakStepDistance;
 		this.finalError = finalError;
 		this.stepCount = stepCount;
+		this.plannedDurationMs = plannedDurationMs;
+		this.plannedReactionDelayMs = plannedReactionDelayMs;
+		this.plannedSettleDelayMs = plannedSettleDelayMs;
+		this.plannedButtonDownTimeMs = plannedButtonDownTimeMs;
 	}
 
 	public static MouseMovementReport empty()
@@ -59,7 +72,18 @@ public final class MouseMovementReport
 		{
 			finalError = distance(path.get(path.size() - 1), plan.getTargetPoint());
 		}
-		return new MouseMovementReport(plan, pathLength, direct, efficiency, peakStep, finalError, path.size());
+		return new MouseMovementReport(
+			plan,
+			pathLength,
+			direct,
+			efficiency,
+			peakStep,
+			finalError,
+			path.size(),
+			plan == null ? 0 : plan.getDurationMs(),
+			plan == null ? 0 : plan.getReactionDelayMs(),
+			plan == null ? 0 : plan.getSettleDelayMs(),
+			plan == null ? 0 : plan.getButtonDownTimeMs());
 	}
 
 	private static double distance(Point a, Point b)
@@ -100,5 +124,25 @@ public final class MouseMovementReport
 	public int getStepCount()
 	{
 		return stepCount;
+	}
+
+	public int getPlannedDurationMs()
+	{
+		return plannedDurationMs;
+	}
+
+	public int getPlannedReactionDelayMs()
+	{
+		return plannedReactionDelayMs;
+	}
+
+	public int getPlannedSettleDelayMs()
+	{
+		return plannedSettleDelayMs;
+	}
+
+	public int getPlannedButtonDownTimeMs()
+	{
+		return plannedButtonDownTimeMs;
 	}
 }

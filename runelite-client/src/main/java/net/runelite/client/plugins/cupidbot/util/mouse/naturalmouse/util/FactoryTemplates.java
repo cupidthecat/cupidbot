@@ -6,6 +6,7 @@ import net.runelite.client.plugins.cupidbot.util.antiban.Rs2AntibanSettings;
 import net.runelite.client.plugins.cupidbot.util.antiban.SessionFatigue;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
+import net.runelite.client.plugins.cupidbot.util.mouse.engine.MouseMovementTuning;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.MouseMotionFactory;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.api.SpeedManager;
 import net.runelite.client.plugins.cupidbot.util.mouse.naturalmouse.support.*;
@@ -132,15 +133,38 @@ public class FactoryTemplates {
             MouseSmoothness mouseSmoothness,
             Random random,
             Integer overshootsOverride) {
+        return createMouseSpeedMotionFactory(
+                nature,
+                mouseSpeed,
+                currentBaseTime,
+                mouseSmoothness,
+                random,
+                overshootsOverride,
+                MouseMovementTuning.defaults());
+    }
+
+    public static MouseMotionFactory createMouseSpeedMotionFactory(
+            MouseMotionNature nature,
+            MouseSpeed mouseSpeed,
+            int currentBaseTime,
+            MouseSmoothness mouseSmoothness,
+            Random random,
+            Integer overshootsOverride,
+            MouseMovementTuning tuning) {
         MouseSpeed speed = mouseSpeed != null ? mouseSpeed : MouseSpeed.DEFAULT;
         MouseSmoothness smoothness = mouseSmoothness != null ? mouseSmoothness : MouseSmoothness.DEFAULT;
+        MouseMovementTuning safeTuning = tuning == null ? MouseMovementTuning.defaults() : tuning;
         Random rng = random == null ? new Random() : random;
 
         MouseMotionFactory factory = new MouseMotionFactory(nature);
         factory.setRandom(rng);
         DefaultSpeedManager manager = new DefaultSpeedManager(createHumanMouseFlows(speed), rng);
-        factory.setDeviationProvider(new SinusoidalDeviationProvider(smoothness.getDeviationSlopeDivider()));
-        factory.setNoiseProvider(new DefaultNoiseProvider(smoothness.getNoiseDivider()));
+        factory.setDeviationProvider(new SinusoidalDeviationProvider(
+                scaledDivider(smoothness.getDeviationSlopeDivider(), safeTuning.getCurveMultiplier())));
+        factory.setNoiseProvider(new DefaultNoiseProvider(
+                smoothness.getNoiseDivider(),
+                safeTuning.getPathNoiseMultiplier(),
+                safeTuning.getMicroJitterMultiplier()));
         factory.getNature().setReactionTimeVariationMs(speed.getReactionTimeVariationMs());
         factory.getNature().setTimeToStepsDivider(smoothness.getTimeToStepsDivider());
         factory.getNature().setMinSteps(smoothness.getMinSteps());
@@ -153,9 +177,19 @@ public class FactoryTemplates {
         overshootManager.setOvershoots(Rs2AntibanSettings.simulateMistakes ? overshoots : 0);
         overshootManager.setMinDistanceForOvershoots(3);
         overshootManager.setMinOvershootMovementMs(speed.getMinOvershootMovementMs());
+        overshootManager.setOvershootRandomModifierDivider(scaledDivider(
+                DefaultOvershootManager.OVERSHOOT_RANDOM_MODIFIER_DIVIDER,
+                safeTuning.getOvershootMultiplier()));
 
         factory.setSpeedManager(manager);
         return factory;
+    }
+
+    private static double scaledDivider(double baseDivider, double multiplier) {
+        if (multiplier <= 0.0) {
+            return Double.MAX_VALUE;
+        }
+        return baseDivider / multiplier;
     }
 
     public static int effectiveMouseBaseTimeMs(MouseSpeed mouseSpeed) {
