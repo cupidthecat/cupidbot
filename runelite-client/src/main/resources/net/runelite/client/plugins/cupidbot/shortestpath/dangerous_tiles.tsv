@@ -1,0 +1,12 @@
+# Tile	Display info
+# Tiles occupied by aggressive NPCs that attack while pathing next to them.
+# When "Avoid dangerous NPCs" is on, a high step penalty is applied to every
+# tile within 1 of these tiles. This is a penalty, not a hard block.
+3103 3347 0	Draynor Manor undead tree
+3107 3342 0	Draynor Manor undead tree
+3107 3344 0	Draynor Manor undead tree
+3108 3346 0	Draynor Manor undead tree
+3111 3339 0	Draynor Manor undead tree
+3111 3348 0	Draynor Manor undead tree
+3115 3344 0	Draynor Manor undead tree
+3120 3344 0	Draynor Manor undead tree

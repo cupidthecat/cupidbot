@@ -133,6 +133,18 @@ public interface ShortestPathConfig extends Config {
     }
 
     @ConfigItem(
+            keyName = "avoidDangerousNpcs",
+            name = "Avoid dangerous NPCs",
+            description = "Route around tiles next to aggressive NPCs that attack you while passing<br>" +
+                    "(e.g. undead trees at Draynor Manor). A penalty, not a block, so chokepoints still work.",
+            position = 1,
+            section = sectionSettings
+    )
+    default boolean avoidDangerousNpcs() {
+        return true;
+    }
+
+    @ConfigItem(
             keyName = "useAgilityShortcuts",
             name = "Use agility shortcuts",
             description = "Whether to include agility shortcuts in the path.<br>" +

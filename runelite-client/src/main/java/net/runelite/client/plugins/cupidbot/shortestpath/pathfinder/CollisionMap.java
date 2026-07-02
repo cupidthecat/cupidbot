@@ -160,6 +160,7 @@ public class CollisionMap {
     private volatile long cachedRegionIdTime = 0;
     private static final long REGION_CACHE_MS = 5000;
     private static final int TOA_PUZZLE_REGION = 14162;
+    private static final int DANGEROUS_TILE_PENALTY = 100;
 
     private int getCachedRegionId() {
         long now = System.currentTimeMillis();
@@ -261,7 +262,16 @@ public class CollisionMap {
             }
 
             if (traversable[i]) {
-                neighbors.add(new Node(neighborPacked, node));
+                if (config.isAvoidDangerousNpcs()
+                        && config.isDangerousAdjacentTile(neighborPacked)
+                        && !targets.contains(neighborPacked)) {
+                    int penalizedCost = node.cost
+                            + WorldPointUtil.distanceBetween(node.packedPosition, neighborPacked)
+                            + DANGEROUS_TILE_PENALTY;
+                    neighbors.add(new Node(neighborPacked, node, penalizedCost));
+                } else {
+                    neighbors.add(new Node(neighborPacked, node));
+                }
             } else if (Math.abs(d.x + d.y) == 1 && isBlocked(x + d.x, y + d.y, z)) {
                 // The transport starts from a blocked adjacent tile, e.g. fairy ring
                 // Only checks non-teleport transports (includes portals and levers, but not items and spells)
@@ -354,7 +364,14 @@ public class CollisionMap {
             }
 
             if (traversable[i]) {
-                neighbors.add(new Node(prevPacked, node));
+                if (config.isAvoidDangerousNpcs() && config.isDangerousAdjacentTile(prevPacked)) {
+                    int penalizedCost = node.cost
+                            + WorldPointUtil.distanceBetween(node.packedPosition, prevPacked)
+                            + DANGEROUS_TILE_PENALTY;
+                    neighbors.add(new Node(prevPacked, node, penalizedCost));
+                } else {
+                    neighbors.add(new Node(prevPacked, node));
+                }
             } else if (Math.abs(d.x + d.y) == 1
                     && isBlocked(WorldPointUtil.unpackWorldX(prevPacked), WorldPointUtil.unpackWorldY(prevPacked), z)) {
                 int wx = WorldPointUtil.unpackWorldX(prevPacked);
