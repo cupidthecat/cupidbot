@@ -7766,6 +7766,7 @@ public final class SpriteID
 		public static final int _67 = 6350;
 		public static final int _68 = 6351;
 		public static final int _69 = 6352;
+		public static final int _70 = 8358;
 
 		public static final int MIMIC = _0;
 		public static final int OBOR = _1;
@@ -7831,6 +7832,7 @@ public final class SpriteID
 		public static final int DOOM_OF_MOKHAIOTL = _64;
 		public static final int SHELLBANE_GRYPHON = _66;
 		public static final int BRUTUS = _69;
+		public static final int MAGGOT_KING = _70;
 	}
 
 	public static final class IconBoss50x50

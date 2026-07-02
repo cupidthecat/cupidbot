@@ -24,11 +24,16 @@
  */
 package net.runelite.client.plugins.hiscore;
 
+import java.lang.reflect.Field;
+import java.util.List;
 import net.runelite.api.Client;
+import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.hiscore.HiscoreClient;
+import net.runelite.client.hiscore.HiscoreSkill;
 import static net.runelite.client.plugins.hiscore.HiscorePanel.formatLevel;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import static org.mockito.Mockito.mock;
 
@@ -50,5 +55,54 @@ public class HiscorePanelTest
 		assertEquals("7682", formatLevel(7682));
 		assertEquals("12k", formatLevel(12398));
 		assertEquals("219k", formatLevel(219824));
+	}
+
+	@Test
+	public void testMaggotKingIsAvailableForHiscores() throws NoSuchFieldException, IllegalAccessException
+	{
+		assertTrue(containsHiscoreSkill("Maggot King"));
+
+		Field maggotKingSprite = SpriteID.IconBoss25x25.class.getField("MAGGOT_KING");
+		assertEquals(8358, maggotKingSprite.getInt(null));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testMaggotKingAppearsAfterLunarChestsInBossPanel() throws NoSuchFieldException, IllegalAccessException
+	{
+		Field bossesField = HiscorePanel.class.getDeclaredField("BOSSES");
+		bossesField.setAccessible(true);
+
+		List<HiscoreSkill> bosses = (List<HiscoreSkill>) bossesField.get(null);
+		int lunarChestsIndex = indexOfHiscoreSkill(bosses, "Lunar Chests");
+		int maggotKingIndex = indexOfHiscoreSkill(bosses, "Maggot King");
+
+		assertEquals(lunarChestsIndex + 1, maggotKingIndex);
+	}
+
+	private static boolean containsHiscoreSkill(String name)
+	{
+		for (HiscoreSkill hiscoreSkill : HiscoreSkill.values())
+		{
+			if (hiscoreSkill.getName().equals(name))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static int indexOfHiscoreSkill(List<HiscoreSkill> hiscoreSkills, String name)
+	{
+		for (int i = 0; i < hiscoreSkills.size(); i++)
+		{
+			if (hiscoreSkills.get(i).getName().equals(name))
+			{
+				return i;
+			}
+		}
+
+		return -1;
 	}
 }
