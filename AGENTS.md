@@ -37,6 +37,9 @@ Read `docs/entity-guides/README.md`. Add a gotcha there when you fix an entity-a
 - Put volatile command details, API examples, endpoint lists, generated inventories, and screenshots in the narrowest owning doc.
 - Prefer links to owner docs over copying the same guidance into multiple high-level files.
 
+## Update Log Workflow
+After any user-facing CupidBot client, launcher, or plugin update is committed, follow [UPDATE_LOG_POLICY.md](UPDATE_LOG_POLICY.md). The canonical log lives in the sibling launcher repo at `../cupidbot-launcher/UPDATE_LOG.md`, and entries are added in a follow-up log-only commit that references the completed implementation commit SHA.
+
 ## Deeper guides
 - Script authoring & threading: `runelite-client/.../cupidbot/AGENTS.md`
 - State machines (use for 3+ phase scripts): `.../cupidbot/statemachine/AGENTS.md`
