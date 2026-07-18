@@ -6,6 +6,7 @@ import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseEngineMode;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSmoothness;
 import net.runelite.client.plugins.cupidbot.util.antiban.enums.MouseSpeed;
 import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.ui.PluginPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,6 +27,7 @@ public class MousePanel extends JPanel
     private static final int ENGINE_MODE_WIDTH = 92;
     private static final int ADVANCED_POPUP_WIDTH = 226;
     private static final int ADVANCED_POPUP_HEIGHT = 420;
+    private static final int CARD_WIDTH = PluginPanel.PANEL_WIDTH - (PluginPanel.BORDER_OFFSET * 2);
 
     private boolean updatingValues;
 
@@ -192,6 +194,13 @@ public class MousePanel extends JPanel
 
         // Make sure the default values on the UI match the current settings
         updateValues();
+    }
+
+    @Override
+    public Dimension getPreferredSize()
+    {
+        Dimension preferredSize = super.getPreferredSize();
+        return new Dimension(Math.min(preferredSize.width, CARD_WIDTH), preferredSize.height);
     }
 
     private void setupActionListeners()
