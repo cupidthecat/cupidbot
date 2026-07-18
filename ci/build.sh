@@ -16,5 +16,6 @@ if [ ! -f "${GLSLANG_ARCHIVE}" ] || [ ! -d "${GLSLANG_DIR}" ] || ! echo "${GLSLA
 fi
 
 export ORG_GRADLE_PROJECT_glslangPath="$GLSLANG_DIR/bin/glslangValidator"
-./gradlew --build-cache ':buildAll'
-./gradlew --build-cache ':client:runUnitTests'
+GRADLE_JVMARGS='-Dfile.encoding=UTF-8 -Xmx2048m'
+./gradlew --build-cache --no-parallel "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}" ':buildAll'
+./gradlew --build-cache --no-parallel "-Dorg.gradle.jvmargs=${GRADLE_JVMARGS}" ':client:runUnitTests'
