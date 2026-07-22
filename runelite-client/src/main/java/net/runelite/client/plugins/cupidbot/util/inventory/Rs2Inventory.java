@@ -1376,8 +1376,16 @@ public class Rs2Inventory {
      * @return True if an item is selected, false otherwise.
      */
     public static boolean isItemSelected() {
-        // TODO: this will also return true if a spell is selected
-        return CupidBot.getClient().isWidgetSelected();
+        return CupidBot.getClientThread().runOnClientThreadOptional(() ->
+                isInventoryItemSelection(CupidBot.getClient().isWidgetSelected(),
+                        CupidBot.getClient().getSelectedWidget() == null
+                                ? -1
+                                : CupidBot.getClient().getSelectedWidget().getItemId()))
+                .orElse(false);
+    }
+
+    static boolean isInventoryItemSelection(boolean widgetSelected, int selectedItemId) {
+        return widgetSelected && selectedItemId != -1;
     }
 
     /**

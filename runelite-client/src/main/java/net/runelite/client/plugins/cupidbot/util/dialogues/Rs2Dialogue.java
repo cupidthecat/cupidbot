@@ -299,11 +299,9 @@ public class Rs2Dialogue {
     public static boolean keyPressForDialogueOption(String text, boolean exact) {
         if (!hasSelectAnOption()) return false;
 
-        Widget dialogueOption = getDialogueOption(text, exact);
-        if (dialogueOption == null) return false;
-
-        Rs2Keyboard.keyPress(dialogueOption.getOnKeyListener()[7].toString().charAt(0));
-        return true;
+        List<String> options = getDialogueOptionTexts();
+        int optionIndex = findDialogueOptionIndex(options, text, exact);
+        return optionIndex >= 0 && keyPressForDialogueOption(optionIndex + 1);
     }
 
     /**
@@ -346,15 +344,13 @@ public class Rs2Dialogue {
      * @param texts varargs parameter representing the*/
     public static boolean clickOption(boolean exact, String... texts){
         if (!hasSelectAnOption()) return false;
-        List<Widget> options = getDialogueOptions();
+        List<String> options = getDialogueOptionTexts();
         if(options.isEmpty()) return false;
 
         int matchIndex = -1;
         for (int i = 0; i < options.size(); i++) {
-            Widget dialop = options.get(i);
-            boolean hit = exact
-                    ? Arrays.stream(texts).anyMatch(t -> dialop.getText().equalsIgnoreCase(t))
-                    : Arrays.stream(texts).anyMatch(t -> dialop.getText().toLowerCase().contains(t.toLowerCase()));
+            String optionText = options.get(i);
+            boolean hit = Arrays.stream(texts).anyMatch(t -> dialogueTextMatches(optionText, t, exact));
             if (hit) { matchIndex = i; break; }
         }
         if (matchIndex < 0) return false;
@@ -390,20 +386,45 @@ public class Rs2Dialogue {
     public static boolean clickOption(String text, boolean exact) {
         if (!hasSelectAnOption()) return false;
 
-        List<Widget> options = getDialogueOptions();
+        List<String> options = getDialogueOptionTexts();
         if (options.isEmpty()) return false;
 
         int matchIndex = -1;
         for (int i = 0; i < options.size(); i++) {
-            Widget w = options.get(i);
-            boolean hit = exact
-                    ? w.getText().equalsIgnoreCase(text)
-                    : w.getText().toLowerCase().contains(text.toLowerCase());
+            boolean hit = dialogueTextMatches(options.get(i), text, exact);
             if (hit) { matchIndex = i; break; }
         }
         if (matchIndex < 0) return false;
 
         return keyPressForDialogueOption(matchIndex + 1);
+    }
+
+    private static List<String> getDialogueOptionTexts() {
+        return CupidBot.getClientThread().runOnClientThreadOptional(() -> getDialogueOptions().stream()
+                .map(Widget::getText)
+                .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
+    }
+
+    static int findDialogueOptionIndex(List<String> options, String text, boolean exact) {
+        if (options == null || text == null) return -1;
+
+        for (int i = 0; i < options.size(); i++) {
+            String option = options.get(i);
+            if (dialogueTextMatches(option, text, exact)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    static boolean dialogueTextMatches(String actual, String expected, boolean exact) {
+        if (actual == null || expected == null) return false;
+        String cleanActual = Rs2UiHelper.stripTagsToSpace(actual).trim();
+        String cleanExpected = Rs2UiHelper.stripTagsToSpace(expected).trim();
+        return exact
+                ? cleanActual.equalsIgnoreCase(cleanExpected)
+                : cleanActual.toLowerCase().contains(cleanExpected.toLowerCase());
     }
 
     /**

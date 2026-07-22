@@ -1,24 +1,21 @@
 package net.runelite.client.plugins.cupidbot.questhelper.logic;
 
-import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.MenuAction;
-import net.runelite.api.Point;
 import net.runelite.api.Quest;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.client.plugins.cupidbot.CupidBot;
-import net.runelite.client.plugins.cupidbot.questhelper.QuestHelperPlugin;
 import net.runelite.client.plugins.cupidbot.questhelper.steps.QuestStep;
 import net.runelite.client.plugins.cupidbot.util.dialogues.Rs2Dialogue;
 import net.runelite.client.plugins.cupidbot.util.gameobject.Rs2GameObject;
 import net.runelite.client.plugins.cupidbot.util.grounditem.Rs2GroundItem;
 import net.runelite.client.plugins.cupidbot.util.inventory.Rs2Inventory;
 import net.runelite.client.plugins.cupidbot.util.keyboard.Rs2Keyboard;
-import net.runelite.client.plugins.cupidbot.util.menu.NewMenuEntry;
 import net.runelite.client.plugins.cupidbot.util.npc.Rs2Npc;
 import net.runelite.client.plugins.cupidbot.util.player.Rs2Player;
 import net.runelite.client.plugins.cupidbot.util.tabs.Rs2Tab;
 import net.runelite.client.plugins.cupidbot.util.walker.Rs2Walker;
 import net.runelite.client.plugins.cupidbot.util.widget.Rs2Widget;
+
+import java.util.List;
 
 import static net.runelite.api.gameval.ItemID.BANANA;
 import static net.runelite.api.gameval.ItemID.SPADE;
@@ -28,65 +25,20 @@ import static net.runelite.client.plugins.cupidbot.util.Global.sleepUntil;
 /**
  * Pirate's Treasure quest custom logic
  */
-@Slf4j
 public class PiratesTreasure extends BaseQuest {
+    private static final String QUEST_NAME = "Pirate's Treasure";
+    private static final String SYNC_STEP_TEXT = "Please open Pirate Treasure's Quest Journal to sync the current quest state.";
 
-    public void setMQuestPlugin(QuestHelperPlugin mQuestPlugin) {
-        this.mQuestPlugin = mQuestPlugin;
+    public PiratesTreasure() {
     }
-
-        private QuestHelperPlugin mQuestPlugin;
-
-        public PiratesTreasure() {
-        }
-
-        public PiratesTreasure(QuestHelperPlugin mQuestPlugin) {
-            this.mQuestPlugin = mQuestPlugin;
-        }
 
     @Override
     public boolean executeCustomLogic() {
         QuestStep questStep = getQuestHelperPlugin().getSelectedQuest().getCurrentStep().getActiveStep();
+        if (questStep == null || questStep.getText() == null) return true;
         if (getQuestHelperPlugin().getSelectedQuest().getQuest().getId() == Quest.PIRATES_TREASURE.getId()) {
-            if (questStep.getText().contains("Please open Pirate Treasure's Quest Journal to sync the current quest state.")) {
-
-                Rs2Tab.switchToQuestTab();
-
-                sleep(600, 800);
-
-                directQuestSearch();
-
-                sleep(600, 800);
-
-                Rs2Widget.clickWidget("Pirate's Treasure");
-
-                sleep(600, 800);
-
-                Rs2Widget.clickWidget("Close Floating panel");
-                sleep(2000);
-                Rs2Widget.clickWidget("Close");
-
-                sleep(2000);
-
-                /* walkTo(3027, 3222, 0);
-
-                if (Rs2Npc.getNpc("Seaman Lorris") != null) {
-                    Rs2Npc.interact("Seaman Lorris", "Talk-to");
-                    sleepUntil(Rs2Dialogue::isInDialogue);
-                    if (Rs2Dialogue.isInDialogue()) {
-                        Rs2Dialogue.clickContinue();
-                    }
-                    sleep(600, 800);
-                    if (Rs2Dialogue.isInDialogue()) {
-                        Rs2Dialogue.clickContinue();
-                    }
-                    sleep(600, 800);
-                    if (Rs2Dialogue.isInDialogue()) {
-                        Rs2Dialogue.clickContinue();
-                    }
-                } */
-
-                return true;
+            if (questStep.getText().contains(SYNC_STEP_TEXT)) {
+                return syncQuestJournal();
             }
             if (questStep.getText().contains("Right-click fill the rest of the crate with bananas, then talk to Luthas.")) {
                 Rs2Walker.walkTo(2917, 3161, 0);
@@ -97,19 +49,9 @@ public class PiratesTreasure extends BaseQuest {
             }
             if (questStep.getText().contains("Talk to Luthas and tell him you finished filling the crate.")) {
                 Rs2Walker.walkTo(2942, 3150, 0);
-                sleep(2000);
-                Rs2GameObject.interact(2072, "Search", 10);
-                sleep(6000);
-                if (!mQuestPlugin.fullCrate) {
-                    collectBananas();
-                } else {
-                    Rs2Npc.interact("Luthas", "Talk-to");
-                    sleepUntil(Rs2Dialogue::isInDialogue);
-                    Rs2Dialogue.clickContinue();
-                    sleep(2000);
-                    Rs2Dialogue.clickContinue();
-                }
-                return true;
+                if (!sleepUntil(() -> Rs2Npc.getNpc("Luthas") != null, 5000)) return false;
+                if (!Rs2Npc.interact("Luthas", "Talk-to")) return false;
+                return sleepUntil(Rs2Dialogue::isInDialogue, 5000);
             }
 
             if (questStep.getText().contains("Search the crate in the back room of the Port Sarim food shop. Make sure you're wearing your white apron.")) {
@@ -176,46 +118,40 @@ public class PiratesTreasure extends BaseQuest {
     }
 
 
-    private void directQuestSearch() {
-        if (openSearchWidget()) {
-            sleep(600, 800);
-            Rs2Keyboard.typeString("Pirate");
-            sleep(800, 1000);
+    private boolean syncQuestJournal() {
+        if (!Rs2Tab.switchToQuestTab()) return false;
+        if (!sleepUntil(() -> Rs2Widget.isWidgetVisible(InterfaceID.Questlist.UNIVERSE), 3000)) return false;
+
+        if (Rs2Widget.hasWidget("Search quest list")) {
+            if (!openSearchWidget()) return false;
+            if (!sleepUntil(() -> !Rs2Widget.hasWidget("Search quest list"), 1500)) return false;
         }
+        if (!openSearchWidget()) return false;
+        if (!sleepUntil(() -> Rs2Widget.hasWidget("Search quest list"), 1500)) return false;
+
+        Rs2Keyboard.typeString("Pirate");
+        if (!sleepUntil(() -> Rs2Widget.hasVisibleWidgetText(QUEST_NAME), 3000)) return false;
+        if (!Rs2Widget.clickWidget(QUEST_NAME, true)) return false;
+        if (!sleepUntil(() -> Rs2Widget.hasWidgetText(QUEST_NAME, InterfaceID.Questjournal.TITLE, true), 3000)) {
+            return false;
+        }
+
+        boolean stateSynced = sleepUntil(() -> {
+            QuestStep activeStep = getQuestHelperPlugin().getSelectedQuest().getCurrentStep().getActiveStep();
+            return activeStep != null && !activeStep.getText().contains(SYNC_STEP_TEXT);
+        }, 3000);
+        Rs2Widget.clickWidget(InterfaceID.Questjournal.CLOSE);
+        if (Rs2Widget.hasWidget("Search quest list")) {
+            openSearchWidget();
+            sleepUntil(() -> !Rs2Widget.hasWidget("Search quest list"), 1500);
+        }
+        return stateSynced;
     }
 
     private boolean openSearchWidget() {
-        // Get the widget with accurate coordinates
-        int groupId = 26148864 >> 16;
-        Widget parentWidget = CupidBot.getClient().getWidget(groupId, 0);
-
-        if (parentWidget != null) {
-            // From the widget info: RelativeX 161, RelativeY 0, Width 18, Height 17
-            // Calculate the exact center point where we need to click
-            Point canvasLocation = parentWidget.getCanvasLocation();
-            int exactX = canvasLocation.getX() + 161 + 9; // center X
-            int exactY = canvasLocation.getY() + 8;       // center Y
-
-            // Create a precise click point directly on the search icon
-            Point clickPoint = new Point(exactX, exactY);
-
-            CupidBot.log("Clicking search icon at " + clickPoint.getX() + ", " + clickPoint.getY());
-
-            // Create a direct menu entry for clicking the search using the builder-style API
-            NewMenuEntry entry = new NewMenuEntry()
-                    .option("Open")
-                    .target("Search")
-                    .identifier(2)
-                    .type(MenuAction.CC_OP)
-                    .param0(0)
-                    .param1(26148864)
-                    .forceLeftClick(false);
-
-            // Use mouse to click at the exact point
-            CupidBot.getMouse().click(clickPoint, entry);
-            sleep(500, 700);
-            return true;
-        }
-        return false;
+        Widget parentWidget = Rs2Widget.getWidget(InterfaceID.Questlist.UNIVERSE);
+        if (parentWidget == null) return false;
+        Widget searchWidget = Rs2Widget.findWidget("Search", List.of(parentWidget), true);
+        return searchWidget != null && Rs2Widget.clickWidget(searchWidget);
     }
 }

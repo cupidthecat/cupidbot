@@ -161,6 +161,7 @@ public abstract class QuestStep implements Module
 	@Setter
 	private boolean showInSidebar = true;
 
+	@Getter
 	protected String lastDialogSeen = "";
 
 	@Setter

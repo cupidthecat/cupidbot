@@ -9,7 +9,6 @@ import net.runelite.api.widgets.Widget;
 import net.runelite.client.plugins.cupidbot.CupidBot;
 import net.runelite.client.plugins.cupidbot.Script;
 import net.runelite.client.plugins.cupidbot.api.tileobject.models.TileObjectType;
-import net.runelite.client.plugins.cupidbot.questhelper.logic.PiratesTreasure;
 import net.runelite.client.plugins.cupidbot.questhelper.logic.QuestRegistry;
 import net.runelite.client.plugins.cupidbot.questhelper.questinfo.QuestHelperQuest;
 import net.runelite.client.plugins.cupidbot.questhelper.managers.QuestContainerManager;
@@ -53,6 +52,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -60,7 +60,7 @@ import org.slf4j.event.Level;
 import net.runelite.api.coords.WorldArea;
 
 public class QuestScript extends Script {
-    public static double version = 0.3;
+    public static double version = 0.4;
 
     private static final long MISSING_REQUIREMENT_NOTIFY_INTERVAL_MS = 10_000L;
     private static final Map<Integer, Long> lastMissingRequirementNotice = new HashMap<>();
@@ -80,9 +80,9 @@ public class QuestScript extends Script {
     int unreachableTargetCheckDist = 1;
 
     private QuestHelperConfig config;
-    private QuestHelperPlugin mQuestPlugin;
-    private static Set<Integer> npcsHandled = new HashSet<>();
-    private static Set<Long> objectsHandeled = new HashSet<>();
+    private final Set<Integer> npcsHandled = new HashSet<>();
+    private final Set<Long> objectsHandled = new HashSet<>();
+    private int handledTargetsQuestId = -1;
 
     private int heldTrackingQuestId = -1;
     private final Set<Integer> everHeldItemRequirementIds = new HashSet<>();
@@ -100,9 +100,8 @@ public class QuestScript extends Script {
 
 
 
-    public boolean run(QuestHelperConfig config, QuestHelperPlugin mQuestPlugin) {
+    public boolean run(QuestHelperConfig config) {
         this.config = config;
-        this.mQuestPlugin = mQuestPlugin;
 
 
         mainScheduledFuture = scheduledExecutorService.scheduleWithFixedDelay(() -> {
@@ -111,6 +110,7 @@ public class QuestScript extends Script {
                 if (!CupidBot.isLoggedIn()) return;
                 if (!super.run()) return;
                 if (getQuestHelperPlugin().getSelectedQuest() == null) return;
+                resetHandledTargetsForQuest(getQuestHelperPlugin().getSelectedQuest());
 
                 if (Rs2Player.isAnimating())
                     Rs2Player.waitForAnimation();
@@ -120,24 +120,8 @@ public class QuestScript extends Script {
                 if (Rs2Dialogue.isInDialogue() && dialogueStartedStep == null)
                     dialogueStartedStep = questStep;
 
-                if (questStep != null && Rs2Widget.isWidgetVisible(ComponentID.DIALOG_OPTION_OPTIONS)) {
-                    var dialogOptions = Rs2Widget.getWidget(ComponentID.DIALOG_OPTION_OPTIONS);
-                    var dialogChoices = dialogOptions.getDynamicChildren();
-
-                    for (var choice : questStep.getChoices().getChoices()) {
-                        if (choice.getExpectedPreviousLine() != null)
-                            continue; // TODO
-
-                        if (choice.getExcludedStrings() != null && choice.getExcludedStrings().stream().anyMatch(Rs2Widget::hasWidget))
-                            continue;
-
-                        for (var dialogChoice : dialogChoices) {
-                            if (dialogChoice.getText().endsWith(choice.getChoice())) {
-                                Rs2Keyboard.keyPress(dialogChoice.getOnKeyListener()[7].toString().charAt(0));
-                                return;
-                            }
-                        }
-                    }
+                if (questStep != null && selectConfiguredDialogueChoice(questStep)) {
+                    return;
                 }
 
                 if (questStep != null && !questStep.getWidgetsToHighlight().isEmpty()) {
@@ -175,9 +159,6 @@ public class QuestScript extends Script {
                  * Execute custom logic for the quest
                  */
                 var questLogic = QuestRegistry.getQuest(getQuestHelperPlugin().getSelectedQuest().getQuest().getId());
-                if (questLogic instanceof PiratesTreasure) {
-                    ((PiratesTreasure) questLogic).setMQuestPlugin(mQuestPlugin);
-                }
                 if (questLogic != null) {
                     if (!questLogic.executeCustomLogic()) {
                         return;
@@ -188,8 +169,6 @@ public class QuestScript extends Script {
                         getQuestHelperPlugin().getSelectedQuest().isCompleted()).orElse(null)) {
                     if (Rs2Widget.isWidgetVisible(ComponentID.DIALOG_OPTION_OPTIONS) && getQuestHelperPlugin().getSelectedQuest().getQuest().getId() != Quest.COOKS_ASSISTANT.getId() && !Rs2Bank.isOpen()) {
                         boolean hasOption = Rs2Dialogue.handleQuestOptionDialogueSelection();
-                        //if there is no quest option in the dialogue, just click player location to remove
-                        // the dialogue to avoid getting stuck in an infinite loop of dialogues
                         if (!hasOption) {
                             if (Rs2Dialogue.acceptQuestStartDialogue()) {
                                 return;
@@ -199,8 +178,9 @@ public class QuestScript extends Script {
                                     && CupidBot.getClient().getTopLevelWorldView().getPlane() == 1) {
                                 Rs2Dialogue.keyPressForDialogueOption(1); // presses option 1
                                 sleep(1200,1800);
+                                return;
                             }
-                            Rs2Walker.walkFastCanvas(Rs2Player.getWorldLocation());
+                            CupidBot.status = "Waiting for a supported quest dialogue option";
                         }
                         return;
                     }
@@ -217,7 +197,7 @@ public class QuestScript extends Script {
                         dialogueStartedStep = questStep;
                     }
 
-                    if (Rs2Dialogue.isInDialogue() && dialogueStartedStep == questStep) {
+                    if (Rs2Dialogue.hasContinue() && dialogueStartedStep == questStep) {
                         Rs2Walker.clearWalkingRoute("quest-helper:dialogue-space-step");
                         Rs2Keyboard.keyPress(KeyEvent.VK_SPACE);
                         return;
@@ -284,6 +264,30 @@ public class QuestScript extends Script {
             }
         }, 0, Rs2Random.between(400, 1000), TimeUnit.MILLISECONDS);
         return true;
+    }
+
+    private boolean selectConfiguredDialogueChoice(QuestStep questStep) {
+        if (!Rs2Dialogue.hasSelectAnOption() || questStep.getChoices() == null) return false;
+
+        for (var choice : questStep.getChoices().getChoices()) {
+            if (!matchesExpectedPreviousLine(questStep.getLastDialogSeen(), choice.getExpectedPreviousLine())) {
+                continue;
+            }
+            if (choice.getExcludedStrings() != null
+                    && choice.getExcludedStrings().stream().anyMatch(Rs2Widget::hasWidget)) {
+                continue;
+            }
+            if (choice.getChoice() != null && Rs2Dialogue.clickOption(choice.getChoice(), false)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean matchesExpectedPreviousLine(String lastDialog, String expectedPreviousLine) {
+        if (expectedPreviousLine == null) return true;
+        if (lastDialog == null) return false;
+        return normalizeActionText(lastDialog).contains(normalizeActionText(expectedPreviousLine));
     }
 
 	private boolean handleRequirements(DetailedQuestStep questStep) {
@@ -1249,7 +1253,7 @@ public class QuestScript extends Script {
 		reset();
 	}
 
-    public static void reset() {
+    public void reset() {
         itemsMissing = new ArrayList<>();
         itemRequirements = new ArrayList<>();
         grandExchangeItems = new ArrayList<>();
@@ -1258,6 +1262,18 @@ public class QuestScript extends Script {
         valeTotemsSessionWoodType = null;
         obtainItemsPromptInFlight.set(false);
         obtainItemsSessionChoice = null;
+        npcsHandled.clear();
+        objectsHandled.clear();
+        handledTargetsQuestId = -1;
+    }
+
+    private void resetHandledTargetsForQuest(QuestHelper questHelper) {
+        if (questHelper == null || questHelper.getQuest() == null) return;
+        int questId = questHelper.getQuest().getId();
+        if (questId == handledTargetsQuestId) return;
+        npcsHandled.clear();
+        objectsHandled.clear();
+        handledTargetsQuestId = questId;
     }
 
     public boolean applyStep(QuestStep step) {
@@ -1371,7 +1387,7 @@ public class QuestScript extends Script {
 
         if (stepObjects.size() > 1) {
             object = stepObjects.stream()
-                    .filter(x -> !objectsHandeled.contains(x.getHash()))
+                    .filter(x -> !objectsHandled.contains(x.getHash()))
                     .findFirst()
                     .orElseGet(() -> stepObjects.stream()
                             .min(Comparator.comparing(x -> Rs2Player.getWorldLocation().distanceTo(x.getWorldLocation())))
@@ -1435,9 +1451,14 @@ public class QuestScript extends Script {
         if (hasLineOfSightToObject(object) || object != null && (Rs2Camera.isTileOnScreen(object.getLocalLocation()) || object.getCanvasLocation() != null)) {
             Rs2Walker.clearWalkingRoute("quest-helper:object-step-interact");
 
-            if (itemId == -1)
-                object.click(chooseCorrectObjectOption(step, object));
-            else {
+            if (itemId == -1) {
+                String action = chooseCorrectObjectOption(step, object);
+                if (action == null) {
+                    CupidBot.status = "Unable to determine the quest object action";
+                    return false;
+                }
+                object.click(action);
+            } else {
                 Rs2Inventory.use(itemId);
                 object.click("");
             }
@@ -1445,7 +1466,7 @@ public class QuestScript extends Script {
             sleepUntil(() -> Rs2Player.isMoving() || Rs2Player.isAnimating());
             sleep(100);
             sleepUntil(() -> !Rs2Player.isMoving() && !Rs2Player.isAnimating());
-            objectsHandeled.add(object.getHash());
+            objectsHandled.add(object.getHash());
         } else if (object != null) {
             Rs2Walker.walkTo(object.getWorldLocation(), 1);
             return false;
@@ -1484,27 +1505,15 @@ public class QuestScript extends Script {
                 CupidBot.getClient().getObjectDefinition(object.getId())).orElse(null);
 
         if (objComp == null)
-            return "";
+            return null;
 
         String[] actions;
-        if (objComp.getImpostorIds() != null) {
+        if (objComp.getImpostorIds() != null && objComp.getImpostor() != null) {
             actions = objComp.getImpostor().getActions();
         } else {
             actions = objComp.getActions();
         }
-
-        for (var action : actions) {
-            if (action != null && step.getText().stream().anyMatch(x -> x.toLowerCase().contains(action.toLowerCase())))
-                return action;
-        }
-
-        // Fallback: first non-empty action (the object's default left-click).
-        for (var action : actions) {
-            if (action != null && !action.isEmpty())
-                return action;
-        }
-
-        return "";
+        return chooseActionFromStepText(step.getText(), actions, null);
     }
 
     private String chooseCorrectNPCOption(QuestStep step, Rs2NpcModel npc) {
@@ -1514,39 +1523,44 @@ public class QuestScript extends Script {
         if (npcComp == null)
             return "Talk-to";
 
-        var actions = npcComp.getActions();
-
-        for (var action : actions) {
-            if (action != null && step.getText().stream().anyMatch(x -> x.toLowerCase().contains(action.toLowerCase())))
-                return action;
-        }
-
-        // Fallback: prefer Talk-to if the NPC has it, otherwise the first non-empty action.
-        String fallback = null;
-        for (var action : actions) {
-            if (action == null || action.isEmpty()) continue;
-            if ("Talk-to".equalsIgnoreCase(action)) return action;
-            if (fallback == null) fallback = action;
-        }
-        return fallback != null ? fallback : "Talk-to";
+        String action = chooseActionFromStepText(step.getText(), npcComp.getActions(), "Talk-to");
+        return action != null ? action : "Talk-to";
     }
 
 	private String chooseCorrectItemOption(QuestStep step, int itemId) {
-		var actions = Rs2Inventory.get(itemId).getInventoryActions();
-
-		for (var action : actions) {
-			if (action != null && step.getText().stream().anyMatch(x -> x.toLowerCase().contains(action.toLowerCase())))
-				return action;
-		}
-
-		// Fallback: first non-empty inventory action (the item's default left-click).
-		for (var action : actions) {
-			if (action != null && !action.isEmpty())
-				return action;
-		}
-
-		return "use";
+        var item = Rs2Inventory.get(itemId);
+        return item == null ? null : chooseActionFromStepText(step.getText(), item.getInventoryActions(), null);
 	}
+
+    static String chooseActionFromStepText(List<String> stepText, String[] actions, String preferredFallback) {
+        if (actions == null) return null;
+
+        List<String> availableActions = java.util.Arrays.stream(actions)
+                .filter(Objects::nonNull)
+                .filter(action -> !action.trim().isEmpty())
+                .collect(Collectors.toList());
+        String normalizedText = normalizeActionText(stepText == null ? "" : String.join(" ", stepText));
+
+        for (String action : availableActions) {
+            String normalizedAction = normalizeActionText(action);
+            if (!normalizedAction.isEmpty()
+                    && Pattern.compile("(^|\\s)" + Pattern.quote(normalizedAction) + "($|\\s)")
+                    .matcher(normalizedText).find()) {
+                return action;
+            }
+        }
+
+        if (preferredFallback != null) {
+            for (String action : availableActions) {
+                if (action.equalsIgnoreCase(preferredFallback)) return action;
+            }
+        }
+        return availableActions.size() == 1 ? availableActions.get(0) : null;
+    }
+
+    private static String normalizeActionText(String text) {
+        return text == null ? "" : text.toLowerCase().replaceAll("[^a-z0-9]+", " ").trim();
+    }
 
 	private boolean hasLineOfSightToObject(Rs2TileObjectModel object) {
 		if (object == null || object.getWorldLocation() == null || CupidBot.getClient().getLocalPlayer() == null) {
@@ -1586,27 +1600,22 @@ public class QuestScript extends Script {
             }
         }
 
-        boolean usingItems = false;
-        for (Requirement requirement : conditionalStep.getRequirements()) {
-            if (requirement instanceof ItemRequirement) {
-                ItemRequirement itemRequirement = (ItemRequirement) requirement;
+        List<ItemRequirement> stepItemRequirements = conditionalStep.getRequirements().stream()
+                .filter(ItemRequirement.class::isInstance)
+                .map(ItemRequirement.class::cast)
+                .collect(Collectors.toList());
 
-				if (itemRequirement.shouldHighlightInInventory(CupidBot.getClient())
-						&& Rs2Inventory.contains(itemRequirement.getAllIds().stream().mapToInt(i -> i).toArray())) {
-					var itemId = itemRequirement.getAllIds().stream().filter(Rs2Inventory::contains).findFirst().orElse(-1);
-					Rs2Inventory.interact(itemId, chooseCorrectItemOption(conditionalStep, itemId));
-					sleep(100, 200);
-					usingItems = true;
-					continue;
-				}
+        for (ItemRequirement itemRequirement : stepItemRequirements) {
+            if (!hasItemRequirementOnPlayer(itemRequirement)) {
+                return attemptToAcquireRequirementItem(conditionalStep, itemRequirement);
+            }
+        }
 
-				if (!hasItemRequirementOnPlayer(itemRequirement)) {
-					return attemptToAcquireRequirementItem(conditionalStep, itemRequirement);
-				}
-			}
-		}
+        if (interactWithDetailedStepItems(conditionalStep, stepItemRequirements)) {
+            return true;
+        }
 
-        if (!usingItems && conditionalStep.getDefinedPoint().getWorldPoint() != null && !Rs2Walker.walkTo(conditionalStep.getDefinedPoint().getWorldPoint()))
+        if (conditionalStep.getDefinedPoint().getWorldPoint() != null && !Rs2Walker.walkTo(conditionalStep.getDefinedPoint().getWorldPoint()))
             return true;
 
 		if (conditionalStep.getIconItemID() != -1 && conditionalStep.getDefinedPoint().getWorldPoint() != null
@@ -1618,8 +1627,78 @@ public class QuestScript extends Script {
 			}
 		}
 
-		return usingItems;
+		return false;
 	}
+
+    private boolean interactWithDetailedStepItems(DetailedQuestStep step, List<ItemRequirement> itemRequirements) {
+        List<ItemRequirement> highlighted = itemRequirements.stream()
+                .filter(requirement -> !requirement.mustBeEquipped())
+                .filter(requirement -> requirement.shouldHighlightInInventory(CupidBot.getClient()))
+                .filter(requirement -> resolveInventoryItemId(requirement) != -1)
+                .collect(Collectors.toList());
+        if (highlighted.isEmpty()) return false;
+
+        if (Rs2Inventory.isItemSelected()) {
+            int selectedIndex = Rs2Inventory.getSelectedItemIndex();
+            for (ItemRequirement requirement : highlighted) {
+                var target = Rs2Inventory.get(item -> item.getSlot() != selectedIndex
+                        && requirement.getAllIds().contains(item.getId()));
+                if (target != null) return Rs2Inventory.interact(target, "");
+            }
+            return false;
+        }
+
+        for (ItemRequirement requirement : highlighted) {
+            int itemId = resolveInventoryItemId(requirement);
+            String action = chooseCorrectItemOption(step, itemId);
+            if (action != null && !"Use".equalsIgnoreCase(action)) {
+                return Rs2Inventory.interact(itemId, action);
+            }
+        }
+
+        List<ItemRequirement> combinationItems = new ArrayList<>(highlighted);
+        if (combinationItems.size() < 2 && isItemCombinationStep(step.getText())) {
+            itemRequirements.stream()
+                    .filter(requirement -> !requirement.mustBeEquipped())
+                    .filter(requirement -> resolveInventoryItemId(requirement) != -1)
+                    .filter(requirement -> !combinationItems.contains(requirement))
+                    .forEach(combinationItems::add);
+        }
+        if (combinationItems.size() < 2) {
+            CupidBot.status = "Waiting for a quest item target";
+            return false;
+        }
+
+        sortRequirementsByStepText(combinationItems, step.getText());
+        int sourceId = resolveInventoryItemId(combinationItems.get(0));
+        int targetId = resolveInventoryItemId(combinationItems.get(1));
+        if (sourceId == -1 || targetId == -1) return false;
+        if (sourceId == targetId) return Rs2Inventory.combine(sourceId, targetId);
+        if (!Rs2Inventory.use(sourceId)) return false;
+        if (!sleepUntil(Rs2Inventory::isItemSelected, 1200)) return false;
+        return Rs2Inventory.interact(targetId, "");
+    }
+
+    private int resolveInventoryItemId(ItemRequirement requirement) {
+        return requirement.getAllIds().stream().filter(Rs2Inventory::contains).findFirst().orElse(-1);
+    }
+
+    static boolean isItemCombinationStep(List<String> stepText) {
+        String text = " " + normalizeActionText(stepText == null ? "" : String.join(" ", stepText)) + " ";
+        return text.contains(" combine ") || text.contains(" mix ") || text.contains(" attach ")
+                || text.contains(" add ") || text.contains(" with ")
+                || (text.contains(" use ") && text.contains(" on "));
+    }
+
+    private static void sortRequirementsByStepText(List<ItemRequirement> requirements, List<String> stepText) {
+        String text = normalizeActionText(stepText == null ? "" : String.join(" ", stepText));
+        Map<ItemRequirement, Integer> originalOrder = new HashMap<>();
+        for (int i = 0; i < requirements.size(); i++) originalOrder.put(requirements.get(i), i);
+        requirements.sort(Comparator.comparingInt(requirement -> {
+            int position = text.indexOf(normalizeActionText(requirement.getName()));
+            return position >= 0 ? position : Integer.MAX_VALUE - requirements.size() + originalOrder.get(requirement);
+        }));
+    }
 
     private boolean applyWidgetStep(WidgetStep step) {
         var widgetDetails = step.getWidgetDetails().get(0);

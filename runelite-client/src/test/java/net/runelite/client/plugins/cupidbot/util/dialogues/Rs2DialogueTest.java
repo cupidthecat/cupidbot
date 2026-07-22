@@ -17,4 +17,15 @@ public class Rs2DialogueTest {
         assertFalse(Rs2Dialogue.isContinuePromptText("Search"));
         assertFalse(Rs2Dialogue.isContinuePromptText("abyssal whip"));
     }
+
+    @Test
+    public void dialogueTextMatchesIgnoresFormattingTags() {
+        assertTrue(Rs2Dialogue.dialogueTextMatches("<col=ff0000>[1] Yes please.</col>", "Yes please.", false));
+        assertTrue(Rs2Dialogue.dialogueTextMatches("<col=ff0000>Yes please.</col>", "Yes please.", true));
+    }
+
+    @Test
+    public void dialogueTextMatchesRejectsDifferentOption() {
+        assertFalse(Rs2Dialogue.dialogueTextMatches("No thanks.", "Yes please.", false));
+    }
 }

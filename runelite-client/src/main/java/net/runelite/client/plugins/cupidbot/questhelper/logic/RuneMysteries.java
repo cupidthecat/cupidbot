@@ -5,6 +5,7 @@ import net.runelite.api.gameval.ItemID;
 import net.runelite.api.gameval.NpcID;
 import net.runelite.client.plugins.cupidbot.CupidBot;
 import net.runelite.client.plugins.cupidbot.questhelper.requirements.item.ItemRequirement;
+import net.runelite.client.plugins.cupidbot.questhelper.steps.DetailedQuestStep;
 import net.runelite.client.plugins.cupidbot.questhelper.steps.NpcStep;
 import net.runelite.client.plugins.cupidbot.questhelper.steps.ObjectStep;
 import net.runelite.client.plugins.cupidbot.questhelper.steps.QuestStep;
@@ -21,6 +22,8 @@ public class RuneMysteries extends BaseQuest {
     @Override
     public boolean executeCustomLogic() {
         QuestStep questStep = getQuestHelperPlugin().getSelectedQuest().getCurrentStep().getActiveStep();
+        if (questStep == null || questStep.getText() == null || questStep.getText().isEmpty()) return true;
+
         if (questStep.getText().get(0).equalsIgnoreCase("Bring the research notes to Sedridor in the Wizard Tower's basement.")) {
             if (!Rs2Inventory.hasItem("notes")) {
                 if (Rs2Player.isInCombat()) {
@@ -40,10 +43,10 @@ public class RuneMysteries extends BaseQuest {
                 return false;
             }
         }
-        try {
-            var objectStep = (ObjectStep) questStep;
-            if (objectStep.getRequirements() != null && objectStep.getRequirements().stream().findFirst().orElse(null) instanceof ItemRequirement
-            && ((ItemRequirement) objectStep.getRequirements().stream().findFirst().get()).getId() == ItemID.AIR_TALISMAN) {
+        if (questStep instanceof ObjectStep) {
+            ObjectStep objectStep = (ObjectStep) questStep;
+            ItemRequirement itemRequirement = firstItemRequirement(objectStep);
+            if (itemRequirement != null && itemRequirement.getId() == ItemID.AIR_TALISMAN) {
                 if (!Rs2Inventory.hasItem(ItemID.AIR_TALISMAN)) {
                     if (Rs2Dialogue.hasSelectAnOption()) {
                         Rs2Dialogue.keyPressForDialogueOption("What did you want me to do again?");
@@ -60,17 +63,18 @@ public class RuneMysteries extends BaseQuest {
                     }
                     return false;
                 }
-            } else if (Rs2Dialogue.hasDialogueOption("Climb down the stairs.")) {
-                Rs2Dialogue.keyPressForDialogueOption("Climb down the stairs.");
-                return false;
             }
-        } catch (Exception ex) {
-            //ignore error
         }
-        try {
-            var npcStep = (NpcStep) questStep;
-            if (npcStep.getRequirements() != null && npcStep.getRequirements().stream().findFirst().orElse(null) instanceof ItemRequirement) {
-                ItemRequirement itemRequirement = (ItemRequirement) npcStep.getRequirements().stream().findFirst().get();
+
+        if (Rs2Dialogue.hasDialogueOption("Climb down the stairs.")) {
+            Rs2Dialogue.keyPressForDialogueOption("Climb down the stairs.");
+            return false;
+        }
+
+        if (questStep instanceof NpcStep) {
+            NpcStep npcStep = (NpcStep) questStep;
+            ItemRequirement itemRequirement = firstItemRequirement(npcStep);
+            if (itemRequirement != null) {
                 if (!Rs2Inventory.hasItem(itemRequirement.getId())) {
                     if (Rs2Dialogue.isInDialogue()) {
                         Rs2Dialogue.clickContinue();
@@ -84,17 +88,26 @@ public class RuneMysteries extends BaseQuest {
                     }
                     return false;
                 }
-            } else if (Rs2Dialogue.hasDialogueOption("Anything useful in that package I gave you?")) {
-                Rs2Dialogue.keyPressForDialogueOption("Anything useful in that package I gave you?");
-                return false;
             }
-        } catch (Exception ex) {
-            //ignore error
+        }
+
+        if (Rs2Dialogue.hasDialogueOption("Anything useful in that package I gave you?")) {
+            Rs2Dialogue.keyPressForDialogueOption("Anything useful in that package I gave you?");
+            return false;
         }
         if (Rs2Dialogue.hasDialogueOption("Go ahead.")) {
             Rs2Dialogue.keyPressForDialogueOption("Go ahead.");
             return false;
         }
         return true;
+    }
+
+    private ItemRequirement firstItemRequirement(DetailedQuestStep questStep) {
+        if (questStep.getRequirements() == null) return null;
+        return questStep.getRequirements().stream()
+                .filter(ItemRequirement.class::isInstance)
+                .map(ItemRequirement.class::cast)
+                .findFirst()
+                .orElse(null);
     }
 }

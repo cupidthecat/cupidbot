@@ -152,3 +152,21 @@ Do not make call sites compensate by assuming `index == 0` when the action array
 **Where this applies:** `Rs2Reflection.getGroundItemActions`, `Rs2GroundItem.interact`, `Rs2TileItemModel.click`, and any future ground-item interaction helper that derives a `MenuAction` from item actions.
 
 **Defensive check:** Live smoke with ExampleScript's "Drop and loot item" check after any RuneLite or injected-client version bump.
+
+---
+
+## 9. Distinguish a selected inventory item from a selected spell
+
+`Client.isWidgetSelected()` reports both selected inventory items and selected spell widgets. Before dispatching
+`WIDGET_TARGET_ON_WIDGET` as an item-on-item action, also require a non-null selected widget with a valid item id.
+
+**Why this matters:** Treating a selected spell as an inventory item changes ordinary inventory interactions into
+widget-target actions, which can cast on the wrong item or make the requested item action silently fail.
+
+**Pattern to follow:** Use `Rs2Inventory.isItemSelected()` when item-selection semantics are required. Use the raw
+client flag only when either a selected spell or a selected item is intentionally acceptable.
+
+**Where this applies:** `Rs2Inventory.invokeMenu`, quest item-on-item automation, and any helper that branches on
+`Client.isWidgetSelected()` before targeting an inventory widget.
+
+**Defensive check:** Unit-test both a selected widget with a real item id and a selected spell widget with item id `-1`.

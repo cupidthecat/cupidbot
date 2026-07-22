@@ -170,7 +170,6 @@ public class QuestHelperPlugin extends Plugin
 
 	private final Collection<String> configEvents = Arrays.asList("orderListBy", "filterListBy", "questDifficulty", "showCompletedQuests");
 	private final Collection<String> configItemEvents = Arrays.asList("highlightNeededQuestItems", "highlightNeededMiniquestItems", "highlightNeededAchievementDiaryItems");
-	public boolean fullCrate;
 	@Inject
 	QuestScript questScript;
 
@@ -228,7 +227,7 @@ public class QuestHelperPlugin extends Plugin
 				GlobalFakeObjects.createNpcs(client, runeliteObjectManager, configManager, config);
 			}
 		});
-		questScript.run(config, this);
+		questScript.run(config);
 	}
 
 	@Override
@@ -530,9 +529,6 @@ public class QuestHelperPlugin extends Plugin
 	@Subscribe
 	public void onChatMessage(ChatMessage chatMessage)
 	{
-		if (chatMessage.getMessage().equals("The crate is full of bananas.")) {
-			fullCrate = true;
-		}
 		if (config.showFan() && chatMessage.getType() == ChatMessageType.GAMEMESSAGE)
 		{
 			if (chatMessage.getMessage().contains("Congratulations! Quest complete!") ||
