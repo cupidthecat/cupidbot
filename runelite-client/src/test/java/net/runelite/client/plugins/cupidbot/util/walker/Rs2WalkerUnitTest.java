@@ -557,8 +557,17 @@ public class Rs2WalkerUnitTest {
 
     @Test
     public void interimPreclickTiles_runHandsOffEarlierThanWalk() {
-        assertEquals(6, Rs2Walker.interimPreclickTiles(false));
+        assertEquals(9, Rs2Walker.interimPreclickTiles(false));
         assertEquals(11, Rs2Walker.interimPreclickTiles(true));
+    }
+
+    @Test
+    public void interimHandoff_requiresMovementBeforeReplacingCloseCheckpoint() {
+        WorldPoint origin = new WorldPoint(3200, 3200, 0);
+
+        assertFalse(Rs2Walker.hasInterimHandoffProgress(origin, origin));
+        assertFalse(Rs2Walker.hasInterimHandoffProgress(origin, new WorldPoint(3201, 3200, 0)));
+        assertTrue(Rs2Walker.hasInterimHandoffProgress(origin, new WorldPoint(3202, 3200, 0)));
     }
 
     @Test

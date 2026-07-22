@@ -122,6 +122,8 @@ public class Rs2Walker {
 	 * (<= {@link #INTERIM_CLOSE_TILES}) or progress stalls for {@link #INTERIM_PROGRESS_TIMEOUT_MS}.
 	 */
 	private static volatile WorldPoint interimTargetWp = null;
+	/** Position when the current interim click was issued; prevents an immediate re-click before it takes effect. */
+	private static volatile WorldPoint interimOriginWp = null;
 	private static volatile int interimTargetIdx = -1;
 	private static volatile long interimSetAtMs = 0L;
 	private static volatile long interimLastProgressAtMs = 0L;
@@ -133,8 +135,12 @@ public class Rs2Walker {
 	private static final long PARTIAL_TRANS_RECAL_COOLDOWN_MS = 3500L;
 
 	private static final int INTERIM_CLOSE_TILES = 4;
-	private static final int INTERIM_PRECLICK_TILES = 6;
+	// Queue the following minimap destination while the current walk still has several tiles left.
+	// The origin-progress guard below keeps diagonal, initially-close clicks from being replaced
+	// before the game has accepted them.
+	private static final int INTERIM_PRECLICK_TILES = 9;
 	private static final int INTERIM_RUN_PRECLICK_TILES = 11;
+	private static final int INTERIM_HANDOFF_MIN_TRAVEL_TILES = 2;
 	private static final int INTERIM_MOVING_POLL_MS = 450;
 	private static final long INTERIM_PROGRESS_TIMEOUT_MS = 2500L;
 	private static final long INTERIM_MAX_AGE_MS = 10_000L;
@@ -1049,12 +1055,7 @@ public class Rs2Walker {
         ShortestPathPlugin.setReachedDistance(distance);
         stuckCount = 0;
         lastMovedTimeMs = System.currentTimeMillis();
-		interimTargetWp = null;
-		interimTargetIdx = -1;
-		interimSetAtMs = 0L;
-        interimLastProgressAtMs = 0L;
-        interimLastBestPathIdx = -1;
-        interimLastRetargetAtMs = 0L;
+        clearInterimTarget("walk-start");
         lastPartialTransRecalcMs = 0L;
         idleNudgeLastObservedLocation = playerLocWalk;
         idleNudgeStationarySinceMs = System.currentTimeMillis();
@@ -1778,9 +1779,7 @@ public class Rs2Walker {
                                 // Sticky interim: subsequent iterations travel toward this point via the
                                 // interim-in-flight path instead of re-running the (false-negative)
                                 // reachability check and re-clicking every tick.
-                                interimTargetWp = recoverTarget;
-                                interimTargetIdx = recoverIdx;
-                                interimSetAtMs = System.currentTimeMillis();
+                                setInterimTarget(recoverTarget, recoverIdx, path, playerLoc);
                                 WorldPoint pathLastRecovery = path.get(path.size() - 1);
                                 int finishThRecovery = tightFinishThreshold(target, pathLastRecovery, distance);
                                 waitUntilIdleAfterSceneWalk(target, POST_SCENE_WALK_IDLE_WAIT_MS_MAX, target,
@@ -1833,12 +1832,7 @@ public class Rs2Walker {
                                 if (!inInstance && handlePendingDoorDuringInterim(rawPath,
                                         obstaclePolicy.segmentDoorTimeoutMs(), doorEdgesAttemptedThisTail,
                                         playerLoc)) {
-                                    interimTargetWp = null;
-                                    interimTargetIdx = -1;
-                                    interimSetAtMs = 0L;
-                                    interimLastProgressAtMs = 0L;
-                                    interimLastBestPathIdx = -1;
-                                    interimLastRetargetAtMs = 0L;
+                                    clearInterimTarget("door-handled-during-interim");
                                     doorOrTransportResult = true;
                                     exitReason = "door-handled-during-interim";
                                     break;
@@ -1866,21 +1860,11 @@ public class Rs2Walker {
 								// Not moving but still far from the interim checkpoint. Treat the interim
 								// as stale and pick a fresh checkpoint below (could still resolve to the
 								// same tile, but ensures we actually issue a new click).
-								interimTargetWp = null;
-								interimTargetIdx = -1;
-								interimSetAtMs = 0L;
-								interimLastProgressAtMs = 0L;
-								interimLastBestPathIdx = -1;
-								interimLastRetargetAtMs = 0L;
+								clearInterimTarget("stopped-before-handoff");
 							}
 						}
 						// Close enough: allow selecting a new checkpoint.
-						interimTargetWp = null;
-						interimTargetIdx = -1;
-						interimSetAtMs = 0L;
-						interimLastProgressAtMs = 0L;
-						interimLastBestPathIdx = -1;
-						interimLastRetargetAtMs = 0L;
+						clearInterimTarget("checkpoint-close");
 					}
 
                     int targetIdx = findFurthestClickableIndex(path, i, playerLoc,
@@ -1925,12 +1909,7 @@ public class Rs2Walker {
 					if (sticky != null && sticky.getPlane() == playerLoc.getPlane()) {
 						int stickyDist = sticky.distanceTo2D(playerLoc);
 						if (stickyDist <= INTERIM_CLOSE_TILES || nowMs - interimSetAtMs > INTERIM_MAX_AGE_MS) {
-							interimTargetWp = null;
-							interimTargetIdx = -1;
-							interimSetAtMs = 0L;
-							interimLastProgressAtMs = 0L;
-							interimLastBestPathIdx = -1;
-							interimLastRetargetAtMs = 0L;
+							clearInterimTarget("checkpoint-close-or-expired");
 						} else {
 							// U-turn safe progress: track progress along the path index, not Euclidean
 							// distance-to-target (which can increase on U-shaped routes).
@@ -2000,12 +1979,7 @@ public class Rs2Walker {
                     if (clicked) {
                         markFirstMovementClick("first_minimap_click", target, posBefore,
                                 "to=" + compactWorldPoint(clickTarget));
-						interimTargetWp = targetWp;
-						interimTargetIdx = targetIdx;
-						interimSetAtMs = nowMs;
-						interimLastProgressAtMs = nowMs;
-						interimLastBestPathIdx = getClosestTileIndex(path);
-						interimLastRetargetAtMs = nowMs;
+						setInterimTarget(targetWp, targetIdx, path, posBefore);
 
                         final WorldPoint b = targetWp;
                         final WorldPoint before = posBefore;
@@ -2064,12 +2038,7 @@ public class Rs2Walker {
                     // loop wait for the player to walk closer before re-evaluating.
                     if (!clicked) {
                         exitReason = "click-failed-off-minimap";
-                        interimTargetWp = null;
-                        interimTargetIdx = -1;
-                        interimSetAtMs = 0L;
-                        interimLastProgressAtMs = 0L;
-                        interimLastBestPathIdx = -1;
-                        interimLastRetargetAtMs = 0L;
+                        clearInterimTarget("minimap-click-failed");
                         sleepUntil(() -> isWalkCancelled(target) || !Rs2Player.isMoving(), 1200);
                         if (walkCancelledDiag(target, "processWalk:after-click-failed-wait", processWalkTail)) {
                             return WalkerState.EXIT;
@@ -2725,12 +2694,7 @@ public class Rs2Walker {
                 target,
                 playerLoc,
                 "to=" + compactWorldPoint(clickTarget));
-        interimTargetWp = clickTarget;
-        interimTargetIdx = targetIdx;
-        interimSetAtMs = System.currentTimeMillis();
-        interimLastProgressAtMs = interimSetAtMs;
-        interimLastBestPathIdx = getClosestTileIndex(path);
-        interimLastRetargetAtMs = interimSetAtMs;
+        setInterimTarget(clickTarget, targetIdx, path, playerLoc);
         if (markRecoveryCooldown) {
             lastUnreachableRecoveryClickAtMs = interimSetAtMs;
         }
@@ -4812,6 +4776,21 @@ public class Rs2Walker {
         if (!shouldClearInterimTarget(interim, playerLoc, interimSetAtMs, interimLastProgressAtMs, nowMs)) {
             return false;
         }
+        boolean closeToCheckpoint = playerLoc != null && interim != null
+                && playerLoc.getPlane() == interim.getPlane()
+                && playerLoc.distanceTo2D(interim) <= interimPreclickTiles();
+        boolean progressStalled = interimLastProgressAtMs > 0L
+                && nowMs - interimLastProgressAtMs > INTERIM_PROGRESS_TIMEOUT_MS;
+        boolean checkpointExpired = interimSetAtMs > 0L && nowMs - interimSetAtMs > INTERIM_MAX_AGE_MS;
+        // A diagonal minimap target can already be within the handoff radius when clicked.
+        // Do not replace it until the player has actually advanced; otherwise the repeated
+        // click resets the server walk queue and produces the visible stop-start cadence.
+        if (closeToCheckpoint
+                && !hasInterimHandoffProgress(interimOriginWp, playerLoc)
+                && !progressStalled
+                && !checkpointExpired) {
+            return false;
+        }
         String reason;
         if (playerLoc == null || interim == null || playerLoc.getPlane() != interim.getPlane()) {
             reason = "invalid";
@@ -4826,12 +4805,31 @@ public class Rs2Walker {
         return true;
     }
 
+    static boolean hasInterimHandoffProgress(WorldPoint origin, WorldPoint playerLoc) {
+        return origin != null
+                && playerLoc != null
+                && origin.getPlane() == playerLoc.getPlane()
+                && origin.distanceTo2D(playerLoc) >= INTERIM_HANDOFF_MIN_TRAVEL_TILES;
+    }
+
+    private static void setInterimTarget(WorldPoint target, int targetIdx, List<WorldPoint> path, WorldPoint origin) {
+        long now = System.currentTimeMillis();
+        interimTargetWp = target;
+        interimOriginWp = origin;
+        interimTargetIdx = targetIdx;
+        interimSetAtMs = now;
+        interimLastProgressAtMs = now;
+        interimLastBestPathIdx = getClosestTileIndex(path);
+        interimLastRetargetAtMs = now;
+    }
+
     private static void clearInterimTarget(String reason) {
         WorldPoint old = interimTargetWp;
         if (old != null) {
             WebWalkLog.spInfo("interim_clear | reason={} interim={}", reason, compactWorldPoint(old));
         }
         interimTargetWp = null;
+        interimOriginWp = null;
         interimTargetIdx = -1;
         interimSetAtMs = 0L;
         interimLastProgressAtMs = 0L;
